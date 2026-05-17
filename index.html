@@ -28,10 +28,8 @@ body{font-family:var(--ff-body);color:var(--tx);background:#fff;overflow-x:hidde
 /* ── NAV ── */
 #nav{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(15,23,42,.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.08);font-family:var(--ff-head)}
 .navi{max-width:1200px;margin:0 auto;padding:0 24px;height:68px;display:flex;align-items:center;gap:20px}
-.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0}
-.nav-logo .logo-circle{width:42px;height:42px;background:linear-gradient(135deg,#C8102E,#9B0020);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:white;letter-spacing:-0.5px}
-.nav-logo .logo-text b{font-size:16px;font-weight:900;color:white;display:block;letter-spacing:1px}
-.nav-logo .logo-text small{font-size:9px;color:rgba(255,255,255,.6);letter-spacing:.5px}
+.nav-logo{display:flex;align-items:center;gap:0;text-decoration:none;flex-shrink:0}
+.nav-logo-svg{height:54px;width:54px;border-radius:7px;display:block;flex-shrink:0}
 nav ul{display:flex;list-style:none;gap:2px;margin-left:auto;align-items:center}
 nav ul li a{color:rgba(255,255,255,.8);text-decoration:none;font-size:13px;font-weight:500;padding:7px 12px;border-radius:6px;transition:.2s;display:block;letter-spacing:.3px}
 nav ul li a:hover{color:white;background:rgba(255,255,255,.08)}
@@ -180,9 +178,7 @@ section{padding:88px 24px}
 footer{background:#0D1F3C;color:white;padding:50px 24px 24px}
 .footer-grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:40px}
 .footer-brand .logo-row{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-.footer-brand .logo-circle{width:42px;height:42px;background:linear-gradient(135deg,var(--rd),#9B0020);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:white}
-.footer-brand .logo-text b{font-size:16px;font-weight:900;color:white;display:block}
-.footer-brand .logo-text small{font-size:9px;color:rgba(255,255,255,.4)}
+.footer-brand .logo-svg{height:54px;width:54px;border-radius:7px;display:block}
 .footer-desc{font-size:12px;color:rgba(255,255,255,.5);line-height:1.7;max-width:280px}
 .footer-col-title{font-size:11px;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px}
 .footer-col ul{list-style:none;display:flex;flex-direction:column;gap:8px}
@@ -228,12 +224,15 @@ footer{background:#0D1F3C;color:white;padding:50px 24px 24px}
 <!-- ── NAVIGATION ── -->
 <header id="nav">
   <div class="navi">
-    <a href="#" class="nav-logo">
-      <div class="logo-circle">JAC</div>
-      <div class="logo-text">
-        <b>JAC SEGUROS</b>
-        <small>Lic. #6175 · Panamá</small>
-      </div>
+    <a href="#" class="nav-logo" aria-label="JAC Seguros — Inicio">
+      <svg class="nav-logo-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" role="img" aria-label="JAC Seguros">
+        <rect width="500" height="500" fill="#fff"/>
+        <rect x="10" y="10" width="480" height="480" fill="none" stroke="#D4CEC8" stroke-width="3"/>
+        <line x1="20" y1="88" x2="480" y2="88" stroke="#ABA49C" stroke-width="8"/>
+        <line x1="20" y1="410" x2="480" y2="410" stroke="#ABA49C" stroke-width="8"/>
+        <text x="250" y="358" font-family="Montserrat,'Arial Black',Arial,sans-serif" font-size="215" font-weight="700" fill="#111" text-anchor="middle">JAC</text>
+        <text x="247" y="435" font-family="Lato,Arial,sans-serif" font-size="50" font-weight="600" fill="#1A5CB8" text-anchor="middle" letter-spacing="12">SEGUROS</text>
+      </svg>
     </a>
     <nav>
       <ul id="nav-menu">
@@ -1139,11 +1138,14 @@ footer{background:#0D1F3C;color:white;padding:50px 24px 24px}
   <div class="footer-grid">
     <div class="footer-brand">
       <div class="logo-row">
-        <div class="logo-circle">JAC</div>
-        <div class="logo-text">
-          <b>JAC SEGUROS</b>
-          <small>Corredora Autorizada · Lic. #6175</small>
-        </div>
+        <svg class="logo-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" role="img" aria-label="JAC Seguros">
+          <rect width="500" height="500" fill="#fff"/>
+          <rect x="10" y="10" width="480" height="480" fill="none" stroke="#D4CEC8" stroke-width="3"/>
+          <line x1="20" y1="88" x2="480" y2="88" stroke="#ABA49C" stroke-width="8"/>
+          <line x1="20" y1="410" x2="480" y2="410" stroke="#ABA49C" stroke-width="8"/>
+          <text x="250" y="358" font-family="Montserrat,'Arial Black',Arial,sans-serif" font-size="215" font-weight="700" fill="#111" text-anchor="middle">JAC</text>
+          <text x="247" y="435" font-family="Lato,Arial,sans-serif" font-size="50" font-weight="600" fill="#1A5CB8" text-anchor="middle" letter-spacing="12">SEGUROS</text>
+        </svg>
       </div>
       <div class="footer-desc">Tu corredora de seguros de confianza en Panamá. Te ayudamos a encontrar la mejor cobertura de todas las aseguradoras autorizadas, sin costo adicional. Supervisada y regulada por la SPRP.</div>
     </div>
