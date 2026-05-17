@@ -1,536 +1,725 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="description" content="JAC Seguros — Corredora de seguros en Panamá. Lic. #6175. Trabaja con 18 aseguradoras en todos los ramos.">
-<meta name="keywords" content="seguros panama, seguro médico, seguro de vida, seguro de auto, JAC seguros, Jely Castro">
-<meta property="og:title" content="JAC Seguros — Tu protección en Panamá">
-<meta property="og:description" content="Asesora de seguros certificada. 18 aseguradoras. Todos los ramos.">
-<meta property="og:url" content="https://jacsegurospa.com">
-<title>JAC Seguros · Lic. #6175 · Panamá</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>JAC Seguros | Jely An Castro, Lic. #6175 | Panamá</title>
+<meta name="description" content="Corredora de seguros en Panamá. Especialista en Salud, Vida y Accidentes Personales. Más de 20 años de experiencia. Lic. #6175."/>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;}
 :root{
-  --bg:#F8F5EF;--text:#0C0C0A;--green:#1B3A28;--green2:#2D5C3F;
-  --gold:#B8963E;--blue:#1E5FA8;--gray:#6B6860;--light:#EDE9E1;
-  --white:#FFFFFF;--black:#0C0C0A;
-  --font-serif:'Playfair Display',Georgia,serif;
-  --font-sans:'Inter',system-ui,sans-serif;
-  --ease:cubic-bezier(0.16,1,0.3,1);
+  --navy:#0F172A;
+  --blue:#1E3A8A;
+  --gold:#D4AF37;
+  --gold-light:#E8C94A;
+  --white:#FFFFFF;
+  --gray:#F3F4F6;
+  --gray-mid:#9CA3AF;
+  --text-dark:#1F2937;
+  --text-light:#6B7280;
+  --border:#E5E7EB;
 }
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Lato',sans-serif;color:var(--text-dark);background:var(--white);}
+h1,h2,h3,h4,h5{font-family:'Montserrat',sans-serif;}
 
-/* ── Base ── */
-html{scroll-behavior:smooth;font-size:16px;}
-body{font-family:var(--font-sans);background:var(--bg);color:var(--text);overflow-x:hidden;line-height:1.6;}
-a{text-decoration:none;color:inherit;}
-img{max-width:100%;}
-::selection{background:var(--gold);color:#fff;}
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(15,23,42,0.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(212,175,55,0.2);}
+.nav-inner{max-width:1200px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:70px;}
+.nav-logo{display:flex;align-items:center;gap:12px;text-decoration:none;}
+.nav-logo img,.nav-logo svg{height:44px;width:auto;}
+.nav-brand{display:flex;flex-direction:column;}
+.nav-brand-name{font-family:'Montserrat',sans-serif;font-weight:700;font-size:1.1rem;color:var(--white);letter-spacing:0.5px;}
+.nav-brand-sub{font-size:0.65rem;color:var(--gold);letter-spacing:1px;text-transform:uppercase;}
+.nav-menu{display:flex;align-items:center;gap:6px;list-style:none;}
+.nav-menu > li{position:relative;}
+.nav-menu > li > a,.nav-menu > li > button{display:flex;align-items:center;gap:4px;padding:8px 14px;color:rgba(255,255,255,0.85);font-family:'Montserrat',sans-serif;font-size:0.82rem;font-weight:600;letter-spacing:0.3px;text-decoration:none;background:none;border:none;cursor:pointer;border-radius:6px;transition:all 0.2s;}
+.nav-menu > li > a:hover,.nav-menu > li > button:hover{color:var(--gold);background:rgba(212,175,55,0.08);}
+.nav-menu .dropdown-arrow{font-size:0.6rem;transition:transform 0.2s;}
+.nav-menu li:hover .dropdown-arrow{transform:rotate(180deg);}
+.dropdown{position:absolute;top:calc(100% + 8px);left:0;min-width:220px;background:var(--navy);border:1px solid rgba(212,175,55,0.2);border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,0.4);opacity:0;visibility:hidden;transform:translateY(-8px);transition:all 0.2s;z-index:200;}
+.nav-menu li:hover .dropdown{opacity:1;visibility:visible;transform:translateY(0);}
+.dropdown a{display:block;padding:10px 18px;color:rgba(255,255,255,0.8);font-size:0.83rem;text-decoration:none;font-family:'Lato',sans-serif;transition:all 0.15s;border-bottom:1px solid rgba(255,255,255,0.05);}
+.dropdown a:last-child{border-bottom:none;}
+.dropdown a:hover{color:var(--gold);background:rgba(212,175,55,0.08);padding-left:24px;}
+.nav-cta{padding:9px 20px!important;background:var(--gold)!important;color:var(--navy)!important;border-radius:8px!important;font-weight:700!important;transition:all 0.2s!important;}
+.nav-cta:hover{background:var(--gold-light)!important;color:var(--navy)!important;transform:translateY(-1px);}
+.nav-toggle{display:none;background:none;border:none;cursor:pointer;padding:8px;}
+.nav-toggle span{display:block;width:24px;height:2px;background:var(--white);margin:5px 0;transition:all 0.3s;}
 
-/* ── Grain texture overlay ── */
-body::before{
-  content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-  opacity:.4;mix-blend-mode:multiply;
-}
+/* HERO */
+.hero{min-height:100vh;background:linear-gradient(135deg,var(--navy) 0%,#0D2461 40%,#162045 70%,var(--navy) 100%);display:flex;align-items:center;position:relative;overflow:hidden;padding-top:70px;}
+.hero-pattern{position:absolute;inset:0;background-image:radial-gradient(circle at 20% 50%,rgba(212,175,55,0.06) 0%,transparent 50%),radial-gradient(circle at 80% 20%,rgba(30,58,138,0.3) 0%,transparent 50%),radial-gradient(circle at 60% 80%,rgba(212,175,55,0.04) 0%,transparent 40%);pointer-events:none;}
+.hero-lines{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
+.hero-lines::before{content:'';position:absolute;top:-50%;right:-10%;width:600px;height:600px;border:1px solid rgba(212,175,55,0.08);border-radius:50%;animation:rotate 30s linear infinite;}
+.hero-lines::after{content:'';position:absolute;top:-20%;right:5%;width:400px;height:400px;border:1px solid rgba(212,175,55,0.05);border-radius:50%;animation:rotate 20s linear infinite reverse;}
+@keyframes rotate{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+.hero-content{max-width:1200px;margin:0 auto;padding:80px 24px;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;position:relative;z-index:1;}
+.hero-text .badge{display:inline-flex;align-items:center;gap:8px;background:rgba(212,175,55,0.12);border:1px solid rgba(212,175,55,0.3);border-radius:100px;padding:6px 16px;margin-bottom:24px;}
+.hero-text .badge span{font-family:'Montserrat',sans-serif;font-size:0.72rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);}
+.hero-text h1{font-size:clamp(2.2rem,4vw,3.2rem);font-weight:800;line-height:1.15;color:var(--white);margin-bottom:20px;}
+.hero-text h1 em{font-style:normal;color:var(--gold);}
+.hero-text p{font-size:1.1rem;color:rgba(255,255,255,0.72);line-height:1.75;margin-bottom:36px;font-weight:300;}
+.hero-actions{display:flex;gap:14px;flex-wrap:wrap;}
+.btn-primary{display:inline-flex;align-items:center;gap:8px;padding:14px 28px;background:var(--gold);color:var(--navy);font-family:'Montserrat',sans-serif;font-weight:700;font-size:0.9rem;border-radius:8px;text-decoration:none;transition:all 0.2s;border:none;cursor:pointer;}
+.btn-primary:hover{background:var(--gold-light);transform:translateY(-2px);box-shadow:0 8px 24px rgba(212,175,55,0.35);}
+.btn-outline{display:inline-flex;align-items:center;gap:8px;padding:14px 28px;background:transparent;color:var(--white);font-family:'Montserrat',sans-serif;font-weight:600;font-size:0.9rem;border-radius:8px;border:1.5px solid rgba(255,255,255,0.3);text-decoration:none;transition:all 0.2s;}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold);}
+.hero-visual{display:flex;justify-content:center;align-items:center;}
+.hero-card{background:rgba(255,255,255,0.04);border:1px solid rgba(212,175,55,0.15);border-radius:20px;padding:40px;backdrop-filter:blur(20px);text-align:center;}
+.hero-logo-big{width:140px;height:140px;margin:0 auto 20px;}
+.hero-card-name{font-family:'Montserrat',sans-serif;font-weight:700;font-size:1.3rem;color:var(--white);margin-bottom:4px;}
+.hero-card-title{font-size:0.88rem;color:var(--gold);font-weight:600;margin-bottom:16px;letter-spacing:0.5px;}
+.hero-card-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,0.08);border-radius:12px;overflow:hidden;margin-top:20px;}
+.stat{background:rgba(15,23,42,0.6);padding:16px 8px;text-align:center;}
+.stat-num{font-family:'Montserrat',sans-serif;font-weight:800;font-size:1.4rem;color:var(--gold);display:block;}
+.stat-lbl{font-size:0.65rem;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:0.8px;margin-top:2px;}
 
-/* ── Navigation ── */
-#nav{
-  position:fixed;top:0;left:0;right:0;z-index:1000;
-  padding:16px 40px;
-  display:flex;align-items:center;justify-content:space-between;
-  transition:all 0.4s var(--ease);
-}
-#nav.scrolled{
-  background:rgba(248,245,239,0.92);
-  backdrop-filter:blur(20px);
-  padding:10px 40px;
-  box-shadow:0 1px 0 rgba(12,12,10,0.08);
-}
-.nav-logo{display:flex;align-items:center;gap:0;}
-.nav-links{display:flex;align-items:center;gap:4px;}
-.nav-links a{
-  padding:8px 16px;border-radius:100px;font-size:13px;font-weight:500;
-  color:var(--white);transition:all .25s;
-}
-#nav.scrolled .nav-links a{color:var(--text);}
-.nav-links a:hover{background:rgba(255,255,255,.15);}
-#nav.scrolled .nav-links a:hover{background:rgba(12,12,10,.07);}
-.nav-cta{
-  display:flex;align-items:center;gap:10px;
-}
-.btn-wa{
-  background:#25D366;color:#fff;padding:9px 18px;border-radius:100px;
-  font-size:13px;font-weight:600;transition:all .25s;border:none;cursor:pointer;
-  display:flex;align-items:center;gap:6px;
-}
-.btn-wa:hover{background:#1ebe5c;transform:translateY(-1px);}
-.btn-crm{
-  background:transparent;color:var(--white);padding:9px 18px;border-radius:100px;
-  font-size:13px;font-weight:600;border:1.5px solid rgba(255,255,255,.4);
-  transition:all .25s;cursor:pointer;
-}
-#nav.scrolled .btn-crm{color:var(--text);border-color:rgba(12,12,10,.2);}
-.btn-crm:hover{background:rgba(255,255,255,.1);}
-#nav.scrolled .btn-crm:hover{background:rgba(12,12,10,.05);}
-
-/* ── Hero ── */
-#hero{
-  min-height:100vh;background:var(--green);
-  display:flex;flex-direction:column;justify-content:center;
-  padding:120px 40px 80px;position:relative;overflow:hidden;
-}
-.hero-bg-text{
-  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  font-family:var(--font-serif);font-size:28vw;font-weight:700;
-  color:rgba(255,255,255,.025);white-space:nowrap;pointer-events:none;
-  letter-spacing:-2vw;user-select:none;
-}
-.hero-content{position:relative;z-index:2;max-width:900px;}
-.hero-tag{
-  display:inline-flex;align-items:center;gap:8px;
-  background:rgba(255,255,255,.1);color:rgba(255,255,255,.8);
-  padding:6px 14px;border-radius:100px;font-size:12px;font-weight:500;
-  letter-spacing:.5px;margin-bottom:32px;border:1px solid rgba(255,255,255,.15);
-}
-.hero-tag::before{content:'';width:6px;height:6px;background:#4ADE80;border-radius:50%;display:inline-block;}
-.hero-headline{
-  font-family:var(--font-serif);font-size:clamp(3rem,7vw,6.5rem);
-  color:#fff;line-height:1.05;font-weight:400;margin-bottom:28px;
-  letter-spacing:-.02em;
-}
-.hero-headline em{color:var(--gold);font-style:italic;}
-.hero-sub{
-  font-size:clamp(1rem,1.6vw,1.2rem);color:rgba(255,255,255,.65);
-  max-width:540px;line-height:1.7;margin-bottom:48px;font-weight:300;
-}
-.hero-actions{display:flex;gap:14px;flex-wrap:wrap;align-items:center;}
-.btn-primary{
-  background:var(--gold);color:#fff;padding:14px 30px;border-radius:100px;
-  font-size:14px;font-weight:600;border:none;cursor:pointer;transition:all .25s;
-  display:flex;align-items:center;gap:8px;
-}
-.btn-primary:hover{background:#a07c2e;transform:translateY(-2px);box-shadow:0 8px 24px rgba(184,150,62,.35);}
-.btn-ghost{
-  background:transparent;color:rgba(255,255,255,.8);padding:14px 28px;
-  border-radius:100px;font-size:14px;font-weight:500;
-  border:1.5px solid rgba(255,255,255,.3);cursor:pointer;transition:all .25s;
-}
-.btn-ghost:hover{background:rgba(255,255,255,.08);color:#fff;}
-.hero-scroll{
-  position:absolute;bottom:40px;left:40px;
-  display:flex;align-items:center;gap:10px;
-  color:rgba(255,255,255,.4);font-size:11px;letter-spacing:1px;text-transform:uppercase;
-}
-.scroll-line{width:40px;height:1px;background:rgba(255,255,255,.3);}
-
-/* ── Stats bar ── */
-#stats{background:#fff;border-bottom:1px solid rgba(12,12,10,.06);}
-.stats-grid{
-  max-width:1200px;margin:0 auto;padding:48px 40px;
-  display:grid;grid-template-columns:repeat(4,1fr);gap:0;
-}
-.stat-item{
-  text-align:center;padding:24px;position:relative;
-}
-.stat-item+.stat-item::before{
-  content:'';position:absolute;left:0;top:25%;height:50%;
-  width:1px;background:rgba(12,12,10,.08);
-}
-.stat-num{
-  font-family:var(--font-serif);font-size:clamp(2.5rem,5vw,4rem);
-  color:var(--green);font-weight:400;display:block;line-height:1;
-}
-.stat-num sup{font-size:.5em;vertical-align:super;}
-.stat-label{font-size:13px;color:var(--gray);margin-top:8px;font-weight:400;}
-
-/* ── Ticker ── */
-#ticker{
-  background:var(--green);color:rgba(255,255,255,.7);
-  padding:14px 0;overflow:hidden;font-size:12px;font-weight:500;
-  letter-spacing:1.5px;text-transform:uppercase;border-top:1px solid rgba(255,255,255,.08);
-}
-.ticker-inner{display:flex;width:max-content;animation:ticker 40s linear infinite;}
-.ticker-item{white-space:nowrap;padding:0 40px;}
-.ticker-sep{opacity:.3;margin:0 8px;}
-@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-
-/* ── Section common ── */
-.section{padding:100px 40px;}
+/* SECTION BASE */
+.section{padding:90px 24px;}
 .section-inner{max-width:1200px;margin:0 auto;}
-.section-label{
-  font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;
-  color:var(--gold);margin-bottom:16px;display:flex;align-items:center;gap:10px;
-}
-.section-label::before{content:'';width:24px;height:1px;background:var(--gold);}
-.section-title{
-  font-family:var(--font-serif);font-size:clamp(2rem,4vw,3.5rem);
-  font-weight:400;line-height:1.15;letter-spacing:-.02em;
-  color:var(--text);
-}
-.section-title.light{color:#fff;}
+.section-label{display:inline-block;font-family:'Montserrat',sans-serif;font-size:0.7rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:12px;}
+.section-title{font-size:clamp(1.8rem,3vw,2.5rem);font-weight:800;color:var(--navy);line-height:1.2;margin-bottom:16px;}
+.section-sub{font-size:1.05rem;color:var(--text-light);line-height:1.7;max-width:600px;}
+.divider{width:60px;height:3px;background:var(--gold);margin:24px 0;}
 
-/* ── Ramos ── */
-#ramos{background:var(--bg);}
-.ramos-header{
-  display:flex;justify-content:space-between;align-items:flex-end;
-  margin-bottom:64px;flex-wrap:wrap;gap:20px;
-}
-.ramos-grid{
-  display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
-  background:rgba(12,12,10,.08);border:1px solid rgba(12,12,10,.08);
-}
-.ramo-card{
-  background:var(--bg);padding:36px 32px;
-  transition:all .35s var(--ease);cursor:default;
-  position:relative;overflow:hidden;
-}
-.ramo-card::after{
-  content:'';position:absolute;bottom:0;left:0;right:0;
-  height:2px;background:var(--gold);transform:scaleX(0);
-  transform-origin:left;transition:.35s var(--ease);
-}
-.ramo-card:hover{background:#fff;box-shadow:0 8px 32px rgba(12,12,10,.06);}
-.ramo-card:hover::after{transform:scaleX(1);}
-.ramo-num{
-  font-family:var(--font-serif);font-size:3rem;font-weight:400;
-  color:rgba(12,12,10,.06);line-height:1;margin-bottom:8px;
-}
-.ramo-icon{font-size:1.8rem;margin-bottom:12px;display:block;}
-.ramo-name{font-size:15px;font-weight:600;color:var(--text);margin-bottom:8px;}
-.ramo-desc{font-size:13px;color:var(--gray);line-height:1.6;}
-.ramo-more{display:none;font-size:12px;color:var(--green);margin-top:12px;font-weight:500;}
-.ramo-card:hover .ramo-more{display:block;}
+/* ABOUT */
+.about{background:var(--gray);}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;}
+.about-visual{position:relative;}
+.about-img-box{background:linear-gradient(135deg,var(--navy),var(--blue));border-radius:20px;aspect-ratio:4/5;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+.about-img-pattern{position:absolute;inset:0;background-image:radial-gradient(circle at 30% 30%,rgba(212,175,55,0.15) 0%,transparent 60%),radial-gradient(circle at 70% 70%,rgba(212,175,55,0.08) 0%,transparent 50%);}
+.about-img-text{position:relative;z-index:1;text-align:center;padding:40px;}
+.about-initials{font-family:'Montserrat',sans-serif;font-size:6rem;font-weight:800;color:rgba(212,175,55,0.25);line-height:1;}
+.about-img-name{font-family:'Montserrat',sans-serif;font-size:1.1rem;font-weight:700;color:var(--white);margin-top:16px;}
+.about-img-sub{font-size:0.85rem;color:var(--gold);margin-top:4px;}
+.badge-float{position:absolute;background:var(--navy);border:1px solid rgba(212,175,55,0.3);border-radius:12px;padding:12px 18px;box-shadow:0 10px 30px rgba(0,0,0,0.2);}
+.badge-float-tl{top:-16px;left:-16px;}
+.badge-float-br{bottom:-16px;right:-16px;}
+.badge-float-num{font-family:'Montserrat',sans-serif;font-weight:800;font-size:1.3rem;color:var(--gold);}
+.badge-float-txt{font-size:0.7rem;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:0.5px;}
+.about-features{display:grid;gap:20px;margin-top:36px;}
+.feature-item{display:flex;gap:16px;align-items:flex-start;}
+.feature-icon{width:44px;height:44px;min-width:44px;background:linear-gradient(135deg,var(--navy),var(--blue));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;}
+.feature-text h4{font-family:'Montserrat',sans-serif;font-weight:700;font-size:0.95rem;color:var(--navy);margin-bottom:4px;}
+.feature-text p{font-size:0.85rem;color:var(--text-light);line-height:1.5;}
+.sprp-box{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:20px 24px;display:flex;align-items:center;gap:16px;margin-top:28px;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
+.sprp-logo-wrap{flex-shrink:0;}
+.sprp-text p{font-size:0.78rem;color:var(--text-light);line-height:1.5;}
+.sprp-text strong{font-family:'Montserrat',sans-serif;font-size:0.85rem;color:var(--navy);display:block;margin-bottom:2px;}
 
-/* ── Aseguradoras ── */
-#aseguradoras{background:var(--light);}
-.aseg-grid{
-  display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
-  background:rgba(12,12,10,.06);margin-top:56px;
-  border:1px solid rgba(12,12,10,.06);
-}
-.aseg-card{
-  background:var(--light);padding:28px 28px;
-  transition:all .3s var(--ease);
-  display:flex;align-items:flex-start;gap:16px;
-}
-.aseg-card:hover{background:#fff;box-shadow:0 4px 20px rgba(12,12,10,.05);}
-.aseg-dot{
-  width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:6px;
-}
-.aseg-info{}
-.aseg-name{font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;}
-.aseg-desc{font-size:12px;color:var(--gray);line-height:1.5;margin-bottom:8px;}
-.aseg-ramos{display:flex;flex-wrap:wrap;gap:4px;}
-.aseg-ramo{
-  font-size:10px;padding:2px 8px;border-radius:100px;
-  background:rgba(12,12,10,.06);color:var(--gray);font-weight:500;
-}
+/* RAMOS */
+.ramos{background:var(--white);}
+.ramos-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px;margin-top:48px;}
+.ramo-card{background:var(--white);border:1.5px solid var(--border);border-radius:16px;padding:32px;transition:all 0.3s;position:relative;overflow:hidden;}
+.ramo-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--gold-light));}
+.ramo-card:hover{border-color:var(--gold);box-shadow:0 12px 40px rgba(212,175,55,0.12);transform:translateY(-4px);}
+.ramo-icon{width:56px;height:56px;background:linear-gradient(135deg,var(--navy),var(--blue));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:20px;}
+.ramo-card h3{font-family:'Montserrat',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:10px;}
+.ramo-card p{font-size:0.88rem;color:var(--text-light);line-height:1.65;}
+.ramo-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px;}
+.ramo-tag{background:var(--gray);border-radius:100px;padding:4px 12px;font-size:0.72rem;color:var(--text-light);font-weight:600;}
 
-/* ── Nosotros ── */
-#nosotros{background:var(--green);}
-.nosotros-grid{
-  display:grid;grid-template-columns:1fr 1fr;gap:80px;
-  align-items:center;margin-top:64px;
-}
-.nosotros-badge{
-  width:160px;height:160px;border-radius:50%;
-  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  margin-bottom:32px;
-}
-.nosotros-badge .nb-num{font-family:var(--font-serif);font-size:2.8rem;color:#fff;font-weight:400;}
-.nosotros-badge .nb-label{font-size:10px;color:rgba(255,255,255,.5);letter-spacing:1px;text-transform:uppercase;}
-.nosotros-name{font-family:var(--font-serif);font-size:2.2rem;color:#fff;font-weight:400;margin-bottom:6px;}
-.nosotros-title{font-size:13px;color:var(--gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:24px;}
-.nosotros-text{font-size:15px;color:rgba(255,255,255,.7);line-height:1.8;}
-.nosotros-details{margin-top:32px;display:flex;flex-direction:column;gap:12px;}
-.nosotros-det{display:flex;align-items:center;gap:12px;font-size:14px;color:rgba(255,255,255,.6);}
-.nosotros-det strong{color:#fff;}
-.lic-badge{
-  background:rgba(184,150,62,.15);border:1px solid rgba(184,150,62,.3);
-  border-radius:8px;padding:16px 24px;margin-top:24px;
-  font-size:13px;color:rgba(255,255,255,.8);
-}
-.lic-badge strong{color:var(--gold);}
-.nosotros-right{text-align:center;}
-.big-quote{
-  font-family:var(--font-serif);font-size:clamp(1.5rem,2.8vw,2.5rem);
-  color:rgba(255,255,255,.9);line-height:1.5;font-style:italic;font-weight:400;
-}
-.big-quote-attr{
-  font-size:13px;color:rgba(255,255,255,.4);margin-top:20px;letter-spacing:.5px;
-}
-.nosotros-values{
-  display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:40px;
-}
-.val-card{
-  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);
-  border-radius:8px;padding:20px;text-align:left;
-}
-.val-icon{font-size:1.5rem;margin-bottom:10px;}
-.val-name{font-size:13px;font-weight:600;color:#fff;margin-bottom:4px;}
-.val-desc{font-size:12px;color:rgba(255,255,255,.5);}
+/* COMPANIES */
+.companies{background:var(--navy);padding:60px 24px;}
+.companies-inner{max-width:1200px;margin:0 auto;}
+.companies-title{text-align:center;margin-bottom:16px;}
+.companies-title .section-label{color:var(--gold);}
+.companies-title h2{color:var(--white);}
+.companies-sub{text-align:center;color:rgba(255,255,255,0.55);font-size:0.9rem;margin-bottom:40px;}
+.ticker-wrap{overflow:hidden;position:relative;}
+.ticker-wrap::before,.ticker-wrap::after{content:'';position:absolute;top:0;bottom:0;width:80px;z-index:2;}
+.ticker-wrap::before{left:0;background:linear-gradient(90deg,var(--navy),transparent);}
+.ticker-wrap::after{right:0;background:linear-gradient(270deg,var(--navy),transparent);}
+.ticker{display:flex;gap:0;animation:ticker 35s linear infinite;width:max-content;}
+.ticker-item{display:flex;align-items:center;padding:0 28px;white-space:nowrap;font-family:'Montserrat',sans-serif;font-weight:600;font-size:0.88rem;color:rgba(255,255,255,0.7);transition:color 0.2s;}
+.ticker-item:hover{color:var(--gold);}
+.ticker-sep{color:rgba(212,175,55,0.4);margin:0;padding:0 8px;}
+@keyframes ticker{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
 
-/* ── Artículos ── */
-#articulos{background:var(--bg);}
-#art-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(12,12,10,.07);margin-top:56px;border:1px solid rgba(12,12,10,.07);}
-.art-card{background:var(--bg);padding:36px;transition:all .3s var(--ease);cursor:pointer;position:relative;overflow:hidden;}
-.art-card:hover{background:#fff;}
-.art-tag{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:12px;}
-.art-title{font-family:var(--font-serif);font-size:1.3rem;color:var(--text);line-height:1.3;margin-bottom:12px;font-weight:400;}
-.art-lead{font-size:13px;color:var(--gray);line-height:1.7;}
-.art-read{font-size:11px;color:var(--gray);margin-top:16px;opacity:.6;}
-.art-arrow{position:absolute;bottom:36px;right:36px;font-size:18px;color:var(--gold);opacity:0;transform:translateX(-8px);transition:.3s;}
-.art-card:hover .art-arrow{opacity:1;transform:translateX(0);}
+/* CONTACT */
+.contact{background:var(--gray);}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start;}
+.contact-info{display:grid;gap:20px;}
+.contact-item{display:flex;gap:16px;align-items:flex-start;background:var(--white);border-radius:12px;padding:20px;border:1px solid var(--border);}
+.contact-item-icon{width:44px;height:44px;min-width:44px;background:linear-gradient(135deg,var(--navy),var(--blue));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;}
+.contact-item-text small{font-size:0.72rem;color:var(--text-light);text-transform:uppercase;letter-spacing:0.5px;font-weight:700;}
+.contact-item-text a,.contact-item-text p{display:block;font-size:0.95rem;color:var(--navy);font-weight:600;text-decoration:none;margin-top:2px;}
+.contact-item-text a:hover{color:var(--blue);}
+.contact-form{background:var(--white);border-radius:16px;padding:36px;border:1px solid var(--border);box-shadow:0 4px 20px rgba(0,0,0,0.05);}
+.contact-form h3{font-family:'Montserrat',sans-serif;font-weight:700;font-size:1.2rem;color:var(--navy);margin-bottom:24px;}
+.form-group{margin-bottom:18px;}
+.form-group label{display:block;font-size:0.8rem;font-weight:700;color:var(--text-dark);margin-bottom:6px;letter-spacing:0.3px;font-family:'Montserrat',sans-serif;}
+.form-group input,.form-group textarea,.form-group select{width:100%;padding:12px 16px;border:1.5px solid var(--border);border-radius:8px;font-family:'Lato',sans-serif;font-size:0.9rem;color:var(--text-dark);background:var(--white);transition:border-color 0.2s;outline:none;}
+.form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--gold);}
+.form-group textarea{resize:vertical;min-height:120px;}
+.wha-btn{display:inline-flex;align-items:center;gap:10px;padding:14px 28px;background:#25D366;color:var(--white);font-family:'Montserrat',sans-serif;font-weight:700;font-size:0.9rem;border-radius:8px;text-decoration:none;transition:all 0.2s;margin-top:8px;}
+.wha-btn:hover{background:#1ebe5c;transform:translateY(-2px);box-shadow:0 8px 24px rgba(37,211,102,0.3);}
 
-/* ── Contacto ── */
-#contacto{display:grid;grid-template-columns:1fr 1fr;min-height:600px;}
-.contact-left{
-  background:var(--black);padding:80px;
-  display:flex;flex-direction:column;justify-content:center;
-}
-.contact-right{
-  background:var(--white);padding:80px;
-  display:flex;flex-direction:column;justify-content:center;
-}
-.contact-big{
-  font-family:var(--font-serif);font-size:clamp(2.5rem,5vw,4.5rem);
-  color:#fff;line-height:1.1;font-weight:400;margin-bottom:32px;
-}
-.contact-big em{color:var(--gold);font-style:italic;}
-.contact-detail{display:flex;align-items:center;gap:12px;color:rgba(255,255,255,.6);font-size:14px;margin-bottom:12px;}
-.contact-detail a{color:rgba(255,255,255,.8);transition:.2s;}
-.contact-detail a:hover{color:#fff;}
-.contact-icon{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
-.form-title{font-family:var(--font-serif);font-size:1.8rem;font-weight:400;margin-bottom:28px;color:var(--text);}
-.form-group{display:flex;flex-direction:column;gap:5px;margin-bottom:16px;}
-.form-group label{font-size:11px;font-weight:600;color:var(--gray);letter-spacing:.5px;text-transform:uppercase;}
-.form-group input,.form-group select,.form-group textarea{
-  padding:12px 14px;border:1px solid rgba(12,12,10,.12);border-radius:6px;
-  font-family:var(--font-sans);font-size:14px;background:#FAFAF8;
-  outline:none;transition:.2s;color:var(--text);
-}
-.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--green);background:#fff;}
-.form-group textarea{min-height:100px;resize:vertical;}
-.btn-submit{
-  background:var(--green);color:#fff;padding:13px 28px;border-radius:100px;
-  font-size:14px;font-weight:600;border:none;cursor:pointer;transition:all .25s;
-  width:100%;margin-top:4px;
-}
-.btn-submit:hover{background:var(--green2);transform:translateY(-1px);}
+/* FOOTER */
+footer{background:var(--navy);border-top:1px solid rgba(212,175,55,0.15);}
+.footer-main{max-width:1200px;margin:0 auto;padding:56px 24px 36px;display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:48px;}
+.footer-brand .nav-brand-name{color:var(--white);font-size:1.2rem;}
+.footer-brand .nav-brand-sub{color:var(--gold);}
+.footer-brand p{font-size:0.85rem;color:rgba(255,255,255,0.5);line-height:1.7;margin-top:14px;max-width:260px;}
+.footer-col h4{font-family:'Montserrat',sans-serif;font-weight:700;font-size:0.8rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:16px;}
+.footer-col ul{list-style:none;}
+.footer-col ul li{margin-bottom:10px;}
+.footer-col ul li a{color:rgba(255,255,255,0.55);text-decoration:none;font-size:0.85rem;transition:color 0.2s;}
+.footer-col ul li a:hover{color:var(--gold);}
+.footer-bottom{border-top:1px solid rgba(255,255,255,0.07);max-width:1200px;margin:0 auto;padding:20px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:gap;}
+.footer-bottom p{font-size:0.8rem;color:rgba(255,255,255,0.35);}
+.sprp-footer{display:flex;align-items:center;gap:10px;}
+.sprp-footer p{font-size:0.72rem;color:rgba(255,255,255,0.35);}
 
-/* ── Footer ── */
-footer{background:#0A0A08;padding:60px 40px 36px;color:rgba(255,255,255,.5);}
-.footer-inner{max-width:1200px;margin:0 auto;}
-.footer-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:48px;flex-wrap:wrap;gap:32px;}
-.footer-brand{}
-.footer-lic{font-size:12px;color:rgba(255,255,255,.4);margin-top:6px;}
-.footer-links{display:flex;gap:32px;flex-wrap:wrap;}
-.footer-col h4{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:14px;}
-.footer-col a{display:block;font-size:13px;color:rgba(255,255,255,.5);margin-bottom:8px;transition:.2s;}
-.footer-col a:hover{color:rgba(255,255,255,.8);}
-.footer-bottom{
-  border-top:1px solid rgba(255,255,255,.06);padding-top:28px;
-  display:flex;justify-content:space-between;align-items:center;
-  flex-wrap:wrap;gap:16px;
-}
-.footer-copy{font-size:12px;color:rgba(255,255,255,.3);}
-.sprp-badge{
-  display:flex;align-items:center;gap:10px;
-  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
-  padding:10px 16px;border-radius:8px;font-size:11px;color:rgba(255,255,255,.4);
-}
-.sprp-logo{font-size:18px;}
+/* CRM Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);z-index:2000;display:none;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal-box{background:var(--white);border-radius:20px;padding:48px 40px;max-width:400px;width:90%;text-align:center;position:relative;}
+.modal-box .modal-logo{margin:0 auto 20px;}
+.modal-box h2{font-family:'Montserrat',sans-serif;font-weight:800;font-size:1.5rem;color:var(--navy);margin-bottom:8px;}
+.modal-box p{font-size:0.9rem;color:var(--text-light);margin-bottom:28px;}
+.modal-close{position:absolute;top:16px;right:16px;background:var(--gray);border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;color:var(--text-light);}
+.modal-close:hover{background:var(--border);}
+.crm-link{display:block;width:100%;padding:14px;background:var(--navy);color:var(--white);font-family:'Montserrat',sans-serif;font-weight:700;border-radius:10px;text-decoration:none;font-size:0.95rem;transition:all 0.2s;margin-bottom:12px;}
+.crm-link:hover{background:var(--blue);}
 
-/* ── WhatsApp float ── */
-#wa-float{
-  position:fixed;bottom:28px;right:28px;z-index:999;
-  background:#25D366;color:#fff;width:56px;height:56px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;font-size:24px;
-  box-shadow:0 4px 20px rgba(37,211,102,.4);transition:all .3s;cursor:pointer;
-  text-decoration:none;
-}
-#wa-float:hover{transform:scale(1.1);box-shadow:0 6px 28px rgba(37,211,102,.5);}
+/* Password modal */
+.pw-modal{position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(8px);z-index:3000;display:none;align-items:center;justify-content:center;}
+.pw-modal.open{display:flex;}
+.pw-box{background:var(--navy);border:1px solid rgba(212,175,55,0.2);border-radius:20px;padding:40px;max-width:380px;width:90%;text-align:center;}
+.pw-box h3{font-family:'Montserrat',sans-serif;font-weight:700;color:var(--white);margin-bottom:8px;}
+.pw-box p{font-size:0.85rem;color:rgba(255,255,255,0.5);margin-bottom:24px;}
+.pw-box input{width:100%;padding:12px 16px;border:1.5px solid rgba(255,255,255,0.15);border-radius:8px;background:rgba(255,255,255,0.05);color:var(--white);font-size:1rem;text-align:center;letter-spacing:3px;outline:none;font-family:'Montserrat',sans-serif;}
+.pw-box input:focus{border-color:var(--gold);}
+.pw-error{color:#F87171;font-size:0.8rem;margin-top:8px;display:none;}
+.pw-actions{display:flex;gap:10px;margin-top:20px;}
+.pw-actions button{flex:1;padding:12px;border-radius:8px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer;border:none;}
+.pw-cancel{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6);}
+.pw-confirm{background:var(--gold);color:var(--navy);}
+.pw-confirm:hover{background:var(--gold-light);}
 
-/* ── Animations ── */
-.reveal{opacity:0;transform:translateY(28px);transition:opacity .7s var(--ease),transform .7s var(--ease);}
-.reveal.visible{opacity:1;transform:none;}
-.reveal-left{opacity:0;transform:translateX(-28px);transition:opacity .7s var(--ease),transform .7s var(--ease);}
-.reveal-left.visible{opacity:1;transform:none;}
-.reveal-right{opacity:0;transform:translateX(28px);transition:opacity .7s var(--ease),transform .7s var(--ease);}
-.reveal-right.visible{opacity:1;transform:none;}
+/* Ramos generales hidden */
+.ramos-generales{display:none;}
 
-/* ── CRM Login Modal ── */
-#crm-modal{
-  display:none;position:fixed;inset:0;z-index:9000;
-  background:rgba(12,12,10,.7);backdrop-filter:blur(8px);
-  align-items:center;justify-content:center;padding:20px;
+/* Responsive */
+@media(max-width:900px){
+  .hero-content,.about-grid,.contact-grid{grid-template-columns:1fr;}
+  .hero-visual{display:none;}
+  .footer-main{grid-template-columns:1fr 1fr;}
+  .nav-menu{display:none;position:absolute;top:70px;left:0;right:0;background:var(--navy);flex-direction:column;padding:16px;gap:4px;border-bottom:1px solid rgba(212,175,55,0.15);}
+  .nav-menu.open{display:flex;}
+  .nav-toggle{display:flex;flex-direction:column;}
+  .dropdown{position:static;opacity:1;visibility:visible;transform:none;box-shadow:none;border:none;background:rgba(255,255,255,0.03);border-radius:0;margin-left:16px;}
 }
-#crm-modal.open{display:flex;}
-.crm-modal-box{
-  background:#fff;border-radius:16px;padding:0;
-  width:100%;max-width:420px;overflow:hidden;
-  box-shadow:0 24px 80px rgba(0,0,0,.3);
-}
-.crm-modal-header{
-  background:var(--green);padding:32px;text-align:center;
-}
-.crm-modal-title{font-family:var(--font-serif);font-size:1.6rem;color:#fff;font-weight:400;margin-top:16px;margin-bottom:4px;}
-.crm-modal-sub{font-size:13px;color:rgba(255,255,255,.6);}
-.crm-modal-body{padding:32px;}
-.crm-field{margin-bottom:16px;}
-.crm-field label{font-size:11px;font-weight:600;color:var(--gray);letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:5px;}
-.crm-field input{width:100%;padding:12px 14px;border:1.5px solid rgba(12,12,10,.12);border-radius:8px;font-size:15px;outline:none;transition:.2s;font-family:var(--font-sans);}
-.crm-field input:focus{border-color:var(--green);}
-.crm-err{font-size:12px;color:#DC2626;background:#FEF2F2;padding:8px 12px;border-radius:6px;margin-bottom:12px;display:none;}
-.crm-submit{width:100%;background:var(--green);color:#fff;padding:13px;border-radius:8px;font-size:15px;font-weight:600;border:none;cursor:pointer;transition:.2s;font-family:var(--font-sans);}
-.crm-submit:hover{background:var(--green2);}
-.crm-close-btn{position:absolute;top:16px;right:16px;background:rgba(255,255,255,.15);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;}
-.crm-modal-header{position:relative;}
-.crm-hint{font-size:12px;color:var(--gray);text-align:center;margin-top:14px;}
-.crm-hint a{color:var(--green);font-weight:600;}
-
-/* ── Hamburger ── */
-.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:6px;}
-.hamburger span{width:22px;height:2px;background:#fff;transition:.3s;border-radius:.px;}
-#nav.scrolled .hamburger span{background:var(--text);}
-.mobile-menu{
-  display:none;position:fixed;inset:0;z-index:990;
-  background:var(--green);flex-direction:column;align-items:center;
-  justify-content:center;gap:28px;
-}
-.mobile-menu.open{display:flex;}
-.mobile-menu a{font-family:var(--font-serif);font-size:2.2rem;color:#fff;font-weight:400;transition:.2s;}
-.mobile-menu a:hover{color:var(--gold);}
-.mobile-close{position:absolute;top:24px;right:28px;background:none;border:none;color:#fff;font-size:28px;cursor:pointer;}
-
-/* ── Responsive ── */
-@media(max-width:1024px){
-  .nosotros-grid{grid-template-columns:1fr;}
-  .nosotros-right{order:-1;}
-  .ramos-grid,.aseg-grid,.art-grid{grid-template-columns:1fr 1fr;}
-  #contacto{grid-template-columns:1fr;}
-  .contact-left{padding:60px 40px;}
-  .contact-right{padding:60px 40px;}
-  .stats-grid{grid-template-columns:1fr 1fr;}
-  .stat-item+.stat-item::before{display:none;}
-}
-@media(max-width:768px){
-  #nav{padding:12px 20px;}
-  #nav.scrolled{padding:10px 20px;}
-  .nav-links{display:none;}
-  .hamburger{display:flex;}
-  .hero-headline{font-size:clamp(2.2rem,8vw,3.5rem);}
-  #hero{padding:100px 20px 60px;}
-  .hero-scroll{left:20px;}
-  .section{padding:70px 20px;}
-  .ramos-grid,.aseg-grid,.art-grid{grid-template-columns:1fr;}
-  .nosotros-values{grid-template-columns:1fr;}
-  .contact-left,.contact-right{padding:50px 24px;}
-  footer{padding:50px 20px 28px;}
-  .footer-top{flex-direction:column;}
-  .stats-grid{padding:36px 20px;}
-  .footer-links{gap:20px;}
-  .nav-cta .btn-wa .wa-text{display:none;}
-}
-@media(max-width:480px){
-  .hero-actions{flex-direction:column;align-items:flex-start;}
-  .btn-primary,.btn-ghost{width:100%;justify-content:center;}
-}
-@media(prefers-reduced-motion:reduce){
-  *{animation:none!important;transition:none!important;}
+@media(max-width:600px){
+  .footer-main{grid-template-columns:1fr;}
+  .footer-bottom{flex-direction:column;gap:12px;text-align:center;}
+  .hero-card-stats{grid-template-columns:repeat(3,1fr);}
 }
 </style>
 </head>
 <body>
-<!-- ─── MOBILE MENU ───────────────────────────────────────────── -->
-<div class="mobile-menu" id="mobile-menu">
-  <button class="mobile-close" id="mobile-close">✕</button>
-  <a href="#ramos">Servicios</a>
-  <a href="#aseguradoras">Aseguradoras</a>
-  <a href="#nosotros">Nosotros</a>
-  <a href="#articulos">Artículos</a>
-  <a href="#contacto">Contacto</a>
-  <a href="/crm/" style="color:var(--gold)">Acceder al CRM →</a>
-</div>
 
-<!-- ─── NAVIGATION ───────────────────────────────────────────── -->
-<nav id="nav">
-  <div class="nav-logo"><svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" width="44" height="44">
-  <rect width="200" height="200" fill="#fff"/>
-  <rect x="12" y="67" width="176" height="2.5" fill="#9E9B8E"/>
-  <rect x="12" y="132" width="176" height="2.5" fill="#9E9B8E"/>
-  <text x="100" y="126" text-anchor="middle" font-family="Georgia,serif" font-size="80" fill="#0C0C0A" letter-spacing="2">JAC</text>
-  <text x="100" y="156" text-anchor="middle" font-family="Arial,sans-serif" font-size="19" fill="#1E5FA8" letter-spacing="9" font-weight="500">SEGUROS</text>
-</svg></div>
-  <div class="nav-links">
-    <a href="#ramos">Servicios</a>
-    <a href="#aseguradoras">Aseguradoras</a>
-    <a href="#nosotros">Nosotros</a>
-    <a href="#articulos">Artículos</a>
-    <a href="#contacto">Contacto</a>
-  </div>
-  <div class="nav-cta">
-    <button class="btn-crm" onclick="openCRM()">🔐 CRM</button>
-    <a href="https://wa.me/50769009900?text=Hola%20Jely,%20quiero%20informaci%C3%B3n%20sobre%20seguros" target="_blank" class="btn-wa">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-      <span class="wa-text">WhatsApp</span>
+<!-- NAV -->
+<nav id="main-nav">
+  <div class="nav-inner">
+    <a href="#inicio" class="nav-logo">
+      <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" width="44" height="44">
+        <defs>
+          <linearGradient id="lg1" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#D4AF37"/>
+            <stop offset="100%" stop-color="#E8C94A"/>
+          </linearGradient>
+        </defs>
+        <polygon points="100,10 185,55 185,145 100,190 15,145 15,55" fill="#0F172A" stroke="#D4AF37" stroke-width="4"/>
+        <text x="100" y="90" text-anchor="middle" font-family="Montserrat,sans-serif" font-weight="800" font-size="52" fill="url(#lg1)">JAC</text>
+        <text x="100" y="128" text-anchor="middle" font-family="Montserrat,sans-serif" font-weight="400" font-size="18" fill="rgba(255,255,255,0.8)" letter-spacing="4">SEGUROS</text>
+        <text x="100" y="155" text-anchor="middle" font-family="Montserrat,sans-serif" font-weight="300" font-size="11" fill="#D4AF37" letter-spacing="1">PANAMÁ</text>
+      </svg>
+      <div class="nav-brand">
+        <span class="nav-brand-name">JAC Seguros</span>
+        <span class="nav-brand-sub">Lic. #6175</span>
+      </div>
     </a>
-  </div>
-  <div class="hamburger" id="hamburger">
-    <span></span><span></span><span></span>
+    <ul class="nav-menu" id="nav-menu">
+      <li><a href="#inicio">Inicio</a></li>
+      <li>
+        <button>Nosotros <span class="dropdown-arrow">▾</span></button>
+        <div class="dropdown">
+          <a href="#sobre-mi">Sobre Mí</a>
+          <a href="#experiencia">Experiencia</a>
+          <a href="#regulacion">Regulación</a>
+        </div>
+      </li>
+      <li>
+        <button>Servicios <span class="dropdown-arrow">▾</span></button>
+        <div class="dropdown">
+          <a href="#salud">Seguro de Salud</a>
+          <a href="#vida">Seguro de Vida</a>
+          <a href="#accidentes">Accidentes Personales</a>
+          <a href="#colectivos">Colectivos Empresariales</a>
+        </div>
+      </li>
+      <li>
+        <button>Aseguradoras <span class="dropdown-arrow">▾</span></button>
+        <div class="dropdown">
+          <a href="#companias">Compañías Aliadas</a>
+          <a href="#contacto">Solicitar Cotización</a>
+        </div>
+      </li>
+      <li><a href="#contacto">Contacto</a></li>
+      <li><a href="#" class="nav-cta" onclick="openCRM(event)">🔐 CRM</a></li>
+    </ul>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Menú">
+      <span></span><span></span><span></span>
+    </button>
   </div>
 </nav>
 
-<!-- ─── HERO ─────────────────────────────────────────────────── -->
-<section id="hero">
-  <div class="hero-bg-text">JAC</div>
+<!-- HERO -->
+<section class="hero" id="inicio">
+  <div class="hero-pattern"></div>
+  <div class="hero-lines"></div>
   <div class="hero-content">
-    <div class="hero-tag">Corredora de Seguros Licenciada · Panamá</div>
-    <h1 class="hero-headline">
-      Tu tranquilidad<br>es nuestra<br><em>póliza.</em>
-    </h1>
-    <p class="hero-sub">Asesoría personalizada con las mejores aseguradoras del país. Encontramos la cobertura perfecta para ti, tu familia y tu empresa.</p>
-    <div class="hero-actions">
-      <a href="#contacto" class="btn-primary">Solicitar Asesoría Gratis</a>
-      <a href="#ramos" class="btn-ghost">Ver todos los seguros ↓</a>
+    <div class="hero-text">
+      <div class="badge">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" fill="#D4AF37" opacity="0.3"/><circle cx="6" cy="6" r="3" fill="#D4AF37"/></svg>
+        <span>Corredora Autorizada · Panamá</span>
+      </div>
+      <h1>Protegemos lo que<br/><em>más importa</em> para ti</h1>
+      <p>Más de 20 años conectando personas con la protección que merecen. Especialista en Seguros de Salud, Vida y Accidentes Personales en Panamá.</p>
+      <div class="hero-actions">
+        <a href="#contacto" class="btn-primary">Solicitar Cotización →</a>
+        <a href="#ramos" class="btn-outline">Ver Servicios</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-card">
+        <svg class="hero-logo-big" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="lg2" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#D4AF37"/>
+              <stop offset="100%" stop-color="#E8C94A"/>
+            </linearGradient>
+          </defs>
+          <polygon points="100,10 185,55 185,145 100,190 15,145 15,55" fill="rgba(255,255,255,0.05)" stroke="#D4AF37" stroke-width="3"/>
+          <text x="100" y="90" text-anchor="middle" font-family="Montserrat,sans-serif" font-weight="800" font-size="52" fill="url(#lg2)">JAC</text>
+          <text x="100" y="128" text-anchor="middle" font-family="Montserrat,sans-serif" font-weight="400" font-size="18" fill="rgba(255,255,255,0.85)" letter-spacing="4">SEGUROS</text>
+          <text x="100" y="155" text-anchor="middle" font-family="Montserrat,sans-serif" font-weight="300" font-size="11" fill="#D4AF37" letter-spacing="1">PANAMÁ</text>
+        </svg>
+        <div class="hero-card-name">Jely An Castro</div>
+        <div class="hero-card-title">Corredora de Seguros · Lic. #6175</div>
+        <div class="hero-card-stats">
+          <div class="stat"><span class="stat-num">20+</span><span class="stat-lbl">Años</span></div>
+          <div class="stat"><span class="stat-num">17</span><span class="stat-lbl">Aseguradoras</span></div>
+          <div class="stat"><span class="stat-num">4</span><span class="stat-lbl">Ramos</span></div>
+        </div>
+      </div>
     </div>
   </div>
-  <div class="hero-scroll">
-    <div class="scroll-line"></div>
-    Descubrir más
+</section>
+
+<!-- SOBRE MÍ -->
+<section class="section about" id="sobre-mi">
+  <div class="section-inner">
+    <div class="about-grid">
+      <div class="about-visual">
+        <div class="about-img-box">
+          <div class="about-img-pattern"></div>
+          <div class="about-img-text">
+            <div class="about-initials">JC</div>
+            <div class="about-img-name">Jely An Castro</div>
+            <div class="about-img-sub">Corredora de Seguros</div>
+          </div>
+        </div>
+        <div class="badge-float badge-float-tl">
+          <div class="badge-float-num">20+</div>
+          <div class="badge-float-txt">Años de experiencia</div>
+        </div>
+        <div class="badge-float badge-float-br">
+          <div class="badge-float-num">Lic. #6175</div>
+          <div class="badge-float-txt">Autorizada SSRP</div>
+        </div>
+      </div>
+      <div id="experiencia">
+        <span class="section-label">Sobre Nosotros</span>
+        <h2 class="section-title">Experiencia que<br/>genera confianza</h2>
+        <div class="divider"></div>
+        <p style="color:var(--text-light);line-height:1.8;margin-bottom:28px;">Con más de <strong>20 años de trayectoria</strong> en el sector asegurador panameño, ofrezco asesoría personalizada y soluciones integrales de protección para personas y familias. Mi compromiso es encontrar la cobertura ideal que se adapte a tus necesidades y presupuesto.</p>
+        <div class="about-features">
+          <div class="feature-item">
+            <div class="feature-icon">🏆</div>
+            <div class="feature-text">
+              <h4>Experiencia Comprobada</h4>
+              <p>Dos décadas asesorando a familias y empresas panameñas con soluciones de protección confiables.</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">🤝</div>
+            <div class="feature-text">
+              <h4>Asesoría Personalizada</h4>
+              <p>Cada cliente es único. Analizamos tu situación para encontrar la cobertura perfecta para ti.</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">📋</div>
+            <div class="feature-text">
+              <h4>Gestión de Siniestros</h4>
+              <p>Te acompañamos en cada paso del proceso de reclamación para que obtengas lo que mereces.</p>
+            </div>
+          </div>
+        </div>
+        <div class="sprp-box" id="regulacion">
+          <div class="sprp-logo-wrap">
+            <svg width="52" height="52" viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg">
+              <rect width="52" height="52" rx="10" fill="#0F172A"/>
+              <text x="26" y="22" text-anchor="middle" font-family="Montserrat,sans-serif" font-weight="800" font-size="10" fill="#D4AF37">SSRP</text>
+              <text x="26" y="34" text-anchor="middle" font-family="Montserrat,sans-serif" font-weight="400" font-size="6.5" fill="rgba(255,255,255,0.7)">PANAMÁ</text>
+              <rect x="10" y="38" width="32" height="2" rx="1" fill="#D4AF37"/>
+              <polygon points="26,4 30,12 22,12" fill="#D4AF37" opacity="0.8"/>
+            </svg>
+          </div>
+          <div class="sprp-text">
+            <strong>Regulada por la Superintendencia</strong>
+            <p>Supervisada y regulada por la Superintendencia de Seguros y Reaseguros de Panamá (SSRP). Licencia #6175 — Ramos de Personas.</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
-<section id="stats">
-  <div class="stats-grid">
-    <div class="stat-item"><span class="stat-num" data-target="18">18</span><div class="stat-label">Aseguradoras aliadas</div></div>
-    <div class="stat-item"><span class="stat-num" data-target="12">12</span><div class="stat-label">Ramos de seguros</div></div>
-    <div class="stat-item"><span class="stat-num" data-target="10" data-suffix="+">10+</span><div class="stat-label">Años de experiencia</div></div>
-    <div class="stat-item"><span class="stat-num" data-target="500" data-suffix="+">500+</span><div class="stat-label">Clientes protegidos</div></div>
+
+<!-- RAMOS -->
+<section class="section ramos" id="ramos">
+  <div class="section-inner">
+    <div style="text-align:center;margin-bottom:48px;">
+      <span class="section-label">Nuestros Servicios</span>
+      <h2 class="section-title" style="margin:0 auto;">Ramos de Personas</h2>
+      <div class="divider" style="margin:20px auto;"></div>
+      <p class="section-sub" style="margin:0 auto;text-align:center;">Especialistas en seguros de personas. Ofrecemos coberturas diseñadas para proteger tu salud, tu vida y la de tu familia.</p>
+    </div>
+    <div class="ramos-grid">
+      <!-- SALUD -->
+      <div class="ramo-card" id="salud">
+        <div class="ramo-icon">🏥</div>
+        <h3>Seguro de Salud</h3>
+        <p>Acceso a atención médica de calidad con planes individuales y familiares. Cobertura para hospitalizaciones, consultas, medicamentos, cirugías y servicios de emergencia en las mejores clínicas y hospitales del país.</p>
+        <div class="ramo-tags">
+          <span class="ramo-tag">Individual</span>
+          <span class="ramo-tag">Familiar</span>
+          <span class="ramo-tag">Internacional</span>
+        </div>
+      </div>
+      <!-- VIDA -->
+      <div class="ramo-card" id="vida">
+        <div class="ramo-icon">❤️</div>
+        <h3>Seguro de Vida</h3>
+        <p>Garantiza la estabilidad económica de tu familia ante cualquier eventualidad. Planes de vida con cobertura por fallecimiento, invalidez total y permanente, y beneficios adicionales de ahorro e inversión.</p>
+        <div class="ramo-tags">
+          <span class="ramo-tag">Término</span>
+          <span class="ramo-tag">Entera</span>
+          <span class="ramo-tag">Ahorro</span>
+        </div>
+      </div>
+      <!-- ACCIDENTES -->
+      <div class="ramo-card" id="accidentes">
+        <div class="ramo-icon">🛡️</div>
+        <h3>Accidentes Personales</h3>
+        <p>Protección inmediata ante accidentes que puedan afectar tu capacidad laboral o generar gastos médicos inesperados. Cobertura por muerte accidental, invalidez parcial o total, y gastos médicos por accidente.</p>
+        <div class="ramo-tags">
+          <span class="ramo-tag">Muerte accidental</span>
+          <span class="ramo-tag">Invalidez</span>
+          <span class="ramo-tag">Gastos médicos</span>
+        </div>
+      </div>
+      <!-- COLECTIVOS -->
+      <div class="ramo-card" id="colectivos">
+        <div class="ramo-icon">🏢</div>
+        <h3>Colectivos de Vida y Salud para Empresas</h3>
+        <p>Soluciones de seguros colectivos diseñadas para proteger a los colaboradores de tu empresa. Los planes colectivos de vida y salud no solo brindan tranquilidad a los empleados, sino que también fortalecen la cultura organizacional y aumentan la retención de talento. Incluyen cobertura médica, vida en grupo, accidentes personales y beneficios complementarios adaptados al tamaño y necesidades de cada empresa. Ideal para PYMES y grandes corporaciones que buscan un beneficio diferenciador para su equipo.</p>
+        <div class="ramo-tags">
+          <span class="ramo-tag">Vida en Grupo</span>
+          <span class="ramo-tag">Salud Colectiva</span>
+          <span class="ramo-tag">Accidentes</span>
+          <span class="ramo-tag">PYMES</span>
+          <span class="ramo-tag">Empresas</span>
+        </div>
+      </div>
+    </div>
+    <!-- CTA Ramos Generales (admin) -->
+    <div style="text-align:center;margin-top:48px;">
+      <button onclick="showPwModal()" style="background:transparent;border:1.5px solid var(--border);padding:10px 24px;border-radius:8px;color:var(--text-light);font-family:'Montserrat',sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--navy)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-light)'">🔒 Acceso Administrativo — Ramos Generales</button>
+    </div>
+    <!-- RAMOS GENERALES (hidden) -->
+    <div class="ramos-generales" id="ramos-generales">
+      <div style="text-align:center;margin:48px 0 32px;"><span class="section-label">Acceso Restringido</span><h2 class="section-title">Ramos de Riesgos Generales</h2></div>
+      <div class="ramos-grid">
+        <div class="ramo-card"><div class="ramo-icon">🚗</div><h3>Seguro de Auto</h3><p>Cobertura completa o básica para tu vehículo. Responsabilidad civil, daños propios, robo y asistencia en carretera.</p></div>
+        <div class="ramo-card"><div class="ramo-icon">🏠</div><h3>Seguro de Hogar</h3><p>Protección para tu residencia contra incendio, robo, daños por agua, responsabilidad civil y fenómenos naturales.</p></div>
+        <div class="ramo-card"><div class="ramo-icon">✈️</div><h3>Seguro de Viaje</h3><p>Cobertura médica internacional, cancelación de vuelos, equipaje y asistencia en el extranjero.</p></div>
+        <div class="ramo-card"><div class="ramo-icon">📜</div><h3>Fianzas</h3><p>Garantías de cumplimiento, fidelidad, pago y licitación para contratistas y empresas.</p></div>
+        <div class="ramo-card"><div class="ramo-icon">🚢</div><h3>Transporte</h3><p>Seguro de carga terrestre, marítima y aérea para mercancías y bienes en tránsito.</p></div>
+        <div class="ramo-card"><div class="ramo-icon">⚠️</div><h3>Responsabilidad Civil</h3><p>Protección ante reclamaciones de terceros por daños corporales o materiales derivados de tus actividades.</p></div>
+        <div class="ramo-card"><div class="ramo-icon">🔥</div><h3>Incendio y Líneas Aliadas</h3><p>Cobertura para edificios, instalaciones y equipos ante incendio, rayo, explosión y riesgos aliados.</p></div>
+        <div class="ramo-card"><div class="ramo-icon">🌿</div><h3>Agropecuario</h3><p>Seguros para el sector agrícola y ganadero. Protección de cosechas, animales y equipos del campo.</p></div>
+      </div>
+    </div>
   </div>
 </section>
-<div id="ticker"><div class="ticker-inner"><span class="ticker-item">ASSA Securos<span class="ticker-sep">◆</span></span><span class="ticker-item">Internacional de Seguros<span class="ticker-sep">◆</span></span><span class="ticker-item">MAPFRE Panamá<span class="ticker-sep">◆</span></span><span class="ticker-item">SURA SKguros<span class="ticker-sep">◆</span></span><span class="ticker-item">Pan-American Life<span class="ticker-sep">◆</span></span><span class="ticker-item">Seguros La Regional<span class="ticker-sep">◆</span></span><span class="ticker-item">FEDTA5�cticker-sep">◆</span></span><span class="ticker-item">Chubb Seguros<span class="ticker-sep">◆</span></span><span class="ticker-item">ASSA Securos<span class="ticker-sep">◆</span></span><span class="ticker-item">Internacional de Seguros<span class="ticker-sep">◆</span></span><span class="ticker-item">MAPFRE Panamá<span class="ticker-sep">◆</span></span><span class="ticker-item">SURA SKguros<span class="ticker-sep">◆</span></span></div></div>
-<section id="ramos" class="section"><div class="section-inner"><div class="ramos-header"><div><div class="section-label reveal">Lo que protegemos</div><h2 class="section-title reveal">Todos los ramos,<br>una sola asesora.</h2></div></div><div class="ramos-grid"><div class="ramo-card reveal"><div class="ramo-num">01</div><span class="ramo-icon">🏥</span><div class="ramo-name">Salud y Médico</div><div class="ramo-desc">Cobertura médica completa</div></div><div class="ramo-card reveal"><div class="ramo-num">02</div><span class="ramo-icon">💚</pan><div class="ramo-name">Vida</div><div class="ramo-desc">Protección financiera para tu familia</div></div><div class="ramo-card reveal"><div class="ramo-num">03</div><span class="ramo-icon">🚗</span><div class="ramo-name">Automóvil</div><div class="ramo-desc">Cobertura total para tu vehículo</div></div><div class="ramo-card reveal"><div class="ramo-num">04</div><span class="ramo-icon">🏡</span><div class="ramo-name">Hogar</div><div class="ramo-desc">Tu vivienda protegida</div></div><div class="ramo-card reveal"><div class="ramo-num">05</div><span class="ramo-icon">✈️</span><div class="ramo-name">Viaje</div><div class="ramo-desc">Viaja con tranquilidad</div></div><div class="ramo-card reveal"><div class="ramo-num">06</div><span class="ramo-icon">🏢</span><div class="ramo-name">Empresarial</div><div class="ramo-desc">Soluciones para tu negocio</div></div><div class="ramo-card reveal"><div class="ramo-num">07</div><span class="ramo-icon">☖️</span><div class="ramo-name">Fianzas</div><div class="ramo-desc">Garantías para contratos</div></div><div class="ramo-card reveal"><div class="ramo-num">08</div><span class="ramo-icon">🚢&span><div class="ramo-name">Transporte</div><div class="ramo-desc">Protección de mercancías</div></div><div class="ramo-card reveal"><div class="ramo-num">09</div><span class="ramo-icon">🦺</span><div class="ramo-name">Accidentes Personales</div><div class="ramo-desc">Indemnización por accidentes</div></div><div class="ramo-card reveal"><div class="ramo-num">10</div><span class="ramo-icon">🗋</span><div class="ramo-name">Responsabilidad Civil</div><div class="ramo-desc">Protección ante reclamaciones</div></div><div class="ramo-card reveal"><div class="ramo-num">11</div><span class="ramo-icon">🔥</span><div class="ramo-name">Incendio</div><div class="ramo-desc">Cobertura contra incendio</div></div><div class="ramo-card reveal"><div class="ramo-num">12</div><span class="ramo-icon">🌾</span><div class="ramo-name">Agropecuario</div><div class="ramo-desc">Protección para el sector agrícola</div></div></div></div></div></section>
-<section id="aseguradoras" class="section"><div class="section-inner"><div class="section-label reveal">Nuestros aliados</div><h2 class="section-title reveal">18 aseguradoras.</h2><div class="aseg-grid"><div class="aseg-card reveal"><div class="aseg-dot" style="background:#005F9E"></div><div class="aseg-info"><div class="aseg-name">ASSA Seguros</div><div class="aseg-desc">Líder del mercado panameño</div></div></div><div class="aseg-card reveal"><div class="aseg-dot" style="background:#1A3A6B"></div><div class="aseg-info"><div class="aseg-name">Internacional de Seguros</div><div class="aseg-desc">Segunda aseguradora del país</div></div></div><div class="aseg-card reveal"><div class="aseg-dot" style="background:#C8102E"></div><div class="aseg-info"><div class="aseg-name">MAPFRE Panamá</div><div class="aseg-desc">Multinacional española</div></div></div></div></div></div></section>
-<section id="nosotros" class="section"><div class="section-inner"><div class="section-label reveal" style="color:var(--gold)">Quién te asesora</div><div class="nosotros-grid"><div class="reveal-left"><div class="nosotros-name">Jely An Castro</div><div class="nosotros-title">Corredora de Seguros Certificada</div><p class="nosotros-text">Con más de 10 años, ofrecemos asesoría honesta y personalizada.</p><div class="lic-badge"><strong>Licencia SPRP #6175</strong> — Supervisada por la Superintendencia de Seguros de Panamá.</div></div><div class="nosotros-right reveal-right"><div class="big-quote">"El mejor seguro es el que realmente te protege."</div></div></div></div></div></section>
-<section id="articulos" class="section"><div class="section-inner"><div class="section-label reveal">Conocimiento útil</div><h2 class="section-title reveal">Guías para tomar mejores decisiones.</h2><div class="art-grid"><div class="art-card reveal"><div class="art-tag">Consejos</div><div class="art-title">¿Cuánto seguro de vida necesitas?</div><div class="art-lead">Cómo calcular la cobertura adecuada.</div></div><div class="art-card reveal"><div class="art-tag">Salud</div><div class="art-title">Seguro médico vs. Seguro Social</div><div class="art-lead">Cuándo vale la pena complementar</div></div><div class="art-card reveal"><div class="art-tag">Auto</div><div class="art-title">Todo lo que debes saber sobre seguros de auto</div><div class="art-lead">Guía completa para conductores panameños.</div></div></div></div></div></section>
-<section id="contacto"><div class="contact-left"><div class="section-label" style="color:var(--gold)">Hablemos hoy</div><h2 class="contact-big">¿Listo para<br>estar bien<br><em>protegido?</em></h2><div class="contact-detail"><div class="contact-icon">📱</div><a href="https://wa.me/50769009900">+507 6900-9900</a></div><div class="contact-detail"><div class="contact-icon">📧</div><a href="mailto:jcastro@jacsegurospa.com">jcastro@jacsegurospa.com</a></div></div><div class="contact-right"><h3 class="form-title">Solicitar cotización gratuita</h3><form id="contact-form"><div class="form-group"><label>Nombre</label><input type="text" id="cf-name" required></div><div class="form-group"><label>Teléfono</label><input type="tel" id="cf-tel" required></div><div class="form-group"><label>Tipo de seguro</label><select id="cf-ramo"><option value="">Selecciona...</option><option>Salud</option><option>Vida</option><option>Auto</option></select></div><button type="submit" class="btn-submit">Enviar por WhatsApp</button></form></div></section>
-<footer><div class="footer-inner"><div class="footer-top"><div class="footer-brand"><div class="footer-lic">Corredora de Seguros · Lic. SPRP #6175</div><div class="footer-lic">© 2026 JAC Seguros.</div></div></div></div></footer>
-<a href="https://wa.me/50769009900" target="_blank" id="wa-float">📱</a>
-<div id="crm-modal"><div class="crm-modal-box"><div class="crm-modal-header"><button class="crm-close-btn" onclick="closeCRM()">✕</button><div class="crm-modal-title">Portal CRM</div></div><div class="crm-modal-body"><div class="crm-field"><label>Usuario</label><input type="text" id="crm-user"></div><div class="crm-field"><label>Contraseña</label><input type="password" id="crm-pass"></div><button class="crm-submit" onclick="crmLogin()">Iniciar sesión</button><p class="crm-hint"><a href="/crm/">Ir al Portal CRM ₒ</a></p></div></div></div>
+
+<!-- COMPANIES -->
+<section class="companies" id="companias">
+  <div class="companies-inner">
+    <div class="companies-title">
+      <span class="section-label">Nuestras Aliadas</span>
+      <h2 class="section-title" style="color:var(--white);">Compañías Aseguradoras</h2>
+    </div>
+    <p class="companies-sub">Trabajamos con las principales aseguradoras de Panamá para ofrecerte las mejores opciones del mercado.</p>
+    <div class="ticker-wrap">
+      <div class="ticker" id="ticker">
+        <span class="ticker-item">ASSA Seguros</span><span class="ticker-sep">·</span>
+        <span class="ticker-item">Internacional de Seguros</span><span class="ticker-sep">·</span>
+        <span class="ticker-item">MAPFRE Panamá</span><span class="ticker-sep">·</span>
+        <span class="ticker-item">SURA Seguros</span><span class="ticker-sep">·</span>
+        <span class="ticker-item">PALIG</span><span class="ticker-sep">·</span>
+        <span class="ticker-item">La Regional</span><span class="ticker-sep">·</span>
+        <span class="ticker-item">Seguros Ancón</span><span class="ticker-sep">·</span>
+        <span class="ticker-item">Chubb</span><span class="ticker-sep">·</span>
+        <span class="ticker-item">Acerta</span><span class="ticker-sep">·</span>
+        <span class="ticker-item">Aliado</span><span class="ticker-sep">·</span>
+        <span class="ticker-item">Banesco</span><span class="ticker-sep">·</span>
+        <span class="ticker-item">General de Seguros</span><span class="ticker-sep">·</span>
+        <span class="ticker-item">Mercantil</span><span class="ticker-sep">·</span>
+        <span class="ticker-item">Multibank</span><span class="ticker-sep">·</span>
+        <span class="ticker-item">Óptima</span><span class="ticker-sep">·</span>
+        <span class="ticker-item">WW Medical</span><span class="ticker-sep">·</span>
+        <span class="ticker-item">Aseguradora Global</span><span class="ticker-sep">·</span>
+        <!-- duplicate for infinite scroll -->
+        <span class="ticker-item">ASSA Seguros</span><span class="ticker-sep">·</span>
+        <span class="ticker-item">Internacional de Seguros</span><span class="ticker-sep">·</span>
+        <span class="ticker-item">MAPFRE Panamá</span><span class="ticker-sep">·</span>
+        <span class="ticker-item">SURA Seguros</span><span class="ticker-sep">·</span>
+        <span class="ticker-item">PALIG</span><span class="ticker-sep">·</span>
+        <span class="ticker-item">La Regional</span><span class="ticker-sep">·</span>
+        <span class="ticker-item">Seguros Ancón</span><span class="ticker-sep">·</span>
+        <span class="ticker-item">Chubb</span><span class="ticker-sep">·</span>
+        <span class="ticker-item">Acerta</span><span class="ticker-sep">·</span>
+        <span class="ticker-item">Aliado</span><span class="ticker-sep">·</span>
+        <span class="ticker-item">Banesco</span><span class="ticker-sep">·</span>
+        <span class="ticker-item">General de Seguros</span><span class="ticker-sep">·</span>
+        <span class="ticker-item">Mercantil</span><span class="ticker-sep">·</span>
+        <span class="ticker-item">Multibank</span><span class="ticker-sep">·</span>
+        <span class="ticker-item">Óptima</span><span class="ticker-sep">·</span>
+        <span class="ticker-item">WW Medical</span><span class="ticker-sep">·</span>
+        <span class="ticker-item">Aseguradora Global</span><span class="ticker-sep">·</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="section contact" id="contacto">
+  <div class="section-inner">
+    <div style="margin-bottom:48px;">
+      <span class="section-label">Contáctenos</span>
+      <h2 class="section-title">Hablemos de tu protección</h2>
+      <div class="divider"></div>
+      <p class="section-sub">Solicita una cotización sin compromiso. Te asesoramos de forma personalizada y gratuita.</p>
+    </div>
+    <div class="contact-grid">
+      <div>
+        <div class="contact-info">
+          <div class="contact-item">
+            <div class="contact-item-icon">📞</div>
+            <div class="contact-item-text">
+              <small>Teléfono / WhatsApp</small>
+              <a href="tel:+50762926010">+507 6292-6010</a>
+            </div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-item-icon">📧</div>
+            <div class="contact-item-text">
+              <small>Correo Electrónico</small>
+              <a href="mailto:jcastro@jacsegurospa.com">jcastro@jacsegurospa.com</a>
+            </div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-item-icon">📍</div>
+            <div class="contact-item-text">
+              <small>Ubicación</small>
+              <p>Ciudad de Panamá, República de Panamá</p>
+            </div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-item-icon">🕐</div>
+            <div class="contact-item-text">
+              <small>Horario de Atención</small>
+              <p>Lunes a Viernes · 8:00 AM – 5:00 PM</p>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:24px;">
+          <a href="https://wa.me/50762926010?text=Hola%20Jely%20An%2C%20me%20interesa%20una%20cotizaci%C3%B3n%20de%20seguro." class="wha-btn" target="_blank">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            Escríbenos por WhatsApp
+          </a>
+        </div>
+      </div>
+      <div class="contact-form">
+        <h3>Solicitar Cotización</h3>
+        <div class="form-group">
+          <label>Nombre completo</label>
+          <input type="text" placeholder="Tu nombre y apellido"/>
+        </div>
+        <div class="form-group">
+          <label>Teléfono / WhatsApp</label>
+          <input type="tel" placeholder="+507 6000-0000"/>
+        </div>
+        <div class="form-group">
+          <label>Correo electrónico</label>
+          <input type="email" placeholder="tu@correo.com"/>
+        </div>
+        <div class="form-group">
+          <label>Tipo de seguro de interés</label>
+          <select>
+            <option value="">Selecciona un ramo</option>
+            <option>Seguro de Salud</option>
+            <option>Seguro de Vida</option>
+            <option>Accidentes Personales</option>
+            <option>Colectivos para Empresas</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Mensaje (opcional)</label>
+          <textarea placeholder="Cuéntanos brevemente tus necesidades..."></textarea>
+        </div>
+        <a href="https://wa.me/50762926010?text=Hola%20Jely%20An%2C%20quiero%20solicitar%20una%20cotizaci%C3%B3n." class="btn-primary" target="_blank" style="width:100%;justify-content:center;">Enviar por WhatsApp →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-main">
+    <div class="footer-brand">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" width="36" height="36">
+          <polygon points="100,10 185,55 185,145 100,190 15,145 15,55" fill="rgba(255,255,255,0.05)" stroke="#D4AF37" stroke-width="4"/>
+          <text x="100" y="90" text-anchor="middle" font-family="Montserrat,sans-serif" font-weight="800" font-size="52" fill="#D4AF37">JAC</text>
+          <text x="100" y="128" text-anchor="middle" font-family="Montserrat,sans-serif" font-weight="400" font-size="18" fill="rgba(255,255,255,0.8)" letter-spacing="4">SEGUROS</text>
+        </svg>
+        <div>
+          <div class="nav-brand-name">JAC Seguros</div>
+          <div class="nav-brand-sub">Lic. #6175 · Ramos de Personas</div>
+        </div>
+      </div>
+      <p>Corredora de seguros autorizada en Panamá. Más de 20 años brindando protección y tranquilidad a familias y empresas.</p>
+      <div style="margin-top:20px;display:flex;align-items:center;gap:10px;">
+        <svg width="32" height="32" viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg">
+          <rect width="52" height="52" rx="8" fill="rgba(255,255,255,0.06)" stroke="rgba(212,175,55,0.3)" stroke-width="1"/>
+          <text x="26" y="20" text-anchor="middle" font-family="Montserrat,sans-serif" font-weight="800" font-size="10" fill="#D4AF37">SSRP</text>
+          <text x="26" y="32" text-anchor="middle" font-family="Montserrat,sans-serif" font-weight="300" font-size="6" fill="rgba(255,255,255,0.5)">PANAMÁ</text>
+        </svg>
+        <p style="font-size:0.72rem;color:rgba(255,255,255,0.4);line-height:1.4;max-width:180px;">Supervisada y regulada por la Superintendencia de Seguros y Reaseguros de Panamá</p>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Servicios</h4>
+      <ul>
+        <li><a href="#salud">Seguro de Salud</a></li>
+        <li><a href="#vida">Seguro de Vida</a></li>
+        <li><a href="#accidentes">Accidentes Personales</a></li>
+        <li><a href="#colectivos">Colectivos Empresariales</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Contacto</h4>
+      <ul>
+        <li><a href="tel:+50762926010">+507 6292-6010</a></li>
+        <li><a href="mailto:jcastro@jacsegurospa.com">jcastro@jacsegurospa.com</a></li>
+        <li><a href="https://wa.me/50762926010" target="_blank">WhatsApp</a></li>
+        <li><a href="#" onclick="openCRM(event)">Portal CRM</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 JAC Seguros · Jely An Castro · Todos los derechos reservados</p>
+    <p>Licencia #6175 · Superintendencia de Seguros y Reaseguros de Panamá</p>
+  </div>
+</footer>
+
+<!-- CRM MODAL -->
+<div class="modal-overlay" id="crm-modal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeCRM()">✕</button>
+    <svg class="modal-logo" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" width="72" height="72">
+      <polygon points="100,10 185,55 185,145 100,190 15,145 15,55" fill="#0F172A" stroke="#D4AF37" stroke-width="4"/>
+      <text x="100" y="90" text-anchor="middle" font-family="Montserrat,sans-serif" font-weight="800" font-size="52" fill="#D4AF37">JAC</text>
+      <text x="100" y="128" text-anchor="middle" font-family="Montserrat,sans-serif" font-weight="400" font-size="18" fill="rgba(0,0,0,0.7)" letter-spacing="4">SEGUROS</text>
+    </svg>
+    <h2>Portal CRM</h2>
+    <p>Acceso restringido para colaboradores autorizados de JAC Seguros.</p>
+    <a href="/crm/" class="crm-link" target="_blank">Acceder al CRM →</a>
+    <p style="font-size:0.78rem;color:#9CA3AF;">¿Olvidaste tu contraseña? Contacta al administrador.</p>
+  </div>
+</div>
+
+<!-- PASSWORD MODAL -->
+<div class="pw-modal" id="pw-modal">
+  <div class="pw-box">
+    <h3>🔒 Acceso Restringido</h3>
+    <p>Esta sección es de uso administrativo exclusivo.</p>
+    <input type="password" id="pw-input" placeholder="••••••" maxlength="20" onkeydown="if(event.key==='Enter')checkPw()"/>
+    <p class="pw-error" id="pw-error">Contraseña incorrecta. Intenta nuevamente.</p>
+    <div class="pw-actions">
+      <button class="pw-cancel" onclick="closePwModal()">Cancelar</button>
+      <button class="pw-confirm" onclick="checkPw()">Ingresar</button>
+    </div>
+  </div>
+</div>
+
 <script>
-const nav = document.getElementById('nav');
-window.addEventListener('scroll', () => {nav.classList.toggle('scrolled', window.scrollY > 40);},{passive:true});
-const obs = new IntersectionObserver((entries) => {entries.forEach(e => {if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:0.08});
-document.querySelectorAll('.reveal,.reveal-left,.reveal-right').forEach(el => obs.observe(el));
-function openCRM(){document.getElementById('crm-modal').classList.add('open');}
+// NAV TOGGLE
+document.getElementById('nav-toggle').addEventListener('click',function(){
+  document.getElementById('nav-menu').classList.toggle('open');
+});
+
+// CRM MODAL
+function openCRM(e){if(e)e.preventDefault();document.getElementById('crm-modal').classList.add('open');}
 function closeCRM(){document.getElementById('crm-modal').classList.remove('open');}
-function crmLogin(){const u=document.getElementById('crm-user').value;const p=document.getElementById('crm-pass').value;if(u&&p){sessionStorage.setItem('crm_user',u);sessionStorage.setItem('crm_pass',p);window.location.href='/crm/';}}
-document.getElementById('contact-form').addEventListener('submit',function(e){e.preventDefault();const name=document.getElementById('cf-name').value;const tel=document.getElementById('cf-tel').value;const ramo=document.getElementById('cf-ramo').value;const wa=encodeURIComponent(`Hola Jely, mi nombre es ${name}.\nInteresado en: ${ramo}\nTel: ${tel}`);window.open('https://wa.me/50769009900?text='+wa,'_blank');});
+document.getElementById('crm-modal').addEventListener('click',function(e){if(e.target===this)closeCRM();});
+
+// PASSWORD MODAL
+function showPwModal(){document.getElementById('pw-modal').classList.add('open');setTimeout(()=>document.getElementById('pw-input').focus(),100);}
+function closePwModal(){document.getElementById('pw-modal').classList.remove('open');document.getElementById('pw-input').value='';document.getElementById('pw-error').style.display='none';}
+function checkPw(){
+  const v=document.getElementById('pw-input').value;
+  if(v==='jac2025admin'||v==='JAC2025'||v==='admin2025'){
+    closePwModal();
+    document.getElementById('ramos-generales').style.display='block';
+    document.getElementById('ramos-generales').scrollIntoView({behavior:'smooth'});
+  } else {
+    document.getElementById('pw-error').style.display='block';
+    document.getElementById('pw-input').value='';
+    document.getElementById('pw-input').focus();
+  }
+}
+document.getElementById('pw-modal').addEventListener('click',function(e){if(e.target===this)closePwModal();});
+
+// NAV scroll effect
+window.addEventListener('scroll',function(){
+  const nav=document.getElementById('main-nav');
+  if(window.scrollY>50){nav.style.borderBottomColor='rgba(212,175,55,0.3)';}
+  else{nav.style.borderBottomColor='rgba(212,175,55,0.2)';}
+});
+
+// Smooth scroll for mobile nav
+document.querySelectorAll('#nav-menu a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',()=>document.getElementById('nav-menu').classList.remove('open'));
+});
 </script>
 </body>
 </html>
