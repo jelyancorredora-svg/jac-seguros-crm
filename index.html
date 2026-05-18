@@ -130,15 +130,20 @@ section{padding:88px 24px}
 .plan-cta:hover{background:#14305a}
 /* ── FORMULARIOS ── */
 #formularios{background:var(--bg)}
-.form-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.form-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:24px;justify-content:center}
+.form-tab{padding:7px 14px;border:1px solid var(--bd);border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;background:white;color:var(--mu);transition:.2s;font-family:var(--ff-head)}
+.form-tab:hover{border-color:var(--bl);color:var(--bl)}
+.form-tab.on{background:var(--bl);color:white;border-color:var(--bl)}
+.form-view{display:none}.form-view.on{display:block}
 .form-company-section{margin-bottom:32px}
 .form-company-title{font-size:16px;font-weight:800;color:var(--bl);margin-bottom:14px;display:flex;align-items:center;gap:8px}
 .form-items-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-.form-item{background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:14px;text-align:center;cursor:pointer;transition:.2s;text-decoration:none;display:block}
+.form-item{background:white;border:1px solid var(--bd);border-radius:8px;padding:14px;text-align:center;cursor:pointer;transition:.2s;text-decoration:none;display:block}
 .form-item:hover{background:#EEF4FF;border-color:var(--bl);transform:translateY(-2px)}
 .form-item-icon{font-size:24px;margin-bottom:6px}
 .form-item-name{font-size:11px;font-weight:700;color:var(--bl)}
 .form-item-type{font-size:9px;color:var(--mu);margin-top:2px}
+@media(max-width:768px){.form-items-grid{grid-template-columns:repeat(2,1fr)}}
 /* ── ARTICLES ── */
 #articulos{background:#fff}
 .art-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
@@ -915,57 +920,191 @@ footer{background:#0D1F3C;color:white;padding:50px 24px 24px}
     <div class="section-header">
       <div class="section-badge">Papelería Oficial</div>
       <h2 class="section-title">Formularios y <span>Documentación</span></h2>
-      <p class="section-sub">Accede a los formularios y documentos oficiales de cada aseguradora. Todos los documentos son oficiales y actualizados.</p>
+      <p class="section-sub">Accede a los formularios y documentos oficiales de cada aseguradora. Selecciona la compañía para ver sus formularios.</p>
     </div>
+    <!-- TABS -->
+    <div class="form-tabs">
+      <button class="form-tab on" onclick="showForms('all',this)">📋 Todas</button>
+      <button class="form-tab" onclick="showForms('assa',this)">ASSA</button>
+      <button class="form-tab" onclick="showForms('sura',this)">SURA</button>
+      <button class="form-tab" onclick="showForms('mapfre',this)">MAPFRE</button>
+      <button class="form-tab" onclick="showForms('is',this)">Internacional</button>
+      <button class="form-tab" onclick="showForms('palig',this)">PALIG</button>
+      <button class="form-tab" onclick="showForms('fedpa',this)">FEDPA</button>
+      <button class="form-tab" onclick="showForms('regional',this)">La Regional</button>
+      <button class="form-tab" onclick="showForms('ancon',this)">Ancón</button>
+      <button class="form-tab" onclick="showForms('chubb',this)">Chubb</button>
+    </div>
+
     <!-- ASSA -->
-    <div class="form-company-section">
-      <div class="form-company-title">
-        <div style="width:32px;height:32px;background:linear-gradient(135deg,#005F9E,#003F6B);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:white">ASSA</div>
-        ASSA Compañía de Seguros
-      </div>
-      <div class="form-items-grid">
-        <a href="https://www.assanet.com/formularios/solicitud-seguro-de-automovil.pdf" target="_blank" class="form-item"><div class="form-item-icon">📋</div><div class="form-item-name">Solicitud de Seguro Auto</div><div class="form-item-type">PDF · ASSA</div></a>
-        <a href="https://www.assanet.com/formularios/solicitud-de-salud-individual.pdf" target="_blank" class="form-item"><div class="form-item-icon">🏥</div><div class="form-item-name">Solicitud Salud Individual</div><div class="form-item-type">PDF · ASSA</div></a>
-        <a href="https://www.assanet.com/formularios/solicitud_vida_individual.pdf" target="_blank" class="form-item"><div class="form-item-icon">💛</div><div class="form-item-name">Solicitud de Vida</div><div class="form-item-type">PDF · ASSA</div></a>
-        <a href="https://www.assanet.com/reclamos/reclamos-de-automovil/" target="_blank" class="form-item"><div class="form-item-icon">🚨</div><div class="form-item-name">Aviso de Siniestro Auto</div><div class="form-item-type">Web · ASSA</div></a>
-        <a href="https://www.assanet.com/formularios/notificacion-de-reclamos-salud-o-accidentes-personales.pdf" target="_blank" class="form-item"><div class="form-item-icon">🏥</div><div class="form-item-name">Aviso de Siniestro Salud</div><div class="form-item-type">PDF · ASSA</div></a>
-        <a href="https://www.assanet.com/formularios/solicitud_assa_travel.pdf" target="_blank" class="form-item"><div class="form-item-icon">✈️</div><div class="form-item-name">Solicitud Viajes</div><div class="form-item-type">PDF · ASSA</div></a>
-        <a href="https://www.assanet.com/formularios/Certificado_de_Salud.pdf" target="_blank" class="form-item"><div class="form-item-icon">📊</div><div class="form-item-name">Declaración de Salud</div><div class="form-item-type">PDF · ASSA</div></a>
-        <a href="https://www.assanet.com/servicio-al-cliente/descargar-formularios/" target="_blank" class="form-item"><div class="form-item-icon">📝</div><div class="form-item-name">Más Formularios ASSA</div><div class="form-item-type">Web · ASSA</div></a>
+    <div class="form-view on" id="fv-assa">
+      <div class="form-company-section">
+        <div class="form-company-title">
+          <div style="width:32px;height:32px;background:linear-gradient(135deg,#005F9E,#003F6B);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:white">ASSA</div>
+          ASSA Compañía de Seguros
+        </div>
+        <div class="form-items-grid">
+          <a href="https://www.assanet.com/formularios/solicitud-seguro-de-automovil.pdf" target="_blank" class="form-item"><div class="form-item-icon">🚗</div><div class="form-item-name">Solicitud Seguro Auto</div><div class="form-item-type">PDF · ASSA</div></a>
+          <a href="https://www.assanet.com/formularios/solicitud-de-salud-individual.pdf" target="_blank" class="form-item"><div class="form-item-icon">🏥</div><div class="form-item-name">Solicitud Salud Individual</div><div class="form-item-type">PDF · ASSA</div></a>
+          <a href="https://www.assanet.com/formularios/solicitud_vida_individual.pdf" target="_blank" class="form-item"><div class="form-item-icon">💛</div><div class="form-item-name">Solicitud Vida Individual</div><div class="form-item-type">PDF · ASSA</div></a>
+          <a href="https://www.assanet.com/formularios/solicitud_assa_travel.pdf" target="_blank" class="form-item"><div class="form-item-icon">✈️</div><div class="form-item-name">Solicitud Viajes / Travel</div><div class="form-item-type">PDF · ASSA</div></a>
+          <a href="https://www.assanet.com/formularios/Certificado_de_Salud.pdf" target="_blank" class="form-item"><div class="form-item-icon">📋</div><div class="form-item-name">Declaración de Salud</div><div class="form-item-type">PDF · ASSA</div></a>
+          <a href="https://www.assanet.com/reclamos/reclamos-de-automovil/" target="_blank" class="form-item"><div class="form-item-icon">🚨</div><div class="form-item-name">Reclamo Auto</div><div class="form-item-type">Web · ASSA</div></a>
+          <a href="https://www.assanet.com/formularios/notificacion-de-reclamos-salud-o-accidentes-personales.pdf" target="_blank" class="form-item"><div class="form-item-icon">🩺</div><div class="form-item-name">Reclamo Salud / AP</div><div class="form-item-type">PDF · ASSA</div></a>
+          <a href="https://www.assanet.com/servicio-al-cliente/descargar-formularios/" target="_blank" class="form-item"><div class="form-item-icon">📂</div><div class="form-item-name">Todos los Formularios</div><div class="form-item-type">Web · ASSA</div></a>
+        </div>
       </div>
     </div>
+
     <!-- SURA -->
-    <div class="form-company-section">
-      <div class="form-company-title">
-        <div style="width:32px;height:32px;background:linear-gradient(135deg,#E85D04,#C04A00);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:white">SURA</div>
-        Seguros SURA Panamá
-      </div>
-      <div class="form-items-grid">
-        <a href="https://segurossura.com.pa/autos/" target="_blank" class="form-item"><div class="form-item-icon">🚗</div><div class="form-item-name">Solicitud Auto SURA</div><div class="form-item-type">Online · SURA</div></a>
-        <a href="https://segurossura.com.pa/wp-content/uploads/2023/07/Reclamos-de-servicios-de-salud.pdf" target="_blank" class="form-item"><div class="form-item-icon">🏥</div><div class="form-item-name">Reclamo Salud SURA</div><div class="form-item-type">PDF · SURA</div></a>
-        <a href="https://segurossura.com.pa/atencion-al-cliente/directorios/formularios-de-reclamos-y-preautorizaciones/" target="_blank" class="form-item"><div class="form-item-icon">🚨</div><div class="form-item-name">Formularios de Reclamos</div><div class="form-item-type">Web · SURA</div></a>
-        <a href="https://segurossura.com.pa/wp-content/uploads/2023/07/Reclamos-AP-SURA-2023-SURA.pdf" target="_blank" class="form-item"><div class="form-item-icon">🩹</div><div class="form-item-name">Reclamo Acc. Personales</div><div class="form-item-type">PDF · SURA</div></a>
+    <div class="form-view on" id="fv-sura">
+      <div class="form-company-section">
+        <div class="form-company-title">
+          <div style="width:32px;height:32px;background:linear-gradient(135deg,#E85D04,#C04A00);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:white">SURA</div>
+          Seguros SURA Panamá
+        </div>
+        <div class="form-items-grid">
+          <a href="https://segurossura.com.pa/autos/" target="_blank" class="form-item"><div class="form-item-icon">🚗</div><div class="form-item-name">Solicitud Auto SURA</div><div class="form-item-type">Online · SURA</div></a>
+          <a href="https://segurossura.com.pa/wp-content/uploads/2023/07/Reclamos-de-servicios-de-salud.pdf" target="_blank" class="form-item"><div class="form-item-icon">🏥</div><div class="form-item-name">Reclamo Salud</div><div class="form-item-type">PDF · SURA</div></a>
+          <a href="https://segurossura.com.pa/wp-content/uploads/2023/07/Reclamos-AP-SURA-2023-SURA.pdf" target="_blank" class="form-item"><div class="form-item-icon">🩹</div><div class="form-item-name">Reclamo Acc. Personales</div><div class="form-item-type">PDF · SURA</div></a>
+          <a href="https://segurossura.com.pa/atencion-al-cliente/directorios/formularios-de-reclamos-y-preautorizaciones/" target="_blank" class="form-item"><div class="form-item-icon">📂</div><div class="form-item-name">Todos los Formularios</div><div class="form-item-type">Web · SURA</div></a>
+        </div>
       </div>
     </div>
+
     <!-- MAPFRE -->
-    <div class="form-company-section">
-      <div class="form-company-title">
-        <div style="width:32px;height:32px;background:linear-gradient(135deg,#C8102E,#8B0020);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:white">MAP</div>
-        MAPFRE Panamá
-      </div>
-      <div class="form-items-grid">
-        <a href="https://www.mapfre.com.pa/media/solicitud-auto-persona-natural.pdf" target="_blank" class="form-item"><div class="form-item-icon">🚗</div><div class="form-item-name">Solicitud Auto MAPFRE</div><div class="form-item-type">PDF · MAPFRE</div></a>
-        <a href="https://www.mapfre.com.pa/seguros-generales/formularios/" target="_blank" class="form-item"><div class="form-item-icon">🏠</div><div class="form-item-name">Solicitud Hogar / Generales</div><div class="form-item-type">Web · MAPFRE</div></a>
-        <a href="https://www.mapfre.com.pa/seguros-salud/formularios/" target="_blank" class="form-item"><div class="form-item-icon">🏥</div><div class="form-item-name">Formularios Salud</div><div class="form-item-type">Web · MAPFRE</div></a>
-        <a href="https://www.mapfre.com.pa/contacto/reclamos/" target="_blank" class="form-item"><div class="form-item-icon">🚨</div><div class="form-item-name">Presentar Reclamo</div><div class="form-item-type">Web · MAPFRE</div></a>
+    <div class="form-view on" id="fv-mapfre">
+      <div class="form-company-section">
+        <div class="form-company-title">
+          <div style="width:32px;height:32px;background:linear-gradient(135deg,#C8102E,#8B0020);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:white">MAP</div>
+          MAPFRE Panamá
+        </div>
+        <div class="form-items-grid">
+          <a href="https://www.mapfre.com.pa/media/solicitud-auto-persona-natural.pdf" target="_blank" class="form-item"><div class="form-item-icon">🚗</div><div class="form-item-name">Solicitud Auto (Persona Natural)</div><div class="form-item-type">PDF · MAPFRE</div></a>
+          <a href="https://www.mapfre.com.pa/seguros-generales/formularios/" target="_blank" class="form-item"><div class="form-item-icon">🏠</div><div class="form-item-name">Formularios Generales / Hogar</div><div class="form-item-type">Web · MAPFRE</div></a>
+          <a href="https://www.mapfre.com.pa/seguros-salud/formularios/" target="_blank" class="form-item"><div class="form-item-icon">🏥</div><div class="form-item-name">Formularios Salud</div><div class="form-item-type">Web · MAPFRE</div></a>
+          <a href="https://www.mapfre.com.pa/contacto/reclamos/" target="_blank" class="form-item"><div class="form-item-icon">🚨</div><div class="form-item-name">Presentar Reclamo</div><div class="form-item-type">Web · MAPFRE</div></a>
+        </div>
       </div>
     </div>
-    <div style="background:#EEF4FF;border:1px solid #C7D7FF;border-radius:8px;padding:16px;text-align:center;font-size:13px;color:var(--bl)">
-      📞 ¿Necesitas un formulario específico? <strong>Contáctanos</strong> y te lo enviamos de inmediato.
+
+    <!-- INTERNACIONAL DE SEGUROS -->
+    <div class="form-view on" id="fv-is">
+      <div class="form-company-section">
+        <div class="form-company-title">
+          <div style="width:32px;height:32px;background:linear-gradient(135deg,#0047AB,#002D7C);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:white">IS</div>
+          Internacional de Seguros
+        </div>
+        <div class="form-items-grid">
+          <a href="https://www.iseguros.com/bibliotecaform.html" target="_blank" class="form-item"><div class="form-item-icon">📂</div><div class="form-item-name">Biblioteca de Formularios</div><div class="form-item-type">Web · IS</div></a>
+          <a href="https://www.iseguros.com/autos.html" target="_blank" class="form-item"><div class="form-item-icon">🚗</div><div class="form-item-name">Seguros de Auto</div><div class="form-item-type">Web · IS</div></a>
+          <a href="https://www.iseguros.com/incendioresidencial.html" target="_blank" class="form-item"><div class="form-item-icon">🔥</div><div class="form-item-name">Incendio Residencial</div><div class="form-item-type">Web · IS</div></a>
+          <a href="https://www.iseguros.com/guiasdereclamos.html" target="_blank" class="form-item"><div class="form-item-icon">🚨</div><div class="form-item-name">Guía de Reclamos</div><div class="form-item-type">Web · IS</div></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- PALIG -->
+    <div class="form-view on" id="fv-palig">
+      <div class="form-company-section">
+        <div class="form-company-title">
+          <div style="width:32px;height:32px;background:linear-gradient(135deg,#00539B,#003268);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;color:white">PALIG</div>
+          Pan-American Life (PALIG)
+        </div>
+        <div class="form-items-grid">
+          <a href="https://www.palig.com/es/panama/home/forms-and-financial-statements" target="_blank" class="form-item"><div class="form-item-icon">📂</div><div class="form-item-name">Formularios y Documentos</div><div class="form-item-type">Web · PALIG</div></a>
+          <a href="https://www.palig.com/en/life-form-panama" target="_blank" class="form-item"><div class="form-item-icon">💛</div><div class="form-item-name">Solicitud Vida (Panamá)</div><div class="form-item-type">Web · PALIG</div></a>
+          <a href="https://www.palig.com/panama-salud-individual" target="_blank" class="form-item"><div class="form-item-icon">🏥</div><div class="form-item-name">Salud Individual</div><div class="form-item-type">Web · PALIG</div></a>
+          <a href="https://benefitsdirect.palig.com/Inicio/Reclamos/FormReclamo.aspx" target="_blank" class="form-item"><div class="form-item-icon">🚨</div><div class="form-item-name">Formulario de Reclamo</div><div class="form-item-type">Portal · PALIG</div></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- FEDPA -->
+    <div class="form-view on" id="fv-fedpa">
+      <div class="form-company-section">
+        <div class="form-company-title">
+          <div style="width:32px;height:32px;background:linear-gradient(135deg,#1B5E20,#0A3D14);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;color:white">FEDPA</div>
+          Seguros FEDPA
+        </div>
+        <div class="form-items-grid">
+          <a href="https://www.segfedpa.com/index.php?option=com_content&view=category&id=21&Itemid=191" target="_blank" class="form-item"><div class="form-item-icon">📂</div><div class="form-item-name">Área de Descarga / Formularios</div><div class="form-item-type">Web · FEDPA</div></a>
+          <a href="https://www.segfedpa.com/site/descarga-de-formulario-de-reclamo/" target="_blank" class="form-item"><div class="form-item-icon">🚨</div><div class="form-item-name">Formulario de Reclamo</div><div class="form-item-type">Web · FEDPA</div></a>
+          <a href="https://afta.com.pa/Formularios/Fedpa/Auto/Requisito%20para%20reclamo%20de%20auto.pdf" target="_blank" class="form-item"><div class="form-item-icon">🚗</div><div class="form-item-name">Requisitos Reclamo Auto</div><div class="form-item-type">PDF · FEDPA</div></a>
+          <a href="https://wscanales.segfedpa.com/clientes/" target="_blank" class="form-item"><div class="form-item-icon">🔑</div><div class="form-item-name">Portal de Clientes</div><div class="form-item-type">Portal · FEDPA</div></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- LA REGIONAL -->
+    <div class="form-view on" id="fv-regional">
+      <div class="form-company-section">
+        <div class="form-company-title">
+          <div style="width:32px;height:32px;background:linear-gradient(135deg,#7B1FA2,#4A0072);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;color:white">REG</div>
+          La Regional de Seguros
+        </div>
+        <div class="form-items-grid">
+          <a href="https://www.laregionaldeseguros.com/lrds/" target="_blank" class="form-item"><div class="form-item-icon">🌐</div><div class="form-item-name">Sitio Web Oficial</div><div class="form-item-type">Web · La Regional</div></a>
+          <a href="https://www.laregionaldeseguros.com/lrds/wp-content/uploads/2024/12/Solicitud_Poliza_Vida_Colectivo.pdf" target="_blank" class="form-item"><div class="form-item-icon">💛</div><div class="form-item-name">Solicitud Póliza Vida Colectivo</div><div class="form-item-type">PDF · La Regional</div></a>
+          <a href="http://www.laregionaldeseguros.com/lrds/wp-content/uploads/2017/04/Solicitud_Poliza_Accidentes_Personales_Colectivo.pdf" target="_blank" class="form-item"><div class="form-item-icon">🩹</div><div class="form-item-name">Solicitud Acc. Personales Colectivo</div><div class="form-item-type">PDF · La Regional</div></a>
+          <a href="https://wa.me/50762926010?text=Necesito%20formularios%20de%20La%20Regional%20de%20Seguros" target="_blank" class="form-item"><div class="form-item-icon">💬</div><div class="form-item-name">Solicitar Formulario</div><div class="form-item-type">WhatsApp · JAC Seguros</div></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ANCÓN -->
+    <div class="form-view on" id="fv-ancon">
+      <div class="form-company-section">
+        <div class="form-company-title">
+          <div style="width:32px;height:32px;background:linear-gradient(135deg,#D84315,#B71C1C);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;color:white">ANCÓN</div>
+          Aseguradora Ancón
+        </div>
+        <div class="form-items-grid">
+          <a href="https://asegurancon.com/formularios-y-solicitudes/" target="_blank" class="form-item"><div class="form-item-icon">📂</div><div class="form-item-name">Formularios y Solicitudes</div><div class="form-item-type">Web · Ancón</div></a>
+          <a href="https://asegurancon.com/wp-content/uploads/2020/08/Solicitud-Automovil-web-1.pdf" target="_blank" class="form-item"><div class="form-item-icon">🚗</div><div class="form-item-name">Solicitud Seguro Auto</div><div class="form-item-type">PDF · Ancón</div></a>
+          <a href="https://www.asegurancon.com/reclamos/auto-y-propiedad/" target="_blank" class="form-item"><div class="form-item-icon">🚨</div><div class="form-item-name">Reclamo Auto / Propiedad</div><div class="form-item-type">Web · Ancón</div></a>
+          <a href="https://www.asegurancon.com/reclamos/vida/" target="_blank" class="form-item"><div class="form-item-icon">🏥</div><div class="form-item-name">Reclamo Salud / Vida</div><div class="form-item-type">Web · Ancón</div></a>
+          <a href="https://asegurancon.com/wp-content/uploads/2022/05/Instructivo-de-Reclamo-de-Auto-2022-2.pdf" target="_blank" class="form-item"><div class="form-item-icon">📋</div><div class="form-item-name">Instructivo Reclamo Auto</div><div class="form-item-type">PDF · Ancón</div></a>
+          <a href="https://asegurancon.com/reclamos/" target="_blank" class="form-item"><div class="form-item-icon">ℹ️</div><div class="form-item-name">¿Qué hacer ante un Siniestro?</div><div class="form-item-type">Web · Ancón</div></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHUBB -->
+    <div class="form-view on" id="fv-chubb">
+      <div class="form-company-section">
+        <div class="form-company-title">
+          <div style="width:32px;height:32px;background:linear-gradient(135deg,#1A1A2E,#0F3460);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;color:white">CHUBB</div>
+          Chubb Seguros Panamá
+        </div>
+        <div class="form-items-grid">
+          <a href="https://www.chubb.com/pa-es/servicios/reporte-un-reclamo.html" target="_blank" class="form-item"><div class="form-item-icon">🚨</div><div class="form-item-name">Reportar un Reclamo</div><div class="form-item-type">Web · Chubb</div></a>
+          <a href="https://www.chubb.com/pa-es/servicios.html" target="_blank" class="form-item"><div class="form-item-icon">⚙️</div><div class="form-item-name">Servicios al Cliente</div><div class="form-item-type">Web · Chubb</div></a>
+          <a href="https://www.chubb.com/pa-es/contactanos.html" target="_blank" class="form-item"><div class="form-item-icon">📞</div><div class="form-item-name">Contactar a Chubb Panamá</div><div class="form-item-type">Web · Chubb</div></a>
+          <a href="https://wa.me/50762926010?text=Necesito%20formularios%20de%20Chubb%20Seguros" target="_blank" class="form-item"><div class="form-item-icon">💬</div><div class="form-item-name">Solicitar Formulario</div><div class="form-item-type">WhatsApp · JAC Seguros</div></a>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:#EEF4FF;border:1px solid #C7D7FF;border-radius:8px;padding:16px;text-align:center;font-size:13px;color:var(--bl);margin-top:8px">
+      📞 ¿Necesitas un formulario que no encuentras aquí? <strong>Contáctanos</strong> y te lo enviamos de inmediato.
       <a href="https://wa.me/50762926010" target="_blank" style="background:var(--bl);color:white;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:700;text-decoration:none;display:inline-block;margin-left:8px">WhatsApp →</a>
     </div>
   </div>
 </section>
+<script>
+function showForms(id, el) {
+  document.querySelectorAll('.form-tab').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');
+  if(id==='all'){
+    document.querySelectorAll('.form-view').forEach(v=>v.classList.add('on'));
+  } else {
+    document.querySelectorAll('.form-view').forEach(v=>v.classList.remove('on'));
+    const fv=document.getElementById('fv-'+id);
+    if(fv)fv.classList.add('on');
+  }
+}
+</script>
 
 <!-- ── ARTÍCULOS ── -->
 <section id="articulos">
