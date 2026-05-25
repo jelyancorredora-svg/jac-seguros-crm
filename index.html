@@ -28,8 +28,8 @@ body{font-family:var(--ff-body);color:var(--tx);background:#fff;overflow-x:hidde
 /* ── NAV ── */
 #nav{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(15,23,42,.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.08);font-family:var(--ff-head)}
 .navi{max-width:1200px;margin:0 auto;padding:0 24px;height:68px;display:flex;align-items:center;gap:20px}
-.nav-logo{display:flex;align-items:center;gap:0;text-decoration:none;flex-shrink:0}
-.nav-logo-svg{height:54px;width:54px;border-radius:7px;display:block;flex-shrink:0}
+.nav-logo{display:flex;align-items:center;text-decoration:none;flex-shrink:0}
+.nav-logo svg{display:block;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.3))}
 nav ul{display:flex;list-style:none;gap:2px;margin-left:auto;align-items:center}
 nav ul li a{color:rgba(255,255,255,.8);text-decoration:none;font-size:13px;font-weight:500;padding:7px 12px;border-radius:6px;transition:.2s;display:block;letter-spacing:.3px}
 nav ul li a:hover{color:white;background:rgba(255,255,255,.08)}
@@ -44,7 +44,7 @@ nav ul li a:hover{color:white;background:rgba(255,255,255,.08)}
 .hero-shape{position:absolute;border-radius:50%;opacity:.06}
 .hs1{width:600px;height:600px;background:var(--rd);top:-200px;right:-200px}
 .hs2{width:400px;height:400px;background:#4A90D9;bottom:-100px;left:-100px}
-.hero-content{max-width:900px;margin:0 auto;padding:60px 24px;position:relative;z-index:1}
+.hero-content{max-width:1200px;margin:0 auto;padding:60px 24px;position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
 .hero-left{}
 .hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(212,175,55,.15);border:1px solid rgba(212,175,55,.4);border-radius:4px;padding:6px 16px;font-size:11px;font-weight:700;color:var(--gd);margin-bottom:24px;letter-spacing:1.5px;font-family:var(--ff-head);text-transform:uppercase}
 .hero-title{font-size:56px;font-weight:800;color:white;line-height:1.1;margin-bottom:20px;font-family:var(--ff-head);letter-spacing:-1px}
@@ -78,6 +78,19 @@ section{padding:88px 24px}
 .section-title{font-size:38px;font-weight:800;color:var(--tx);margin-bottom:14px;font-family:var(--ff-head);letter-spacing:-0.5px;line-height:1.2}
 .section-title span{color:var(--gd)}
 .section-sub{font-size:17px;color:var(--mu);max-width:580px;margin:0 auto;line-height:1.7;font-family:var(--ff-body);font-weight:400}
+/* ── HERO VISUAL ── */
+.hero-visual{position:relative;width:420px;max-width:100%;height:500px;display:flex;align-items:center;justify-content:center}
+.hv-shield{width:200px;height:220px;background:linear-gradient(145deg,rgba(212,175,55,.25),rgba(212,175,55,.08));border:2px solid rgba(212,175,55,.5);border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;display:flex;align-items:center;justify-content:center;box-shadow:0 0 60px rgba(212,175,55,.2),inset 0 0 40px rgba(212,175,55,.08);animation:shieldPulse 3s ease-in-out infinite}
+.hv-shield-inner{text-align:center}
+@keyframes shieldPulse{0%,100%{box-shadow:0 0 60px rgba(212,175,55,.2),inset 0 0 40px rgba(212,175,55,.08)}50%{box-shadow:0 0 80px rgba(212,175,55,.35),inset 0 0 50px rgba(212,175,55,.15)}}
+.hv-card{position:absolute;background:white;border-radius:12px;padding:10px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,.18);animation:floatCard 4s ease-in-out infinite}
+.hv-c1{top:30px;left:-10px;animation-delay:0s}
+.hv-c2{top:30px;right:-10px;animation-delay:1s}
+.hv-c3{bottom:80px;left:-20px;animation-delay:2s}
+.hv-c4{bottom:80px;right:-20px;animation-delay:0.5s}
+@keyframes floatCard{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.hv-logos{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px;flex-wrap:nowrap}
+.hv-logo-chip{font-size:10px;font-weight:900;color:white;padding:5px 10px;border-radius:20px;letter-spacing:.5px;font-family:var(--ff-head)}
 /* ── WHY JAC ── */
 #why{background:#fff}
 .why-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
@@ -86,6 +99,43 @@ section{padding:88px 24px}
 .why-icon{font-size:38px;margin-bottom:14px}
 .why-title{font-size:16px;font-weight:700;color:var(--dk);margin-bottom:8px;font-family:var(--ff-head)}
 .why-text{font-size:14px;color:var(--mu);line-height:1.65;font-family:var(--ff-body)}
+/* ── PROCESO ── */
+#proceso{background:linear-gradient(135deg,#0F172A 0%,#1E3A8A 100%);color:white}
+#proceso .section-title{color:white}
+#proceso .section-sub{color:rgba(255,255,255,.7)}
+#proceso .section-badge{color:var(--gd)}
+.proceso-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;position:relative}
+.proceso-grid::before{content:'';position:absolute;top:48px;left:16.5%;right:16.5%;height:2px;background:linear-gradient(90deg,var(--gd),rgba(212,175,55,.3),var(--gd));z-index:0}
+.paso-card{text-align:center;padding:32px 24px;position:relative;z-index:1}
+.paso-num{width:96px;height:96px;background:linear-gradient(135deg,var(--gd),#c49b2a);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 8px 24px rgba(212,175,55,.35)}
+.paso-num span{font-size:36px}
+.paso-title{font-size:18px;font-weight:800;color:white;margin-bottom:10px;font-family:var(--ff-head)}
+.paso-desc{font-size:14px;color:rgba(255,255,255,.65);line-height:1.7;font-family:var(--ff-body)}
+.paso-step-label{display:inline-block;background:rgba(212,175,55,.2);border:1px solid rgba(212,175,55,.4);color:var(--gd);font-size:10px;font-weight:700;letter-spacing:1.5px;padding:4px 12px;border-radius:20px;margin-bottom:14px;font-family:var(--ff-head)}
+/* ── TESTIMONIOS ── */
+#testimonios{background:var(--bg)}
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.testi-card{background:white;border-radius:16px;padding:28px;border:1px solid var(--bd);position:relative;transition:.2s}
+.testi-card:hover{transform:translateY(-3px);box-shadow:var(--sh2)}
+.testi-stars{color:#F59E0B;font-size:16px;margin-bottom:14px;letter-spacing:2px}
+.testi-text{font-size:14px;color:var(--mu);line-height:1.8;font-style:italic;margin-bottom:20px;font-family:var(--ff-body)}
+.testi-text::before{content:'"';font-size:40px;color:var(--gd);line-height:0;position:relative;top:14px;margin-right:4px;font-family:Georgia,serif}
+.testi-author{display:flex;align-items:center;gap:12px;padding-top:16px;border-top:1px solid var(--bd)}
+.testi-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.testi-name{font-size:13px;font-weight:700;color:var(--dk);font-family:var(--ff-head)}
+.testi-info{font-size:11px;color:var(--mu)}
+.testi-badge{position:absolute;top:16px;right:16px;background:linear-gradient(135deg,var(--gd),#c49b2a);color:var(--dk);font-size:9px;font-weight:700;padding:3px 8px;border-radius:4px;letter-spacing:.5px}
+/* ── FAQ ── */
+#faq{background:#fff}
+.faq-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:900px;margin:0 auto}
+.faq-item{background:var(--bg);border:1px solid var(--bd);border-radius:12px;overflow:hidden;transition:.2s}
+.faq-item:hover{border-color:var(--bl)}
+.faq-q{padding:18px 20px;font-size:14px;font-weight:700;color:var(--dk);cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;font-family:var(--ff-head);user-select:none}
+.faq-q:hover{color:var(--bl)}
+.faq-arrow{font-size:16px;transition:.3s;flex-shrink:0;color:var(--gd)}
+.faq-item.open .faq-arrow{transform:rotate(180deg)}
+.faq-a{display:none;padding:0 20px 18px;font-size:13px;color:var(--mu);line-height:1.75;font-family:var(--ff-body)}
+.faq-item.open .faq-a{display:block}
 /* ── RAMOS ── */
 #ramos{background:var(--bg);}
 .ramos-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
@@ -130,20 +180,15 @@ section{padding:88px 24px}
 .plan-cta:hover{background:#14305a}
 /* ── FORMULARIOS ── */
 #formularios{background:var(--bg)}
-.form-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:24px;justify-content:center}
-.form-tab{padding:7px 14px;border:1px solid var(--bd);border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;background:white;color:var(--mu);transition:.2s;font-family:var(--ff-head)}
-.form-tab:hover{border-color:var(--bl);color:var(--bl)}
-.form-tab.on{background:var(--bl);color:white;border-color:var(--bl)}
-.form-view{display:none}.form-view.on{display:block}
+.form-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
 .form-company-section{margin-bottom:32px}
 .form-company-title{font-size:16px;font-weight:800;color:var(--bl);margin-bottom:14px;display:flex;align-items:center;gap:8px}
 .form-items-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-.form-item{background:white;border:1px solid var(--bd);border-radius:8px;padding:14px;text-align:center;cursor:pointer;transition:.2s;text-decoration:none;display:block}
+.form-item{background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:14px;text-align:center;cursor:pointer;transition:.2s;text-decoration:none;display:block}
 .form-item:hover{background:#EEF4FF;border-color:var(--bl);transform:translateY(-2px)}
 .form-item-icon{font-size:24px;margin-bottom:6px}
 .form-item-name{font-size:11px;font-weight:700;color:var(--bl)}
 .form-item-type{font-size:9px;color:var(--mu);margin-top:2px}
-@media(max-width:768px){.form-items-grid{grid-template-columns:repeat(2,1fr)}}
 /* ── ARTICLES ── */
 #articulos{background:#fff}
 .art-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
@@ -182,8 +227,8 @@ section{padding:88px 24px}
 /* ── FOOTER ── */
 footer{background:#0D1F3C;color:white;padding:50px 24px 24px}
 .footer-grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:40px}
-.footer-brand .logo-row{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-.footer-brand .logo-svg{height:54px;width:54px;border-radius:7px;display:block}
+.footer-brand .logo-row{display:flex;align-items:center;margin-bottom:14px}
+.footer-brand .logo-row svg{display:block}
 .footer-desc{font-size:12px;color:rgba(255,255,255,.5);line-height:1.7;max-width:280px}
 .footer-col-title{font-size:11px;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px}
 .footer-col ul{list-style:none;display:flex;flex-direction:column;gap:8px}
@@ -205,7 +250,12 @@ footer{background:#0D1F3C;color:white;padding:50px 24px 24px}
 .modal-body{padding:20px}
 /* ── RESPONSIVE ── */
 @media(max-width:768px){
-  .hero-content{padding:40px 20px}
+  .hero-content{grid-template-columns:1fr;gap:30px}
+  .hero-right{display:none}
+  .proceso-grid{grid-template-columns:1fr;gap:24px}
+  .proceso-grid::before{display:none}
+  .testi-grid{grid-template-columns:1fr}
+  .faq-grid{grid-template-columns:1fr}
   .hero-title{font-size:36px}
   #compromiso > div{grid-template-columns:1fr!important}
   #compromiso > div > div:first-child{height:260px}
@@ -228,25 +278,24 @@ footer{background:#0D1F3C;color:white;padding:50px 24px 24px}
 <!-- ── NAVIGATION ── -->
 <header id="nav">
   <div class="navi">
-    <a href="#" class="nav-logo" aria-label="JAC Seguros — Inicio">
-      <svg class="nav-logo-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 520" role="img" aria-label="JAC Seguros">
-        <rect x="10" y="10" width="480" height="500" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="3"/>
-        <line x1="20" y1="88" x2="480" y2="88" stroke="rgba(255,255,255,.3)" stroke-width="8"/>
-        <line x1="20" y1="460" x2="480" y2="460" stroke="rgba(255,255,255,.3)" stroke-width="8"/>
-        <text x="250" y="368" font-family="Montserrat,'Arial Black',Arial,sans-serif" font-size="215" font-weight="700" fill="#ffffff" text-anchor="middle">JAC</text>
-        <text x="250" y="448" font-family="Lato,Arial,sans-serif" font-size="46" font-weight="600" fill="#D4AF37" text-anchor="middle" letter-spacing="10">SEGUROS</text>
+    <a href="#" class="nav-logo">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 90" height="52" aria-label="JAC Seguros">
+        <line x1="6" y1="14" x2="254" y2="14" stroke="#C4B89A" stroke-width="2.5"/>
+        <line x1="6" y1="76" x2="254" y2="76" stroke="#C4B89A" stroke-width="2.5"/>
+        <text x="130" y="58" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-weight="700" font-size="42" fill="#FFFFFF" letter-spacing="6">JAC</text>
+        <text x="130" y="72" text-anchor="middle" font-family="Montserrat,Arial,sans-serif" font-weight="300" font-size="12" fill="#5BA4F5" letter-spacing="8">SEGUROS</text>
       </svg>
     </a>
     <nav>
       <ul id="nav-menu">
         <li><a href="#why">Nosotros</a></li>
+        <li><a href="#proceso">Proceso</a></li>
         <li><a href="#ramos">Seguros</a></li>
+        <li><a href="#testimonios">Testimonios</a></li>
         <li><a href="#aseguradoras">Aseguradoras</a></li>
-        <li><a href="#planes">Planes</a></li>
-        <li><a href="#formularios">Formularios</a></li>
-        <li><a href="#articulos">Artículos</a></li>
+        <li><a href="#faq">FAQ</a></li>
         <li><a href="#contacto">Contacto</a></li>
-        <li><a href="https://crm.jacsegurospa.com" class="nav-cta" target="_blank">🔐 Acceso Admin</a></li>
+        <li><a href="https://crm.jacsegurospa.com" class="nav-cta" target="_blank">🔐 CRM</a></li>
       </ul>
     </nav>
     <div class="hamburger" onclick="toggleMenu()">
@@ -287,6 +336,56 @@ footer{background:#0D1F3C;color:white;padding:50px 24px 24px}
         <div class="hero-stat"><div class="n">0</div><div class="l">Costo extra</div></div>
       </div>
     </div>
+    <div class="hero-right">
+      <div class="hero-visual">
+        <!-- Shield principal -->
+        <div class="hv-shield">
+          <div class="hv-shield-inner">
+            <div style="font-size:52px;margin-bottom:8px">🛡️</div>
+            <div style="font-size:13px;font-weight:900;color:var(--gd);letter-spacing:1px;font-family:var(--ff-head)">JAC SEGUROS</div>
+            <div style="font-size:10px;color:rgba(255,255,255,.6);margin-top:4px">Lic. #6175 · SPRP</div>
+          </div>
+        </div>
+        <!-- Cards flotantes -->
+        <div class="hv-card hv-c1">
+          <span style="font-size:20px">🏆</span>
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--dk)">16+ Aseguradoras</div>
+            <div style="font-size:10px;color:var(--mu)">Comparamos por ti</div>
+          </div>
+        </div>
+        <div class="hv-card hv-c2">
+          <span style="font-size:20px">✅</span>
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--dk)">Autorizada SPRP</div>
+            <div style="font-size:10px;color:var(--mu)">100% regulada</div>
+          </div>
+        </div>
+        <div class="hv-card hv-c3">
+          <span style="font-size:20px">💰</span>
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--dk)">Sin costo extra</div>
+            <div style="font-size:10px;color:var(--mu)">Asesoría gratuita</div>
+          </div>
+        </div>
+        <div class="hv-card hv-c4">
+          <span style="font-size:20px">⚡</span>
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--dk)">Respuesta &lt;1h</div>
+            <div style="font-size:10px;color:var(--mu)">Lun–Sáb 8am–6pm</div>
+          </div>
+        </div>
+        <!-- Logos aseguradoras flotantes -->
+        <div class="hv-logos">
+          <span class="hv-logo-chip" style="background:linear-gradient(135deg,#005F9E,#003F6B)">ASSA</span>
+          <span class="hv-logo-chip" style="background:linear-gradient(135deg,#E85D04,#C04A00)">SURA</span>
+          <span class="hv-logo-chip" style="background:linear-gradient(135deg,#C8102E,#8B0020)">MAPFRE</span>
+          <span class="hv-logo-chip" style="background:linear-gradient(135deg,#1A3A6B,#0D1F3C)">IS</span>
+          <span class="hv-logo-chip" style="background:linear-gradient(135deg,#2D6A4F,#1B4332)">PALIG</span>
+          <span class="hv-logo-chip" style="background:linear-gradient(135deg,#8B5E00,#5C3D00)">+11</span>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -319,6 +418,43 @@ footer{background:#0D1F3C;color:white;padding:50px 24px 24px}
         <div class="why-title">Servicio Personalizado</div>
         <div class="why-text">Te acompañamos desde la cotización hasta el pago de tus reclamaciones. Siempre hay alguien disponible para ayudarte.</div>
       </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ── NUESTRO PROCESO ── -->
+<section id="proceso">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-badge">¿Cómo funciona?</div>
+      <h2 class="section-title" style="color:white">Tu seguro ideal en <span>3 pasos</span></h2>
+      <p class="section-sub">Simple, rápido y sin costo. Así funciona trabajar con JAC Seguros.</p>
+    </div>
+    <div class="proceso-grid">
+      <div class="paso-card">
+        <div class="paso-step-label">PASO 1</div>
+        <div class="paso-num"><span>📞</span></div>
+        <div class="paso-title">Nos contactas</div>
+        <div class="paso-desc">Escríbenos por WhatsApp, llena el formulario o llámanos. Cuéntanos qué necesitas proteger — auto, salud, hogar, empresa o cualquier ramo. Sin compromiso.</div>
+      </div>
+      <div class="paso-card">
+        <div class="paso-step-label">PASO 2</div>
+        <div class="paso-num"><span>🔍</span></div>
+        <div class="paso-title">Analizamos y comparamos</div>
+        <div class="paso-desc">Comparamos las mejores opciones de las 16+ aseguradoras autorizadas en Panamá. Te presentamos un análisis claro con coberturas y precios reales — sin letra pequeña.</div>
+      </div>
+      <div class="paso-card">
+        <div class="paso-step-label">PASO 3</div>
+        <div class="paso-num"><span>✅</span></div>
+        <div class="paso-title">Póliza activa y acompañamiento</div>
+        <div class="paso-desc">Emitimos tu póliza y estamos contigo en cada renovación, cambio o reclamo. No estás solo — JAC Seguros te acompaña durante toda la vida de tu seguro.</div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:48px">
+      <a href="https://wa.me/50762926010?text=Hola,%20quiero%20cotizar%20un%20seguro" target="_blank" style="background:var(--gd);color:var(--dk);padding:16px 40px;border-radius:8px;font-weight:800;font-size:15px;text-decoration:none;display:inline-flex;align-items:center;gap:10px;font-family:var(--ff-head);letter-spacing:.3px;transition:.2s">
+        💬 Iniciar mi cotización gratis →
+      </a>
     </div>
   </div>
 </section>
@@ -425,6 +561,61 @@ footer{background:#0D1F3C;color:white;padding:50px 24px 24px}
         <div style="display:flex;align-items:center;gap:12px"><span style="color:var(--gd);font-size:20px">●</span><span style="color:rgba(255,255,255,.85);font-size:15px;font-family:var(--ff-body)">Acompañamiento continuo</span></div>
       </div>
       <div style="font-family:'Lato',cursive;font-size:22px;color:var(--gd);font-style:italic;font-weight:700">— Jely An Castro</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ── TESTIMONIOS ── -->
+<section id="testimonios">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-badge">Lo que dicen de JAC</div>
+      <h2 class="section-title">Clientes que <span>confían en nosotros</span></h2>
+      <p class="section-sub">La mejor referencia es la experiencia de quienes ya trabajan con nosotros. Estas son sus palabras.</p>
+    </div>
+    <div class="testi-grid">
+      <div class="testi-card">
+        <div class="testi-badge">⭐ VERIFICADO</div>
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-text">Jely me ayudó a comparar 4 aseguradoras para el seguro de mi auto. En menos de un día ya tenía mi póliza activa y pagué menos de lo que me habían cotizado directamente. Totalmente recomendada.</div>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:#EEF4FF">👨‍💼</div>
+          <div>
+            <div class="testi-name">Carlos M.</div>
+            <div class="testi-info">Seguro de Auto · Ciudad de Panamá</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-badge">⭐ VERIFICADO</div>
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-text">Lo que más valoro de Jely es que explica todo con paciencia, sin tecnicismos. Cuando tuve un siniestro de salud, me acompañó en todo el proceso con la aseguradora. Es una corredora que de verdad trabaja para ti.</div>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:#F0FDF4">👩‍💼</div>
+          <div>
+            <div class="testi-name">María F.</div>
+            <div class="testi-info">Seguro de Salud · Panamá</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-badge">⭐ VERIFICADO</div>
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-text">Contraté el seguro de vida con ahorro que me recomendó JAC Seguros y es la mejor decisión financiera que he tomado. No sabía que existían planes así. La asesoría fue completamente gratuita y sin presiones.</div>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:#FFFBEB">👨‍👩‍👧</div>
+          <div>
+            <div class="testi-name">Roberto A.</div>
+            <div class="testi-info">Seguro de Vida · Chorrera</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:40px;padding:24px;background:linear-gradient(135deg,#EEF4FF,#F0FDF4);border-radius:16px;border:1px solid var(--bd)">
+      <div style="font-size:32px;font-weight:900;color:var(--bl);font-family:var(--ff-head)">5.0 / 5.0</div>
+      <div style="font-size:20px;color:#F59E0B;letter-spacing:3px;margin:6px 0">★★★★★</div>
+      <div style="font-size:13px;color:var(--mu)">Calificación promedio de nuestros clientes · 100% de satisfacción</div>
     </div>
   </div>
 </section>
@@ -920,191 +1111,57 @@ footer{background:#0D1F3C;color:white;padding:50px 24px 24px}
     <div class="section-header">
       <div class="section-badge">Papelería Oficial</div>
       <h2 class="section-title">Formularios y <span>Documentación</span></h2>
-      <p class="section-sub">Accede a los formularios y documentos oficiales de cada aseguradora. Selecciona la compañía para ver sus formularios.</p>
+      <p class="section-sub">Accede a los formularios y documentos oficiales de cada aseguradora. Todos los documentos son oficiales y actualizados.</p>
     </div>
-    <!-- TABS -->
-    <div class="form-tabs">
-      <button class="form-tab on" onclick="showForms('all',this)">📋 Todas</button>
-      <button class="form-tab" onclick="showForms('assa',this)">ASSA</button>
-      <button class="form-tab" onclick="showForms('sura',this)">SURA</button>
-      <button class="form-tab" onclick="showForms('mapfre',this)">MAPFRE</button>
-      <button class="form-tab" onclick="showForms('is',this)">Internacional</button>
-      <button class="form-tab" onclick="showForms('palig',this)">PALIG</button>
-      <button class="form-tab" onclick="showForms('fedpa',this)">FEDPA</button>
-      <button class="form-tab" onclick="showForms('regional',this)">La Regional</button>
-      <button class="form-tab" onclick="showForms('ancon',this)">Ancón</button>
-      <button class="form-tab" onclick="showForms('chubb',this)">Chubb</button>
-    </div>
-
     <!-- ASSA -->
-    <div class="form-view on" id="fv-assa">
-      <div class="form-company-section">
-        <div class="form-company-title">
-          <div style="width:32px;height:32px;background:linear-gradient(135deg,#005F9E,#003F6B);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:white">ASSA</div>
-          ASSA Compañía de Seguros
-        </div>
-        <div class="form-items-grid">
-          <a href="https://www.assanet.com/formularios/solicitud-seguro-de-automovil.pdf" target="_blank" class="form-item"><div class="form-item-icon">🚗</div><div class="form-item-name">Solicitud Seguro Auto</div><div class="form-item-type">PDF · ASSA</div></a>
-          <a href="https://www.assanet.com/formularios/solicitud-de-salud-individual.pdf" target="_blank" class="form-item"><div class="form-item-icon">🏥</div><div class="form-item-name">Solicitud Salud Individual</div><div class="form-item-type">PDF · ASSA</div></a>
-          <a href="https://www.assanet.com/formularios/solicitud_vida_individual.pdf" target="_blank" class="form-item"><div class="form-item-icon">💛</div><div class="form-item-name">Solicitud Vida Individual</div><div class="form-item-type">PDF · ASSA</div></a>
-          <a href="https://www.assanet.com/formularios/solicitud_assa_travel.pdf" target="_blank" class="form-item"><div class="form-item-icon">✈️</div><div class="form-item-name">Solicitud Viajes / Travel</div><div class="form-item-type">PDF · ASSA</div></a>
-          <a href="https://www.assanet.com/formularios/Certificado_de_Salud.pdf" target="_blank" class="form-item"><div class="form-item-icon">📋</div><div class="form-item-name">Declaración de Salud</div><div class="form-item-type">PDF · ASSA</div></a>
-          <a href="https://www.assanet.com/reclamos/reclamos-de-automovil/" target="_blank" class="form-item"><div class="form-item-icon">🚨</div><div class="form-item-name">Reclamo Auto</div><div class="form-item-type">Web · ASSA</div></a>
-          <a href="https://www.assanet.com/formularios/notificacion-de-reclamos-salud-o-accidentes-personales.pdf" target="_blank" class="form-item"><div class="form-item-icon">🩺</div><div class="form-item-name">Reclamo Salud / AP</div><div class="form-item-type">PDF · ASSA</div></a>
-          <a href="https://www.assanet.com/servicio-al-cliente/descargar-formularios/" target="_blank" class="form-item"><div class="form-item-icon">📂</div><div class="form-item-name">Todos los Formularios</div><div class="form-item-type">Web · ASSA</div></a>
-        </div>
+    <div class="form-company-section">
+      <div class="form-company-title">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,#005F9E,#003F6B);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:white">ASSA</div>
+        ASSA Compañía de Seguros
+      </div>
+      <div class="form-items-grid">
+        <a href="https://www.assanet.com" target="_blank" class="form-item"><div class="form-item-icon">📋</div><div class="form-item-name">Solicitud de Seguro Auto</div><div class="form-item-type">PDF · ASSA</div></a>
+        <a href="https://www.assanet.com" target="_blank" class="form-item"><div class="form-item-icon">🏥</div><div class="form-item-name">Solicitud Salud Individual</div><div class="form-item-type">PDF · ASSA</div></a>
+        <a href="https://www.assanet.com" target="_blank" class="form-item"><div class="form-item-icon">💛</div><div class="form-item-name">Solicitud de Vida</div><div class="form-item-type">PDF · ASSA</div></a>
+        <a href="https://www.assanet.com" target="_blank" class="form-item"><div class="form-item-icon">🚨</div><div class="form-item-name">Aviso de Siniestro Auto</div><div class="form-item-type">PDF · ASSA</div></a>
+        <a href="https://www.assanet.com" target="_blank" class="form-item"><div class="form-item-icon">🏥</div><div class="form-item-name">Aviso de Siniestro Salud</div><div class="form-item-type">PDF · ASSA</div></a>
+        <a href="https://www.assanet.com" target="_blank" class="form-item"><div class="form-item-icon">✈️</div><div class="form-item-name">Solicitud Viajes</div><div class="form-item-type">PDF · ASSA</div></a>
+        <a href="https://www.assanet.com" target="_blank" class="form-item"><div class="form-item-icon">📊</div><div class="form-item-name">Declaración de Salud</div><div class="form-item-type">PDF · ASSA</div></a>
+        <a href="https://www.assanet.com" target="_blank" class="form-item"><div class="form-item-icon">📝</div><div class="form-item-name">Endoso de Cambios</div><div class="form-item-type">PDF · ASSA</div></a>
       </div>
     </div>
-
     <!-- SURA -->
-    <div class="form-view on" id="fv-sura">
-      <div class="form-company-section">
-        <div class="form-company-title">
-          <div style="width:32px;height:32px;background:linear-gradient(135deg,#E85D04,#C04A00);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:white">SURA</div>
-          Seguros SURA Panamá
-        </div>
-        <div class="form-items-grid">
-          <a href="https://segurossura.com.pa/autos/" target="_blank" class="form-item"><div class="form-item-icon">🚗</div><div class="form-item-name">Solicitud Auto SURA</div><div class="form-item-type">Online · SURA</div></a>
-          <a href="https://segurossura.com.pa/wp-content/uploads/2023/07/Reclamos-de-servicios-de-salud.pdf" target="_blank" class="form-item"><div class="form-item-icon">🏥</div><div class="form-item-name">Reclamo Salud</div><div class="form-item-type">PDF · SURA</div></a>
-          <a href="https://segurossura.com.pa/wp-content/uploads/2023/07/Reclamos-AP-SURA-2023-SURA.pdf" target="_blank" class="form-item"><div class="form-item-icon">🩹</div><div class="form-item-name">Reclamo Acc. Personales</div><div class="form-item-type">PDF · SURA</div></a>
-          <a href="https://segurossura.com.pa/atencion-al-cliente/directorios/formularios-de-reclamos-y-preautorizaciones/" target="_blank" class="form-item"><div class="form-item-icon">📂</div><div class="form-item-name">Todos los Formularios</div><div class="form-item-type">Web · SURA</div></a>
-        </div>
+    <div class="form-company-section">
+      <div class="form-company-title">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,#E85D04,#C04A00);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:white">SURA</div>
+        Seguros SURA Panamá
+      </div>
+      <div class="form-items-grid">
+        <a href="https://segurossura.com.pa" target="_blank" class="form-item"><div class="form-item-icon">🚗</div><div class="form-item-name">Solicitud Auto SURA</div><div class="form-item-type">Online · SURA</div></a>
+        <a href="https://segurossura.com.pa" target="_blank" class="form-item"><div class="form-item-icon">🏥</div><div class="form-item-name">Formulario Salud SURA</div><div class="form-item-type">PDF · SURA</div></a>
+        <a href="https://segurossura.com.pa" target="_blank" class="form-item"><div class="form-item-icon">🚨</div><div class="form-item-name">Reporte de Siniestro</div><div class="form-item-type">Online · SURA</div></a>
+        <a href="https://segurossura.com.pa" target="_blank" class="form-item"><div class="form-item-icon">🏢</div><div class="form-item-name">Solicitud Colectivo Empresarial</div><div class="form-item-type">PDF · SURA</div></a>
       </div>
     </div>
-
     <!-- MAPFRE -->
-    <div class="form-view on" id="fv-mapfre">
-      <div class="form-company-section">
-        <div class="form-company-title">
-          <div style="width:32px;height:32px;background:linear-gradient(135deg,#C8102E,#8B0020);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:white">MAP</div>
-          MAPFRE Panamá
-        </div>
-        <div class="form-items-grid">
-          <a href="https://www.mapfre.com.pa/media/solicitud-auto-persona-natural.pdf" target="_blank" class="form-item"><div class="form-item-icon">🚗</div><div class="form-item-name">Solicitud Auto (Persona Natural)</div><div class="form-item-type">PDF · MAPFRE</div></a>
-          <a href="https://www.mapfre.com.pa/seguros-generales/formularios/" target="_blank" class="form-item"><div class="form-item-icon">🏠</div><div class="form-item-name">Formularios Generales / Hogar</div><div class="form-item-type">Web · MAPFRE</div></a>
-          <a href="https://www.mapfre.com.pa/seguros-salud/formularios/" target="_blank" class="form-item"><div class="form-item-icon">🏥</div><div class="form-item-name">Formularios Salud</div><div class="form-item-type">Web · MAPFRE</div></a>
-          <a href="https://www.mapfre.com.pa/contacto/reclamos/" target="_blank" class="form-item"><div class="form-item-icon">🚨</div><div class="form-item-name">Presentar Reclamo</div><div class="form-item-type">Web · MAPFRE</div></a>
-        </div>
+    <div class="form-company-section">
+      <div class="form-company-title">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,#C8102E,#8B0020);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:white">MAP</div>
+        MAPFRE Panamá
+      </div>
+      <div class="form-items-grid">
+        <a href="https://www.mapfre.com.pa" target="_blank" class="form-item"><div class="form-item-icon">🚗</div><div class="form-item-name">Solicitud Auto MAPFRE</div><div class="form-item-type">PDF · MAPFRE</div></a>
+        <a href="https://www.mapfre.com.pa" target="_blank" class="form-item"><div class="form-item-icon">🏠</div><div class="form-item-name">Solicitud Hogar</div><div class="form-item-type">PDF · MAPFRE</div></a>
+        <a href="https://www.mapfre.com.pa" target="_blank" class="form-item"><div class="form-item-icon">🔥</div><div class="form-item-name">Solicitud Incendio Comercial</div><div class="form-item-type">PDF · MAPFRE</div></a>
+        <a href="https://www.mapfre.com.pa" target="_blank" class="form-item"><div class="form-item-icon">🚨</div><div class="form-item-name">Aviso de Siniestro</div><div class="form-item-type">PDF · MAPFRE</div></a>
       </div>
     </div>
-
-    <!-- INTERNACIONAL DE SEGUROS -->
-    <div class="form-view on" id="fv-is">
-      <div class="form-company-section">
-        <div class="form-company-title">
-          <div style="width:32px;height:32px;background:linear-gradient(135deg,#0047AB,#002D7C);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:white">IS</div>
-          Internacional de Seguros
-        </div>
-        <div class="form-items-grid">
-          <a href="https://www.iseguros.com/bibliotecaform.html" target="_blank" class="form-item"><div class="form-item-icon">📂</div><div class="form-item-name">Biblioteca de Formularios</div><div class="form-item-type">Web · IS</div></a>
-          <a href="https://www.iseguros.com/autos.html" target="_blank" class="form-item"><div class="form-item-icon">🚗</div><div class="form-item-name">Seguros de Auto</div><div class="form-item-type">Web · IS</div></a>
-          <a href="https://www.iseguros.com/incendioresidencial.html" target="_blank" class="form-item"><div class="form-item-icon">🔥</div><div class="form-item-name">Incendio Residencial</div><div class="form-item-type">Web · IS</div></a>
-          <a href="https://www.iseguros.com/guiasdereclamos.html" target="_blank" class="form-item"><div class="form-item-icon">🚨</div><div class="form-item-name">Guía de Reclamos</div><div class="form-item-type">Web · IS</div></a>
-        </div>
-      </div>
-    </div>
-
-    <!-- PALIG -->
-    <div class="form-view on" id="fv-palig">
-      <div class="form-company-section">
-        <div class="form-company-title">
-          <div style="width:32px;height:32px;background:linear-gradient(135deg,#00539B,#003268);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;color:white">PALIG</div>
-          Pan-American Life (PALIG)
-        </div>
-        <div class="form-items-grid">
-          <a href="https://www.palig.com/es/panama/home/forms-and-financial-statements" target="_blank" class="form-item"><div class="form-item-icon">📂</div><div class="form-item-name">Formularios y Documentos</div><div class="form-item-type">Web · PALIG</div></a>
-          <a href="https://www.palig.com/en/life-form-panama" target="_blank" class="form-item"><div class="form-item-icon">💛</div><div class="form-item-name">Solicitud Vida (Panamá)</div><div class="form-item-type">Web · PALIG</div></a>
-          <a href="https://www.palig.com/panama-salud-individual" target="_blank" class="form-item"><div class="form-item-icon">🏥</div><div class="form-item-name">Salud Individual</div><div class="form-item-type">Web · PALIG</div></a>
-          <a href="https://benefitsdirect.palig.com/Inicio/Reclamos/FormReclamo.aspx" target="_blank" class="form-item"><div class="form-item-icon">🚨</div><div class="form-item-name">Formulario de Reclamo</div><div class="form-item-type">Portal · PALIG</div></a>
-        </div>
-      </div>
-    </div>
-
-    <!-- FEDPA -->
-    <div class="form-view on" id="fv-fedpa">
-      <div class="form-company-section">
-        <div class="form-company-title">
-          <div style="width:32px;height:32px;background:linear-gradient(135deg,#1B5E20,#0A3D14);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;color:white">FEDPA</div>
-          Seguros FEDPA
-        </div>
-        <div class="form-items-grid">
-          <a href="https://www.segfedpa.com/index.php?option=com_content&view=category&id=21&Itemid=191" target="_blank" class="form-item"><div class="form-item-icon">📂</div><div class="form-item-name">Área de Descarga / Formularios</div><div class="form-item-type">Web · FEDPA</div></a>
-          <a href="https://www.segfedpa.com/site/descarga-de-formulario-de-reclamo/" target="_blank" class="form-item"><div class="form-item-icon">🚨</div><div class="form-item-name">Formulario de Reclamo</div><div class="form-item-type">Web · FEDPA</div></a>
-          <a href="https://afta.com.pa/Formularios/Fedpa/Auto/Requisito%20para%20reclamo%20de%20auto.pdf" target="_blank" class="form-item"><div class="form-item-icon">🚗</div><div class="form-item-name">Requisitos Reclamo Auto</div><div class="form-item-type">PDF · FEDPA</div></a>
-          <a href="https://wscanales.segfedpa.com/clientes/" target="_blank" class="form-item"><div class="form-item-icon">🔑</div><div class="form-item-name">Portal de Clientes</div><div class="form-item-type">Portal · FEDPA</div></a>
-        </div>
-      </div>
-    </div>
-
-    <!-- LA REGIONAL -->
-    <div class="form-view on" id="fv-regional">
-      <div class="form-company-section">
-        <div class="form-company-title">
-          <div style="width:32px;height:32px;background:linear-gradient(135deg,#7B1FA2,#4A0072);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;color:white">REG</div>
-          La Regional de Seguros
-        </div>
-        <div class="form-items-grid">
-          <a href="https://www.laregionaldeseguros.com/lrds/" target="_blank" class="form-item"><div class="form-item-icon">🌐</div><div class="form-item-name">Sitio Web Oficial</div><div class="form-item-type">Web · La Regional</div></a>
-          <a href="https://www.laregionaldeseguros.com/lrds/wp-content/uploads/2024/12/Solicitud_Poliza_Vida_Colectivo.pdf" target="_blank" class="form-item"><div class="form-item-icon">💛</div><div class="form-item-name">Solicitud Póliza Vida Colectivo</div><div class="form-item-type">PDF · La Regional</div></a>
-          <a href="http://www.laregionaldeseguros.com/lrds/wp-content/uploads/2017/04/Solicitud_Poliza_Accidentes_Personales_Colectivo.pdf" target="_blank" class="form-item"><div class="form-item-icon">🩹</div><div class="form-item-name">Solicitud Acc. Personales Colectivo</div><div class="form-item-type">PDF · La Regional</div></a>
-          <a href="https://wa.me/50762926010?text=Necesito%20formularios%20de%20La%20Regional%20de%20Seguros" target="_blank" class="form-item"><div class="form-item-icon">💬</div><div class="form-item-name">Solicitar Formulario</div><div class="form-item-type">WhatsApp · JAC Seguros</div></a>
-        </div>
-      </div>
-    </div>
-
-    <!-- ANCÓN -->
-    <div class="form-view on" id="fv-ancon">
-      <div class="form-company-section">
-        <div class="form-company-title">
-          <div style="width:32px;height:32px;background:linear-gradient(135deg,#D84315,#B71C1C);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;color:white">ANCÓN</div>
-          Aseguradora Ancón
-        </div>
-        <div class="form-items-grid">
-          <a href="https://asegurancon.com/formularios-y-solicitudes/" target="_blank" class="form-item"><div class="form-item-icon">📂</div><div class="form-item-name">Formularios y Solicitudes</div><div class="form-item-type">Web · Ancón</div></a>
-          <a href="https://asegurancon.com/wp-content/uploads/2020/08/Solicitud-Automovil-web-1.pdf" target="_blank" class="form-item"><div class="form-item-icon">🚗</div><div class="form-item-name">Solicitud Seguro Auto</div><div class="form-item-type">PDF · Ancón</div></a>
-          <a href="https://www.asegurancon.com/reclamos/auto-y-propiedad/" target="_blank" class="form-item"><div class="form-item-icon">🚨</div><div class="form-item-name">Reclamo Auto / Propiedad</div><div class="form-item-type">Web · Ancón</div></a>
-          <a href="https://www.asegurancon.com/reclamos/vida/" target="_blank" class="form-item"><div class="form-item-icon">🏥</div><div class="form-item-name">Reclamo Salud / Vida</div><div class="form-item-type">Web · Ancón</div></a>
-          <a href="https://asegurancon.com/wp-content/uploads/2022/05/Instructivo-de-Reclamo-de-Auto-2022-2.pdf" target="_blank" class="form-item"><div class="form-item-icon">📋</div><div class="form-item-name">Instructivo Reclamo Auto</div><div class="form-item-type">PDF · Ancón</div></a>
-          <a href="https://asegurancon.com/reclamos/" target="_blank" class="form-item"><div class="form-item-icon">ℹ️</div><div class="form-item-name">¿Qué hacer ante un Siniestro?</div><div class="form-item-type">Web · Ancón</div></a>
-        </div>
-      </div>
-    </div>
-
-    <!-- CHUBB -->
-    <div class="form-view on" id="fv-chubb">
-      <div class="form-company-section">
-        <div class="form-company-title">
-          <div style="width:32px;height:32px;background:linear-gradient(135deg,#1A1A2E,#0F3460);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;color:white">CHUBB</div>
-          Chubb Seguros Panamá
-        </div>
-        <div class="form-items-grid">
-          <a href="https://www.chubb.com/pa-es/servicios/reporte-un-reclamo.html" target="_blank" class="form-item"><div class="form-item-icon">🚨</div><div class="form-item-name">Reportar un Reclamo</div><div class="form-item-type">Web · Chubb</div></a>
-          <a href="https://www.chubb.com/pa-es/servicios.html" target="_blank" class="form-item"><div class="form-item-icon">⚙️</div><div class="form-item-name">Servicios al Cliente</div><div class="form-item-type">Web · Chubb</div></a>
-          <a href="https://www.chubb.com/pa-es/contactanos.html" target="_blank" class="form-item"><div class="form-item-icon">📞</div><div class="form-item-name">Contactar a Chubb Panamá</div><div class="form-item-type">Web · Chubb</div></a>
-          <a href="https://wa.me/50762926010?text=Necesito%20formularios%20de%20Chubb%20Seguros" target="_blank" class="form-item"><div class="form-item-icon">💬</div><div class="form-item-name">Solicitar Formulario</div><div class="form-item-type">WhatsApp · JAC Seguros</div></a>
-        </div>
-      </div>
-    </div>
-
-    <div style="background:#EEF4FF;border:1px solid #C7D7FF;border-radius:8px;padding:16px;text-align:center;font-size:13px;color:var(--bl);margin-top:8px">
-      📞 ¿Necesitas un formulario que no encuentras aquí? <strong>Contáctanos</strong> y te lo enviamos de inmediato.
+    <div style="background:#EEF4FF;border:1px solid #C7D7FF;border-radius:8px;padding:16px;text-align:center;font-size:13px;color:var(--bl)">
+      📞 ¿Necesitas un formulario específico? <strong>Contáctanos</strong> y te lo enviamos de inmediato.
       <a href="https://wa.me/50762926010" target="_blank" style="background:var(--bl);color:white;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:700;text-decoration:none;display:inline-block;margin-left:8px">WhatsApp →</a>
     </div>
   </div>
 </section>
-<script>
-function showForms(id, el) {
-  document.querySelectorAll('.form-tab').forEach(t=>t.classList.remove('on'));
-  el.classList.add('on');
-  if(id==='all'){
-    document.querySelectorAll('.form-view').forEach(v=>v.classList.add('on'));
-  } else {
-    document.querySelectorAll('.form-view').forEach(v=>v.classList.remove('on'));
-    const fv=document.getElementById('fv-'+id);
-    if(fv)fv.classList.add('on');
-  }
-}
-</script>
 
 <!-- ── ARTÍCULOS ── -->
 <section id="articulos">
@@ -1173,6 +1230,48 @@ function showForms(id, el) {
   </div>
 </section>
 
+
+<!-- ── FAQ ── -->
+<section id="faq">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-badge">Preguntas Frecuentes</div>
+      <h2 class="section-title">Todo lo que necesitas <span>saber</span></h2>
+      <p class="section-sub">Resolvemos las dudas más comunes sobre seguros en Panamá y sobre cómo trabajar con JAC Seguros.</p>
+    </div>
+    <div class="faq-grid">
+      <div class="faq-item" onclick="toggleFAQ(this)">
+        <div class="faq-q">¿Cuánto cuesta la asesoría de JAC Seguros? <span class="faq-arrow">▾</span></div>
+        <div class="faq-a">Absolutamente nada. Nuestra asesoría, comparación y gestión de pólizas es completamente gratuita para el cliente. Nuestra comisión la paga la aseguradora — no tú. Y el precio de tu póliza es exactamente el mismo que si contrataras directo.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFAQ(this)">
+        <div class="faq-q">¿Cuánto tiempo tarda en emitirse una póliza? <span class="faq-arrow">▾</span></div>
+        <div class="faq-a">Depende del ramo. Un seguro de auto o SOAT puede emitirse el mismo día. Seguros de salud y vida requieren una declaración de salud y pueden tardar 3–7 días hábiles. Te avisamos en cada paso del proceso.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFAQ(this)">
+        <div class="faq-q">¿Puedo cambiar de aseguradora cuando quiera? <span class="faq-arrow">▾</span></div>
+        <div class="faq-a">Sí. Al vencer tu póliza puedes cambiar de aseguradora sin penalidades. En algunos casos, también es posible cancelar antes de tiempo con reembolso proporcional. JAC Seguros te asesora en el momento ideal para hacer el cambio.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFAQ(this)">
+        <div class="faq-q">¿Qué pasa si tengo un siniestro? <span class="faq-arrow">▾</span></div>
+        <div class="faq-a">Contáctanos de inmediato por WhatsApp. Te guiamos en la documentación, el reporte a la aseguradora y el seguimiento del reclamo. No estarás solo en ese proceso — es parte de nuestro servicio.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFAQ(this)">
+        <div class="faq-q">¿Trabajan con clientes fuera de la ciudad de Panamá? <span class="faq-arrow">▾</span></div>
+        <div class="faq-a">¡Sí! Atendemos clientes en todo Panamá. La mayor parte de la gestión se hace digitalmente por WhatsApp, email y videollamada. También podemos visitar empresas en el área metropolitana para asesorías presenciales.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFAQ(this)">
+        <div class="faq-q">¿Necesito tener cédula panameña para contratar un seguro? <span class="faq-arrow">▾</span></div>
+        <div class="faq-a">No necesariamente. Los extranjeros residentes con pasaporte válido pueden contratar la mayoría de seguros en Panamá. Algunos productos de vida y salud pueden requerir permiso de trabajo o residencia. Consúltanos tu caso específico.</div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:40px">
+      <p style="color:var(--mu);font-size:14px;margin-bottom:16px">¿Tienes otra pregunta? Escríbenos directamente.</p>
+      <a href="https://wa.me/50762926010?text=Tengo%20una%20pregunta%20sobre%20seguros" target="_blank" style="background:#25D366;color:white;padding:14px 32px;border-radius:8px;font-weight:700;font-size:14px;text-decoration:none;display:inline-flex;align-items:center;gap:8px;font-family:var(--ff-head)">💬 Preguntar por WhatsApp →</a>
+    </div>
+  </div>
+</section>
+
 <!-- ── CONTACTO ── -->
 <section id="contacto">
   <div class="container">
@@ -1201,7 +1300,7 @@ function showForms(id, el) {
           <div class="contact-icon">💬</div>
           <div>
             <div class="contact-item-label">WhatsApp</div>
-            <div class="contact-item-text">+507 6292-6010<br><span style="font-size:12px;color:rgba(255,255,255,.5)">Lun–Sáb 8am–6pm</span></div>
+            <div class="contact-item-text"><a href="https://wa.me/50762926010" target="_blank" style="color:#4ADE80;font-weight:700">+507 6292-6010</a><br><span style="font-size:12px;color:rgba(255,255,255,.5)">Lun–Sáb 8am–6pm</span></div>
           </div>
         </div>
         <div class="contact-item">
@@ -1215,7 +1314,7 @@ function showForms(id, el) {
           <div class="contact-icon">🌐</div>
           <div>
             <div class="contact-item-label">Portal CRM</div>
-            <div class="contact-item-text"><a href="https://crm.jacsegurospa.com" style="color:#93C5FD">crm.jacsegurospa.com</a><br><span style="font-size:12px;color:rgba(255,255,255,.5)">Acceso privado — solo uso administrativo</span></div>
+            <div class="contact-item-text"><a href="https://crm.jacsegurospa.com" style="color:#93C5FD">crm.jacsegurospa.com</a><br><span style="font-size:12px;color:rgba(255,255,255,.5)">Para clientes registrados</span></div>
           </div>
         </div>
       </div>
@@ -1263,29 +1362,14 @@ function showForms(id, el) {
   <div class="footer-grid">
     <div class="footer-brand">
       <div class="logo-row">
-        <svg class="logo-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 520" role="img" aria-label="JAC Seguros">
-          <rect x="10" y="10" width="480" height="500" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="3"/>
-          <line x1="20" y1="88" x2="480" y2="88" stroke="rgba(255,255,255,.3)" stroke-width="8"/>
-          <line x1="20" y1="460" x2="480" y2="460" stroke="rgba(255,255,255,.3)" stroke-width="8"/>
-          <text x="250" y="368" font-family="Montserrat,'Arial Black',Arial,sans-serif" font-size="215" font-weight="700" fill="#ffffff" text-anchor="middle">JAC</text>
-          <text x="250" y="448" font-family="Lato,Arial,sans-serif" font-size="46" font-weight="600" fill="#D4AF37" text-anchor="middle" letter-spacing="10">SEGUROS</text>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 90" height="52" aria-label="JAC Seguros">
+          <line x1="6" y1="14" x2="254" y2="14" stroke="#C4B89A" stroke-width="2.5"/>
+          <line x1="6" y1="76" x2="254" y2="76" stroke="#C4B89A" stroke-width="2.5"/>
+          <text x="130" y="58" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-weight="700" font-size="42" fill="#FFFFFF" letter-spacing="6">JAC</text>
+          <text x="130" y="72" text-anchor="middle" font-family="Montserrat,Arial,sans-serif" font-weight="300" font-size="12" fill="#5BA4F5" letter-spacing="8">SEGUROS</text>
         </svg>
       </div>
       <div class="footer-desc">Tu corredora de seguros de confianza en Panamá. Te ayudamos a encontrar la mejor cobertura de todas las aseguradoras autorizadas, sin costo adicional. Supervisada y regulada por la SPRP.</div>
-      <div class="footer-social" style="display:flex;gap:12px;margin-top:16px">
-        <a href="https://www.instagram.com/jacsegurospa" target="_blank" rel="noopener" title="Instagram" style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;background:rgba(255,255,255,.12);border-radius:50%;text-decoration:none;font-size:16px;color:#fff;transition:background .2s" onmouseover="this.style.background='rgba(255,255,255,.25)'" onmouseout="this.style.background='rgba(255,255,255,.12)'">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
-        </a>
-        <a href="https://www.facebook.com/jacsegurospan" target="_blank" rel="noopener" title="Facebook" style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;background:rgba(255,255,255,.12);border-radius:50%;text-decoration:none;font-size:16px;color:#fff;transition:background .2s" onmouseover="this.style.background='rgba(255,255,255,.25)'" onmouseout="this.style.background='rgba(255,255,255,.12)'">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
-        </a>
-        <a href="https://www.linkedin.com/in/jelyancastrop" target="_blank" rel="noopener" title="LinkedIn" style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;background:rgba(255,255,255,.12);border-radius:50%;text-decoration:none;font-size:16px;color:#fff;transition:background .2s" onmouseover="this.style.background='rgba(255,255,255,.25)'" onmouseout="this.style.background='rgba(255,255,255,.12)'">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
-        </a>
-        <a href="https://wa.me/50762926010" target="_blank" rel="noopener" title="WhatsApp" style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;background:rgba(255,255,255,.12);border-radius:50%;text-decoration:none;font-size:16px;color:#fff;transition:background .2s" onmouseover="this.style.background='rgba(255,255,255,.25)'" onmouseout="this.style.background='rgba(255,255,255,.12)'">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
-        </a>
-      </div>
     </div>
     <div class="footer-col">
       <div class="footer-col-title">Seguros</div>
@@ -1317,21 +1401,19 @@ function showForms(id, el) {
         <li><a href="#formularios">Formularios</a></li>
         <li><a href="#contacto">Contacto</a></li>
         <li><a href="https://crm.jacsegurospa.com" target="_blank">Portal CRM</a></li>
-        <li><a href="#contacto" onclick="document.getElementById('cf-asunto').value='Consulta general'">✉️ Escríbenos</a></li>
+        <li><a href="https://mail.zoho.com" target="_blank">Email Corporativo</a></li>
       </ul>
     </div>
   </div>
   <div class="footer-bottom" style="max-width:1200px;margin:0 auto;border-top:1px solid rgba(255,255,255,.08);padding-top:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
     <div class="footer-copy">
       © 2026 JAC Seguros · Jely An Castro Pérez · Licencia #6175 · jacsegurospa.com<br>
-      Supervisada y regulada por la Superintendencia de Seguros y Reaseguros de Panamá (SSRP)<br>
-      <span style="font-size:11px;opacity:.6">Todos los derechos reservados</span>
+      Supervisada y regulada por la Superintendencia de Seguros y Reaseguros de Panamá (SPRP)
     </div>
     <div class="sprp-badge">
-      <img src="https://superseguros.gob.pa/wp-content/uploads/2019/09/logo-1.png" style="height:40px;background:white;padding:4px 8px;border-radius:6px;opacity:.95" alt="SSRP" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-      <div style="display:none;width:36px;height:36px;background:rgba(255,255,255,.1);border-radius:50%;align-items:center;justify-content:center;font-size:18px">🏛️</div>
+      <div style="width:36px;height:36px;background:rgba(255,255,255,.1);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px">🏛️</div>
       <div class="sprp-text">
-        <strong>Supervisada por la SSRP</strong>
+        <strong>Supervisada por la SPRP</strong>
         Superintendencia de Seguros y<br>Reaseguros de Panamá
       </div>
     </div>
@@ -1412,128 +1494,26 @@ window.onclick = e => { if (e.target.classList.contains('modal-overlay')) e.targ
 const RAMO_DATA = {
   autos: {
     title: '🚗 Seguros de Autos y Vehículos',
-    body: `<p style="color:var(--mu);font-size:13px;line-height:1.7;margin-bottom:14px">Protege tu vehículo ante accidentes, robo, daños a terceros y más. Trabajamos con todas las aseguradoras autorizadas en Panamá para ofrecerte el mejor precio.</p>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-<div style="background:#EEF4FF;border-radius:8px;padding:12px"><strong style="color:var(--bl)">SOAT / Daños a Terceros</strong><p style="font-size:12px;color:var(--mu);margin-top:4px">Obligatorio por ley. Cubre daños que causes a otras personas y vehículos en accidentes.</p></div>
-<div style="background:#F0FDF4;border-radius:8px;padding:12px"><strong style="color:var(--ok)">Cobertura Completa</strong><p style="font-size:12px;color:var(--mu);margin-top:4px">Todo riesgo: daños propios, robo total/parcial, cristales, grúa, asistencia vial 24h.</p></div>
-</div>
-<div style="background:#FFFBEB;border-radius:8px;padding:12px;margin-bottom:14px"><strong style="color:#D97706;font-size:12px">📋 Coberturas adicionales disponibles</strong><ul style="font-size:12px;color:var(--mu);margin-top:6px;columns:2;gap:10px"><li>Daños por inundación</li><li>Responsabilidad civil ampliada</li><li>Pasajeros y ocupantes</li><li>Auto sustituto</li><li>Gastos médicos conductor</li><li>Accesorios y equipo especial</li></ul></div>
-<p style="font-size:12px;color:var(--mu);margin-bottom:12px"><strong>Aseguradoras:</strong> ASSA, SURA, MAPFRE, Internacional, La Regional, FEDPA, Ancón, Chubb</p>
-<div style="margin-bottom:10px"><span style="font-size:12px;font-weight:700;color:var(--bl)">📄 Formularios:</span><br><a href="https://assanet.com/seguros/autos" target="_blank" style="font-size:12px;color:var(--bl)">ASSA Autos</a> &nbsp;·&nbsp; <a href="https://segurossura.com.pa" target="_blank" style="font-size:12px;color:var(--bl)">SURA Autos</a> &nbsp;·&nbsp; <a href="https://mapfre.com.pa" target="_blank" style="font-size:12px;color:var(--bl)">MAPFRE Autos</a></div>
-<a href="https://wa.me/50762926010?text=Quiero%20cotizar%20un%20seguro%20de%20auto" target="_blank" style="display:block;background:#25D366;color:white;text-align:center;padding:12px;border-radius:8px;font-weight:700;text-decoration:none">💬 Cotizar seguro de auto →</a>`
+    body: `<p style="color:var(--mu);font-size:13px;line-height:1.7;margin-bottom:16px">El seguro de auto te protege ante daños a tu vehículo, daños a terceros, robo y más. En Panamá existen dos modalidades principales:</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+      <div style="background:#EEF4FF;border-radius:8px;padding:14px"><strong style="color:var(--bl)">SOAT / Daños a Terceros</strong><p style="font-size:12px;color:var(--mu);margin-top:4px">Obligatorio por ley. Cubre daños que causes a otras personas y vehículos.</p></div>
+      <div style="background:#F0FDF4;border-radius:8px;padding:14px"><strong style="color:var(--ok)">Cobertura Completa</strong><p style="font-size:12px;color:var(--mu);margin-top:4px">Incluye daños a tu propio vehículo, robo, cristales, asistencia vial y más.</p></div>
+    </div>
+    <p style="font-size:12px;color:var(--mu);margin-bottom:12px"><strong>Aseguradoras disponibles:</strong> ASSA, SURA, MAPFRE, Internacional de Seguros, La Regional, FEDPA, Ancón, y más.</p>
+    <a href="https://wa.me/50762926010?text=Quiero%20cotizar%20un%20seguro%20de%20auto" target="_blank" style="display:block;background:#25D366;color:white;text-align:center;padding:12px;border-radius:8px;font-weight:700;text-decoration:none">💬 Cotizar mi seguro de auto →</a>`
   },
   salud: {
     title: '🏥 Seguros de Salud y Gastos Médicos',
-    body: `<p style="color:var(--mu);font-size:13px;line-height:1.7;margin-bottom:14px">El seguro de salud es tu red de seguridad ante imprevistos médicos. Hospitalizaciones, cirugías, consultas y medicamentos cubiertos según el plan.</p>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-<div style="background:#EEF4FF;border-radius:8px;padding:12px"><strong style="color:var(--bl)">Individual / Familiar</strong><ul style="font-size:12px;color:var(--mu);margin-top:6px;display:flex;flex-direction:column;gap:3px"><li>✓ Hospitalización ilimitada</li><li>✓ Cirugías electivas y de urgencia</li><li>✓ Maternidad (con preexistencia)</li><li>✓ Medicamentos y laboratorios</li></ul></div>
-<div style="background:#F0FDF4;border-radius:8px;padding:12px"><strong style="color:var(--ok)">Colectivo Empresarial</strong><ul style="font-size:12px;color:var(--mu);margin-top:6px;display:flex;flex-direction:column;gap:3px"><li>✓ Desde 2 personas</li><li>✓ Sin exclusión por preexistencia</li><li>✓ Primas más bajas en grupo</li><li>✓ Cobertura internacional</li></ul></div>
-</div>
-<p style="font-size:12px;color:var(--mu);margin-bottom:12px"><strong>Aseguradoras:</strong> ASSA, SURA, MAPFRE, PALIG, WW Medical, AIG, Internacional, Generali</p>
-<div style="margin-bottom:10px"><span style="font-size:12px;font-weight:700;color:var(--bl)">📄 Formularios:</span><br><a href="https://assanet.com" target="_blank" style="font-size:12px;color:var(--bl)">ASSA Salud</a> &nbsp;·&nbsp; <a href="https://segurossura.com.pa" target="_blank" style="font-size:12px;color:var(--bl)">SURA Salud</a> &nbsp;·&nbsp; <a href="https://palig.com" target="_blank" style="font-size:12px;color:var(--bl)">PALIG</a> &nbsp;·&nbsp; <a href="https://wwmedical.com" target="_blank" style="font-size:12px;color:var(--bl)">WW Medical</a></div>
-<a href="https://wa.me/50762926010?text=Quiero%20cotizar%20un%20seguro%20de%20salud" target="_blank" style="display:block;background:#25D366;color:white;text-align:center;padding:12px;border-radius:8px;font-weight:700;text-decoration:none">💬 Cotizar seguro de salud →</a>`
-  },
-  vida: {
-    title: '💛 Seguros de Vida y Ahorro',
-    body: `<p style="color:var(--mu);font-size:13px;line-height:1.7;margin-bottom:14px">El seguro de vida protege a tu familia y puede ser una herramienta de ahorro e inversión a largo plazo. Existen planes desde $20/mes.</p>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-<div style="background:#FFFBEB;border-radius:8px;padding:12px"><strong style="color:#D97706">Vida Temporal</strong><ul style="font-size:12px;color:var(--mu);margin-top:6px;display:flex;flex-direction:column;gap:3px"><li>✓ Suma asegurada fija</li><li>✓ Prima más económica</li><li>✓ Ideal para hipotecas/préstamos</li><li>✓ Muerte accidental incluida</li></ul></div>
-<div style="background:#F3E8FF;border-radius:8px;padding:12px"><strong style="color:#7E22CE">Vida Universal / Ahorro</strong><ul style="font-size:12px;color:var(--mu);margin-top:6px;display:flex;flex-direction:column;gap:3px"><li>✓ Genera valor en efectivo</li><li>✓ Préstamos sobre póliza</li><li>✓ Pensión al retiro</li><li>✓ Rendimiento garantizado</li></ul></div>
-</div>
-<div style="background:#EEF4FF;border-radius:8px;padding:12px;margin-bottom:14px;font-size:12px;color:var(--mu)"><strong style="color:var(--bl)">💡 Beneficios adicionales disponibles:</strong> Invalidez total y permanente · Enfermedades graves (cáncer, infarto) · Muerte accidental doble · Exoneración de primas</div>
-<p style="font-size:12px;color:var(--mu);margin-bottom:12px"><strong>Aseguradoras:</strong> ASSA, SURA, MAPFRE, PALIG, Internacional, Generali, AIG, FEDPA, Ancón</p>
-<div style="margin-bottom:10px"><span style="font-size:12px;font-weight:700;color:var(--bl)">📄 Formularios:</span><br><a href="https://assanet.com" target="_blank" style="font-size:12px;color:var(--bl)">ASSA Vida</a> &nbsp;·&nbsp; <a href="https://segurossura.com.pa" target="_blank" style="font-size:12px;color:var(--bl)">SURA Vida</a> &nbsp;·&nbsp; <a href="https://mapfre.com.pa" target="_blank" style="font-size:12px;color:var(--bl)">MAPFRE Vida</a></div>
-<a href="https://wa.me/50762926010?text=Quiero%20informaci%C3%B3n%20sobre%20seguros%20de%20vida" target="_blank" style="display:block;background:#25D366;color:white;text-align:center;padding:12px;border-radius:8px;font-weight:700;text-decoration:none">💬 Cotizar seguro de vida →</a>`
-  },
-  hogar: {
-    title: '🏠 Seguros de Hogar',
-    body: `<p style="color:var(--mu);font-size:13px;line-height:1.7;margin-bottom:14px">Protege tu casa, apartamento o contenido ante incendios, robos, inundaciones y más. Ideal tanto para propietarios como para arrendatarios.</p>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-<div style="background:#EEF4FF;border-radius:8px;padding:12px"><strong style="color:var(--bl)">Cobertura Básica</strong><ul style="font-size:12px;color:var(--mu);margin-top:6px;display:flex;flex-direction:column;gap:3px"><li>✓ Incendio y rayo</li><li>✓ Daños por agua/inundación</li><li>✓ Robo con violencia</li><li>✓ Daños por viento y granizo</li></ul></div>
-<div style="background:#F0FDF4;border-radius:8px;padding:12px"><strong style="color:var(--ok)">Cobertura Amplia</strong><ul style="font-size:12px;color:var(--mu);margin-top:6px;display:flex;flex-direction:column;gap:3px"><li>✓ Todo lo básico más:</li><li>✓ Responsabilidad civil familiar</li><li>✓ Equipos eléctricos y electrónicos</li><li>✓ Joyas y objetos de valor</li></ul></div>
-</div>
-<p style="font-size:12px;color:var(--mu);margin-bottom:12px"><strong>Aseguradoras:</strong> ASSA, SURA, MAPFRE, Internacional, Chubb, La Regional</p>
-<div style="margin-bottom:10px"><span style="font-size:12px;font-weight:700;color:var(--bl)">📄 Formularios:</span><br><a href="https://assanet.com" target="_blank" style="font-size:12px;color:var(--bl)">ASSA Hogar</a> &nbsp;·&nbsp; <a href="https://segurossura.com.pa" target="_blank" style="font-size:12px;color:var(--bl)">SURA Hogar</a> &nbsp;·&nbsp; <a href="https://mapfre.com.pa" target="_blank" style="font-size:12px;color:var(--bl)">MAPFRE Hogar</a></div>
-<a href="https://wa.me/50762926010?text=Quiero%20cotizar%20un%20seguro%20de%20hogar" target="_blank" style="display:block;background:#25D366;color:white;text-align:center;padding:12px;border-radius:8px;font-weight:700;text-decoration:none">💬 Cotizar seguro de hogar →</a>`
-  },
-  incendio: {
-    title: '🔥 Seguro de Incendio y Líneas Aliadas',
-    body: `<p style="color:var(--mu);font-size:13px;line-height:1.7;margin-bottom:14px">El seguro de incendio es fundamental para propiedades residenciales, comerciales e industriales. Cubre el edificio, el contenido y las pérdidas por interrupción de negocio.</p>
-<div style="background:#FEF2F2;border-radius:8px;padding:12px;margin-bottom:14px"><strong style="color:#B91C1C">Coberturas principales</strong><ul style="font-size:12px;color:var(--mu);margin-top:6px;columns:2;gap:10px"><li>✓ Incendio y rayo</li><li>✓ Explosión</li><li>✓ Humo y hollín</li><li>✓ Daños por agua</li><li>✓ Viento y granizo</li><li>✓ Impacto de vehículo</li><li>✓ Rotura de cristales</li><li>✓ Responsabilidad civil</li></ul></div>
-<div style="background:#FEF3C7;border-radius:8px;padding:12px;margin-bottom:14px;font-size:12px;color:var(--mu)"><strong style="color:#D97706">Coberturas adicionales (líneas aliadas):</strong> Terremoto y temblor · Inundación y marejada · Motín y huelga · Daños maliciosos · Terrorismo</div>
-<p style="font-size:12px;color:var(--mu);margin-bottom:12px"><strong>Aseguradoras:</strong> ASSA, SURA, MAPFRE, Internacional, Chubb, La Regional, FEDPA</p>
-<div style="margin-bottom:10px"><span style="font-size:12px;font-weight:700;color:var(--bl)">📄 Formularios:</span><br><a href="https://assanet.com" target="_blank" style="font-size:12px;color:var(--bl)">ASSA Incendio</a> &nbsp;·&nbsp; <a href="https://segurossura.com.pa" target="_blank" style="font-size:12px;color:var(--bl)">SURA Incendio</a></div>
-<a href="https://wa.me/50762926010?text=Quiero%20cotizar%20un%20seguro%20de%20incendio" target="_blank" style="display:block;background:#25D366;color:white;text-align:center;padding:12px;border-radius:8px;font-weight:700;text-decoration:none">💬 Cotizar seguro de incendio →</a>`
-  },
-  ap: {
-    title: '🦺 Seguros de Accidentes Personales',
-    body: `<p style="color:var(--mu);font-size:13px;line-height:1.7;margin-bottom:14px">Los accidentes personales te protegen 24 horas, los 365 días del año, en cualquier parte del mundo. Ideal como complemento a otros seguros o de forma independiente.</p>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-<div style="background:#EEF4FF;border-radius:8px;padding:12px"><strong style="color:var(--bl)">Coberturas básicas</strong><ul style="font-size:12px;color:var(--mu);margin-top:6px;display:flex;flex-direction:column;gap:3px"><li>✓ Muerte accidental</li><li>✓ Invalidez total permanente</li><li>✓ Invalidez parcial permanente</li><li>✓ Gastos médicos por accidente</li></ul></div>
-<div style="background:#F0FDF4;border-radius:8px;padding:12px"><strong style="color:var(--ok)">Coberturas adicionales</strong><ul style="font-size:12px;color:var(--mu);margin-top:6px;display:flex;flex-direction:column;gap:3px"><li>✓ Renta por incapacidad</li><li>✓ Fractura de huesos</li><li>✓ Quemaduras</li><li>✓ Rescate y traslado</li></ul></div>
-</div>
-<p style="font-size:12px;color:var(--mu);margin-bottom:12px"><strong>Aseguradoras:</strong> ASSA, SURA, MAPFRE, AIG, Chubb, Internacional, PALIG</p>
-<div style="margin-bottom:10px"><span style="font-size:12px;font-weight:700;color:var(--bl)">📄 Formularios:</span><br><a href="https://assanet.com" target="_blank" style="font-size:12px;color:var(--bl)">ASSA AP</a> &nbsp;·&nbsp; <a href="https://segurossura.com.pa" target="_blank" style="font-size:12px;color:var(--bl)">SURA AP</a> &nbsp;·&nbsp; <a href="https://mapfre.com.pa" target="_blank" style="font-size:12px;color:var(--bl)">MAPFRE AP</a></div>
-<a href="https://wa.me/50762926010?text=Quiero%20cotizar%20un%20seguro%20de%20accidentes%20personales" target="_blank" style="display:block;background:#25D366;color:white;text-align:center;padding:12px;border-radius:8px;font-weight:700;text-decoration:none">💬 Cotizar accidentes personales →</a>`
-  },
-  fianzas: {
-    title: '📜 Fianzas y Garantías',
-    body: `<p style="color:var(--mu);font-size:13px;line-height:1.7;margin-bottom:14px">Las fianzas son garantías exigidas por el Estado o entidades privadas para asegurar el cumplimiento de contratos, licitaciones y obligaciones legales.</p>
-<div style="background:#EEF4FF;border-radius:8px;padding:12px;margin-bottom:14px"><strong style="color:var(--bl)">Tipos de fianzas disponibles</strong><ul style="font-size:12px;color:var(--mu);margin-top:6px;columns:2;gap:8px"><li>✓ Fiel cumplimiento</li><li>✓ Propuesta (bid bond)</li><li>✓ Anticipo</li><li>✓ Pago de planilla</li><li>✓ Correcta inversión</li><li>✓ Mantenimiento de obra</li><li>✓ Aduanera / Fiscal</li><li>✓ Fidelidad de empleados</li></ul></div>
-<div style="background:#FFFBEB;border-radius:8px;padding:12px;margin-bottom:14px;font-size:12px;color:var(--mu)"><strong style="color:#D97706">⚠️ Documentos requeridos:</strong> Estados financieros · Historial de contratos · RUC y permisos comerciales · Información del contrato o licitación a garantizar</div>
-<p style="font-size:12px;color:var(--mu);margin-bottom:12px"><strong>Aseguradoras:</strong> ASSA, SURA, MAPFRE, Internacional, Chubb, La Regional</p>
-<a href="https://wa.me/50762926010?text=Necesito%20una%20fianza%2C%20%C2%BFpueden%20ayudarme%3F" target="_blank" style="display:block;background:#25D366;color:white;text-align:center;padding:12px;border-radius:8px;font-weight:700;text-decoration:none">💬 Consultar fianzas →</a>`
-  },
-  rc: {
-    title: '⚖️ Responsabilidad Civil',
-    body: `<p style="color:var(--mu);font-size:13px;line-height:1.7;margin-bottom:14px">El seguro de Responsabilidad Civil protege tus activos personales y empresariales cuando una reclamación de terceros te atribuye daños físicos o materiales.</p>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-<div style="background:#EEF4FF;border-radius:8px;padding:12px"><strong style="color:var(--bl)">RC Personal / Familiar</strong><ul style="font-size:12px;color:var(--mu);margin-top:6px;display:flex;flex-direction:column;gap:3px"><li>✓ Daños a terceros en el hogar</li><li>✓ RC por actividades deportivas</li><li>✓ Gastos de defensa legal</li><li>✓ Daños causados por mascotas</li></ul></div>
-<div style="background:#F3E8FF;border-radius:8px;padding:12px"><strong style="color:#7E22CE">RC Empresarial / Profesional</strong><ul style="font-size:12px;color:var(--mu);margin-top:6px;display:flex;flex-direction:column;gap:3px"><li>✓ RC de operaciones</li><li>✓ RC de productos</li><li>✓ RC profesional (errores/omisiones)</li><li>✓ RC de directores y ejecutivos (D&O)</li></ul></div>
-</div>
-<p style="font-size:12px;color:var(--mu);margin-bottom:12px"><strong>Aseguradoras:</strong> ASSA, SURA, MAPFRE, Chubb, AIG, Internacional</p>
-<a href="https://wa.me/50762926010?text=Quiero%20cotizar%20un%20seguro%20de%20responsabilidad%20civil" target="_blank" style="display:block;background:#25D366;color:white;text-align:center;padding:12px;border-radius:8px;font-weight:700;text-decoration:none">💬 Cotizar responsabilidad civil →</a>`
-  },
-  soat: {
-    title: '🚦 SOAT — Seguro Obligatorio de Daños a Terceros',
-    body: `<p style="color:var(--mu);font-size:13px;line-height:1.7;margin-bottom:14px">El SOAT es obligatorio para todos los vehículos que circulan en Panamá según la Ley 24 de 2002. Sin él no puedes circular legalmente ni pasar la revisión técnica.</p>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-<div style="background:#F0FDF4;border-radius:8px;padding:12px"><strong style="color:var(--ok)">✓ Sí cubre</strong><ul style="font-size:12px;color:var(--mu);margin-top:6px;display:flex;flex-direction:column;gap:3px"><li>Daños corporales a terceros</li><li>Gastos médicos de víctimas</li><li>Muerte e invalidez de terceros</li><li>Gastos funerarios</li></ul></div>
-<div style="background:#FEF2F2;border-radius:8px;padding:12px"><strong style="color:#B91C1C">✗ No cubre</strong><ul style="font-size:12px;color:var(--mu);margin-top:6px;display:flex;flex-direction:column;gap:3px"><li>Daños a tu propio vehículo</li><li>Daños a tu propiedad</li><li>Lesiones del conductor responsable</li><li>Daños materiales a terceros</li></ul></div>
-</div>
-<div style="background:#EEF4FF;border-radius:8px;padding:12px;margin-bottom:14px;font-size:12px;color:var(--mu)"><strong style="color:var(--bl)">💰 Costo aproximado (auto particular):</strong> $50–$80/año · Motos: $20–$40 · Buses: varía por cupo<br><strong style="color:var(--bl)">📋 Documentos para adquirir:</strong> Cédula / Pasaporte · Placa del vehículo · Modelo y año</div>
-<p style="font-size:12px;color:var(--mu);margin-bottom:12px"><strong>Aseguradoras:</strong> ASSA, SURA, MAPFRE, Internacional, FEDPA, La Regional, Ancón, Chubb</p>
-<a href="https://wa.me/50762926010?text=Necesito%20renovar%20o%20tramitar%20mi%20SOAT" target="_blank" style="display:block;background:#25D366;color:white;text-align:center;padding:12px;border-radius:8px;font-weight:700;text-decoration:none">💬 Tramitar SOAT →</a>`
-  },
-  viajes: {
-    title: '✈️ Seguros de Viaje',
-    body: `<p style="color:var(--mu);font-size:13px;line-height:1.7;margin-bottom:14px">Viaja tranquilo. Los seguros de viaje te protegen ante emergencias médicas en el exterior, cancelaciones, pérdida de equipaje y más. Muchos destinos los exigen como requisito de visa.</p>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-<div style="background:#EEF4FF;border-radius:8px;padding:12px"><strong style="color:var(--bl)">Coberturas estándar</strong><ul style="font-size:12px;color:var(--mu);margin-top:6px;display:flex;flex-direction:column;gap:3px"><li>✓ Emergencias médicas en exterior</li><li>✓ Evacuación y repatriación</li><li>✓ Cancelación de viaje</li><li>✓ Pérdida o retraso de equipaje</li></ul></div>
-<div style="background:#F0FDF4;border-radius:8px;padding:12px"><strong style="color:var(--ok)">Coberturas adicionales</strong><ul style="font-size:12px;color:var(--mu);margin-top:6px;display:flex;flex-direction:column;gap:3px"><li>✓ Deportes extremos</li><li>✓ Embarazo hasta sem. 32</li><li>✓ COVID-19 cubierto</li><li>✓ Telemedicina 24h</li></ul></div>
-</div>
-<div style="background:#FFFBEB;border-radius:8px;padding:10px;margin-bottom:14px;font-size:12px;color:var(--mu)"><strong style="color:#D97706">🗺️ Destinos que requieren seguro:</strong> Schengen (Europa) · Cuba · Ecuador · Varios de Asia · Cruceros internacionales</div>
-<p style="font-size:12px;color:var(--mu);margin-bottom:12px"><strong>Aseguradoras:</strong> ASSA, SURA, MAPFRE, AIG, Chubb, Generali, WW Medical</p>
-<a href="https://wa.me/50762926010?text=Necesito%20un%20seguro%20de%20viaje" target="_blank" style="display:block;background:#25D366;color:white;text-align:center;padding:12px;border-radius:8px;font-weight:700;text-decoration:none">💬 Cotizar seguro de viaje →</a>`
-  },
-  motos: {
-    title: '🏍️ Seguros de Motos y Vehículos de Motor',
-    body: `<p style="color:var(--mu);font-size:13px;line-height:1.7;margin-bottom:14px">Las motos tienen mayor exposición a accidentes. Un buen seguro protege tu inversión, tu salud y tu responsabilidad ante terceros.</p>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-<div style="background:#EEF4FF;border-radius:8px;padding:12px"><strong style="color:var(--bl)">SOAT Moto (Obligatorio)</strong><ul style="font-size:12px;color:var(--mu);margin-top:6px;display:flex;flex-direction:column;gap:3px"><li>✓ Obligatorio por ley</li><li>✓ Daños corporales a terceros</li><li>✓ Costo: $20–$40/año</li><li>✓ Renovación anual</li></ul></div>
-<div style="background:#F0FDF4;border-radius:8px;padding:12px"><strong style="color:var(--ok)">Cobertura Amplia</strong><ul style="font-size:12px;color:var(--mu);margin-top:6px;display:flex;flex-direction:column;gap:3px"><li>✓ Daños propios (choque/vuelco)</li><li>✓ Robo total</li><li>✓ Gastos médicos del conductor</li><li>✓ Asistencia vial</li></ul></div>
-</div>
-<p style="font-size:12px;color:var(--mu);margin-bottom:12px"><strong>Aseguradoras:</strong> ASSA, SURA, MAPFRE, Internacional, FEDPA, La Regional</p>
-<a href="https://wa.me/50762926010?text=Quiero%20cotizar%20un%20seguro%20para%20mi%20moto" target="_blank" style="display:block;background:#25D366;color:white;text-align:center;padding:12px;border-radius:8px;font-weight:700;text-decoration:none">💬 Cotizar seguro de moto →</a>`
-  },
-  empresas: {
-    title: '🏢 Seguros para Empresas y Negocios',
-    body: `<p style="color:var(--mu);font-size:13px;line-height:1.7;margin-bottom:14px">Un programa de seguros empresarial bien estructurado protege tu inversión, cumple con la ley y da tranquilidad a tus empleados y socios. Lo diseñamos a tu medida.</p>
-<div style="background:#EEF4FF;border-radius:8px;padding:12px;margin-bottom:12px"><strong style="color:var(--bl)">Seguros obligatorios para empresas</strong><ul style="font-size:12px;color:var(--mu);margin-top:6px;columns:2;gap:8px"><li>✓ SOAT flota vehicular</li><li>✓ RC en construcción</li><li>✓ Fianzas para contratos estado</li><li>✓ Vida colectivo (algunos sectores)</li></ul></div>
-<div style="background:#F0FDF4;border-radius:8px;padding:12px;margin-bottom:12px"><strong style="color:var(--ok)">Seguros recomendados</strong><ul style="font-size:12px;color:var(--mu);margin-top:6px;columns:2;gap:8px"><li>✓ Salud colectiva empleados</li><li>✓ Todo riesgo de propiedad</li><li>✓ AP trabajo colectivo</li><li>✓ RC de operaciones</li><li>✓ Equipos y maquinaria</li><li>✓ Transporte de mercancías</li><li>✓ D&O (directivos)</li><li>✓ Cyber / Datos</li></ul></div>
-<p style="font-size:12px;color:var(--mu);margin-bottom:12px"><strong>Aseguradoras:</strong> ASSA, SURA, MAPFRE, Internacional, Chubb, AIG, La Regional</p>
-<div style="margin-bottom:10px"><span style="font-size:12px;font-weight:700;color:var(--bl)">📄 Formularios empresariales:</span><br><a href="https://assanet.com" target="_blank" style="font-size:12px;color:var(--bl)">ASSA Empresas</a> &nbsp;·&nbsp; <a href="https://segurossura.com.pa" target="_blank" style="font-size:12px;color:var(--bl)">SURA Empresas</a> &nbsp;·&nbsp; <a href="https://mapfre.com.pa" target="_blank" style="font-size:12px;color:var(--bl)">MAPFRE Empresas</a></div>
-<a href="https://wa.me/50762926010?text=Necesito%20un%20programa%20de%20seguros%20para%20mi%20empresa" target="_blank" style="display:block;background:#25D366;color:white;text-align:center;padding:12px;border-radius:8px;font-weight:700;text-decoration:none">💬 Diseñar programa empresarial →</a>`
+    body: `<p style="color:var(--mu);font-size:13px;line-height:1.7;margin-bottom:16px">El seguro de salud es una de las inversiones más importantes que puedes hacer. Te protege de los altos costos de hospitalización, cirugías, medicamentos y más.</p>
+    <div style="background:#F0FDF4;border-radius:8px;padding:14px;margin-bottom:16px">
+      <strong style="color:var(--ok)">¿Qué incluye un buen seguro de salud?</strong>
+      <ul style="font-size:12px;color:var(--mu);margin-top:8px;display:flex;flex-direction:column;gap:4px">
+        <li>✓ Hospitalización sin límite de días</li><li>✓ Cirugías electivas y de emergencia</li>
+        <li>✓ Consultas médicas ambulatorias</li><li>✓ Maternidad (opcional)</li>
+        <li>✓ Medicamentos y laboratorios</li><li>✓ Cobertura internacional</li>
+      </ul>
+    </div>
+    <a href="https://wa.me/50762926010?text=Quiero%20cotizar%20un%20seguro%20de%20salud" target="_blank" style="display:block;background:#25D366;color:white;text-align:center;padding:12px;border-radius:8px;font-weight:700;text-decoration:none">💬 Cotizar seguro de salud →</a>`
   }
 };
 
@@ -1657,9 +1637,16 @@ function submitContactForm() {
   window.open(`https://wa.me/50762926010?text=${encodeURIComponent(waMsg)}`, '_blank');
 }
 
+// FAQ toggle
+function toggleFAQ(el) {
+  const isOpen = el.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(f => f.classList.remove('open'));
+  if (!isOpen) el.classList.add('open');
+}
+
 // Highlight active nav on scroll
 window.addEventListener('scroll', () => {
-  const sections = ['why','ramos','aseguradoras','planes','formularios','articulos','contacto'];
+  const sections = ['why','proceso','ramos','testimonios','aseguradoras','planes','formularios','faq','articulos','contacto'];
   const navLinks = document.querySelectorAll('nav a');
   let current = '';
   sections.forEach(id => {
