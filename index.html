@@ -271,6 +271,26 @@ footer{background:#0D1F3C;color:white;padding:50px 24px 24px}
   .hero-stats{gap:16px}
   .hero-stat .n{font-size:24px}
 }
+
+/* ─── Accordion / Collapsible sections ──────────────────────── */
+.accordion-section{border:1px solid #e5e7eb;border-radius:14px;margin-bottom:12px;overflow:hidden;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,0.05)}
+.accordion-header{display:flex;justify-content:space-between;align-items:center;padding:18px 22px;cursor:pointer;background:#fff;transition:background .2s}
+.accordion-header:hover{background:#F8FAFC}
+.accordion-header-left{display:flex;align-items:center;gap:14px}
+.accordion-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.accordion-title{font-size:16px;font-weight:700;color:#111827;font-family:var(--ff-head)}
+.accordion-sub{font-size:13px;color:var(--mu);margin-top:2px}
+.accordion-arrow{font-size:18px;color:var(--mu);transition:transform .3s;flex-shrink:0}
+.accordion-body{max-height:0;overflow:hidden;transition:max-height .4s ease}
+.accordion-body.open{max-height:2000px}
+.accordion-body-inner{padding:0 22px 22px}
+.section-collapse-btn{display:flex;align-items:center;justify-content:center;gap:8px;background:transparent;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 22px;font-size:13px;font-weight:600;color:var(--mu);cursor:pointer;margin:20px auto 0;transition:all .2s;width:fit-content}
+.section-collapse-btn:hover{border-color:var(--bl);color:var(--bl)}
+.hidden-initially{display:none}
+.show-more-row{text-align:center;margin-top:16px}
+/* SSRP badge */
+.ssrp-badge{display:inline-flex;align-items:center;gap:10px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);border-radius:50px;padding:8px 18px;font-size:12px;font-weight:600;color:rgba(255,255,255,0.9);backdrop-filter:blur(4px)}
+.ssrp-badge img{height:28px;object-fit:contain;filter:brightness(0) invert(1);opacity:0.85}
 </style>
 </head>
 <body>
@@ -313,7 +333,10 @@ footer{background:#0D1F3C;color:white;padding:50px 24px 24px}
   </div>
   <div class="hero-content">
     <div class="hero-left">
-      <div class="hero-badge">🛡️ Corredora Autorizada · Lic. #6175</div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px">
+        <div class="hero-badge">🛡️ Corredora Autorizada · Lic. #6175</div>
+        <div class="ssrp-badge"><img src="https://superseguros.gob.pa/wp-content/uploads/2019/09/logo-1.png" alt="SSRP"> Supervisada SSRP</div>
+      </div>
       <h1 class="hero-title">
         Protegemos lo que<br><span>más valoras</span>
       </h1>
@@ -541,6 +564,9 @@ footer{background:#0D1F3C;color:white;padding:50px 24px 24px}
         <div class="ramo-companies"><span class="ramo-co">SURA</span><span class="ramo-co">ASSA</span><span class="ramo-co">MAPFRE</span></div>
       </div>
     </div>
+    <div style="text-align:center;margin-top:20px">
+      <button class="section-collapse-btn" id="ramos-toggle-btn" onclick="toggleRamosGrid()"><span id="ramos-toggle-text">Ver todos los ramos ▼</span></button>
+    </div>
   </div>
 </section>
 
@@ -626,9 +652,9 @@ footer{background:#0D1F3C;color:white;padding:50px 24px 24px}
     <div class="section-header">
       <div class="section-badge">Nuestras Aliadas</div>
       <h2 class="section-title">Aseguradoras <span>Autorizadas</span></h2>
-      <p class="section-sub">Trabajamos con todas las aseguradoras autorizadas por la Superintendencia de Seguros y Reaseguros de Panamá (SPRP).</p>
+      <p class="section-sub">Trabajamos con todas las aseguradoras autorizadas por la Superintendencia de Seguros y Reaseguros de Panamá (SSRP).</p>
     </div>
-    <div class="aseg-grid">
+    <div class="aseg-grid" id="aseg-grid-main">
       <!-- ASSA -->
       <div class="aseg-card">
         <div class="aseg-header">
@@ -778,11 +804,12 @@ footer{background:#0D1F3C;color:white;padding:50px 24px 24px}
 <!-- ── PLANES ── -->
 <section id="planes">
   <div class="container">
-    <div class="section-header">
+    <div class="section-header" style="cursor:pointer;user-select:none" onclick="togglePlanesSection(this)">
       <div class="section-badge">Planes por Aseguradora</div>
-      <h2 class="section-title">Encuentra tu <span>plan ideal</span></h2>
-      <p class="section-sub">Comparamos los principales planes de cada aseguradora. Actualizado Mayo 2026. Contáctanos para cotizaciones personalizadas.</p>
+      <h2 class="section-title">Encuentra tu <span>plan ideal</span> <span id="planes-arrow" style="font-size:24px;color:var(--mu);margin-left:8px;vertical-align:middle">▼</span></h2>
+      <p class="section-sub">Comparamos los principales planes de cada aseguradora — haz clic para ver/ocultar. Actualizado Mayo 2026.</p>
     </div>
+    <div id="planes-content" style="display:none">
     <div class="planes-tabs">
       <button class="planes-tab on" onclick="showPlan('assa',this)">ASSA</button>
       <button class="planes-tab" onclick="showPlan('sura',this)">SURA</button>
@@ -1658,6 +1685,58 @@ window.addEventListener('scroll', () => {
     a.style.background = a.getAttribute('href') === `#${current}` ? 'rgba(255,255,255,.15)' : '';
   });
 });
+</script>
+
+<script>
+// ─── Accordion helpers ─────────────────────────────────────────
+function togglePlanesSection(header){
+  const content=document.getElementById('planes-content');
+  const arrow=document.getElementById('planes-arrow');
+  if(!content)return;
+  const open=content.style.display!=='none';
+  content.style.display=open?'none':'block';
+  if(arrow)arrow.textContent=open?'▼':'▲';
+}
+
+// ─── Aseguradoras: show first 9, hide the rest ─────────────────
+(function initAsegGrid(){
+  const grid=document.getElementById('aseg-grid-main');
+  if(!grid)return;
+  const cards=[...grid.children];
+  if(cards.length<=9)return;
+  cards.forEach((c,i)=>{if(i>=9)c.style.display='none';});
+  window._asegExpanded=false;
+})();
+
+function toggleAsegGrid(){
+  const grid=document.getElementById('aseg-grid-main');
+  const btn=document.getElementById('aseg-toggle-text');
+  if(!grid)return;
+  const cards=[...grid.children];
+  window._asegExpanded=!window._asegExpanded;
+  cards.forEach((c,i)=>{if(i>=9)c.style.display=window._asegExpanded?'':'none';});
+  if(btn)btn.textContent=window._asegExpanded?'Mostrar menos ▲':'Ver todas las aseguradoras ▼';
+}
+
+// ─── Ramos: show first 6, hide the rest ────────────────────────
+(function initRamosGrid(){
+  const grid=document.querySelector('#ramos .ramos-grid');
+  if(!grid)return;
+  const cards=[...grid.children];
+  if(cards.length<=6)return;
+  cards.forEach((c,i)=>{if(i>=6)c.style.display='none';});
+  window._ramosExpanded=false;
+})();
+
+function toggleRamosGrid(){
+  const grid=document.querySelector('#ramos .ramos-grid');
+  const btn=document.getElementById('ramos-toggle-text');
+  if(!grid)return;
+  const cards=[...grid.children];
+  window._ramosExpanded=!window._ramosExpanded;
+  cards.forEach((c,i)=>{if(i>=6)c.style.display=window._ramosExpanded?'':'none';});
+  if(btn)btn.textContent=window._ramosExpanded?'Mostrar menos ▲':'Ver todos los ramos ▼';
+}
 </script>
 </body>
 </html>
