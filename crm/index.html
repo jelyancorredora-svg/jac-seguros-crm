@@ -15994,7 +15994,7 @@ document.addEventListener('click', function(e){
       sincronizacion, sin tener que cambiar de pantalla.
    ============================================================ */
 (function(){
-  var MARCA = 'JAC-BUILD-2026-10-06-FF';   /* cambia en cada publicacion */
+  var MARCA = 'JAC-BUILD-2026-10-07-FG';   /* cambia en cada publicacion */
   window.JAC_BUILD = MARCA;
 
   /* ==================================================================
@@ -25868,9 +25868,18 @@ img, video, canvas, svg { max-width: 100%; height: auto; }
   var _ultimo=0;
   function hayFormularioAbierto2(){
     try{
+      /* OJO: los modales son position:fixed, y en un elemento fijo
+         offsetParent SIEMPRE es null. Esta comprobacion, tal como estaba,
+         no detectaba NUNCA un formulario abierto: la unica proteccion que
+         quedaba era que el foco estuviera dentro de un campo, asi que con
+         solo mirar la pantalla sin escribir, el repintado periodico podia
+         tocar los desplegables del formulario. Se mira la clase 'on' y el
+         display de verdad. */
       var m=document.querySelectorAll('.mo');
       for(var i=0;i<m.length;i++){
-        if(m[i].offsetParent!==null && m[i].offsetHeight>80) return true;
+        var abierto = /\bon\b/.test(m[i].className||'');
+        if(!abierto){ try{ abierto = getComputedStyle(m[i]).display !== 'none'; }catch(e){} }
+        if(abierto && m[i].offsetHeight>80) return true;
       }
       var a=document.activeElement;
       if(a && /^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName||'')) return true;
@@ -26548,8 +26557,25 @@ img, video, canvas, svg { max-width: 100%; height: auto; }
       if(cab) h+='<option value="'+cab.v.replace(/"/g,'&quot;')+'">'+cab.t+'</option>';
       L.forEach(function(x){ h+='<option value="'+x.replace(/"/g,'&quot;')+'">'+x+'</option>'; });
       sel.innerHTML=h;
-      if(actual && L.indexOf(actual)>=0) sel.value=actual;
-      else if(cab) sel.value=cab.v;
+      /* Lo que estuviera elegido NO se pierde nunca. Antes, si el valor no
+         estaba EXACTO en la lista, se caia al '— Seleccione —' y la
+         seleccion quedaba en blanco sin que nadie la tocara: el ramo se
+         borraba solo. Ahora se busca con tolerancia de tildes y mayusculas
+         y, si aun asi no esta, se agrega como opcion propia. */
+      if(actual){
+        sel.value=actual;
+        if(sel.value!==actual){
+          var meta=llave(actual), puesto=false;
+          for(var q=0;q<sel.options.length;q++){
+            if(llave(sel.options[q].value)===meta){ sel.selectedIndex=q; puesto=true; break; }
+          }
+          if(!puesto){
+            var o2=document.createElement('option');
+            o2.value=actual; o2.textContent=actual+' (sin unificar)';
+            sel.appendChild(o2); sel.value=actual;
+          }
+        }
+      } else if(cab) sel.value=cab.v;
       n++;
     });
     return n;
@@ -26640,9 +26666,18 @@ img, video, canvas, svg { max-width: 100%; height: auto; }
 
   function hayFormularioAbierto(){
     try{
+      /* OJO: los modales son position:fixed, y en un elemento fijo
+         offsetParent SIEMPRE es null. Esta comprobacion, tal como estaba,
+         no detectaba NUNCA un formulario abierto: la unica proteccion que
+         quedaba era que el foco estuviera dentro de un campo, asi que con
+         solo mirar la pantalla sin escribir, el repintado periodico podia
+         tocar los desplegables del formulario. Se mira la clase 'on' y el
+         display de verdad. */
       var m=document.querySelectorAll('.mo');
       for(var i=0;i<m.length;i++){
-        if(m[i].offsetParent!==null && m[i].offsetHeight>80) return true;
+        var abierto = /\bon\b/.test(m[i].className||'');
+        if(!abierto){ try{ abierto = getComputedStyle(m[i]).display !== 'none'; }catch(e){} }
+        if(abierto && m[i].offsetHeight>80) return true;
       }
       var a=document.activeElement;
       if(a && /^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName||'')) return true;
@@ -29997,7 +30032,7 @@ img, video, canvas, svg { max-width: 100%; height: auto; }
 (function(){
   'use strict';
 
-  var VERSION='JAC-BUILD-2026-10-06-FF';
+  var VERSION='JAC-BUILD-2026-10-07-FG';
 
   window.jacVersion=function(){ return VERSION; };
 
