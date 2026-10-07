@@ -4557,7 +4557,7 @@ function OP(id){
  EID=id||null;_pf=[];const p=id?GP(id):{};
  const mpt=document.getElementById('mpt');if(mpt)mpt.textContent=id?'Editar Póliza':'Nueva Póliza';
  const csel=document.getElementById('p-cl');csel.innerHTML='<option value="">— Cliente —</option>';
- S.clientes.sort((a,z)=>a.nombre.localeCompare(z.nombre)).forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.nombre;if(p.clienteId===c.id)o.selected=true;csel.add(o);});
+ S.clientes.sort((a,z)=>String(a&&a.nombre||'').localeCompare(String(z&&z.nombre||''))).forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.nombre;if(p.clienteId===c.id)o.selected=true;csel.add(o);});
  const asel=document.getElementById('p-as');asel.innerHTML='';
  ['ASSA','IS','SURA','MAPFRE','PALIG','UNIVIVIR','FEDPA','Ancón','Acerta','WW Medical','VUMI-LA REGIONAL DE SEGUROS','Generali','Chubb','Aliados','La Regional','General',...new Set(S.aseguradoras.map(a=>a.nombre.split(',')[0].trim()))].filter((x,i,a)=>a.indexOf(x)===i).forEach(a=>{const o=document.createElement('option');o.value=a;o.textContent=a;if(p.aseg===a)o.selected=true;asel.add(o);});
  const rsel=document.getElementById('p-ra');rsel.innerHTML='';
@@ -4888,7 +4888,7 @@ function RSin(){
 function OS(id){
  EID=id||null;_pf=[];const s=id?S.siniestros.find(x=>x.id===id)||{}:{};
  const mst=document.getElementById('mst');if(mst)mst.textContent=id?'Editar Siniestro':'Nuevo Siniestro';
- const csel=document.getElementById('s-cl');csel.innerHTML='<option value="">— Cliente —</option>';S.clientes.sort((a,z)=>a.nombre.localeCompare(z.nombre)).forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.nombre;if(s.clienteId===c.id)o.selected=true;csel.add(o);});
+ const csel=document.getElementById('s-cl');csel.innerHTML='<option value="">— Cliente —</option>';S.clientes.sort((a,z)=>String(a&&a.nombre||'').localeCompare(String(z&&z.nombre||''))).forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.nombre;if(s.clienteId===c.id)o.selected=true;csel.add(o);});
  const asel=document.getElementById('s-as');asel.innerHTML='<option value="">—</option>';['ASSA','IS','SURA','MAPFRE','PALIG','UNIVIVIR','FEDPA','Ancón','WW Medical','Generali','Chubb','La Regional','VUMI-LA REGIONAL DE SEGUROS','General',...new Set(S.aseguradoras.map(a=>a.nombre.split(',')[0].trim()))].filter((x,i,arr)=>arr.indexOf(x)===i).forEach(a=>{const o=document.createElement('option');o.value=a;o.textContent=a;if(s.aseg===a)o.selected=true;asel.add(o);});
  [['s-po','poliza'],['s-sr','subramo'],['s-no','nombre'],['s-nc','numCia'],['s-fd','fechaSin'],['s-fa','fechaAviso'],['s-fn','fechaNotif'],['s-prov','proveedor'],['s-na','asegurado'],['s-da','docAseg'],['s-mr','montoReclamo'],['s-de','deducible'],['s-vi','valInd'],['s-cos','coaseguros'],['s-sp','sinPct'],['s-es','estado'],['s-ds','desc'],['s-seg','seguimiento']].forEach(([fid,key])=>SVal(fid,s[key]));
  const sfl=document.getElementById('s-file-list');if(sfl)sfl.innerHTML=renderFL(s.archivos||[],id||'','siniestro');
@@ -4928,7 +4928,7 @@ function RV(){
 function OVeh(id){
  EID=id||null;const veh=id?S.vehiculos.find(v=>v.id===id)||{}:{};
  const mvt=document.getElementById('mvt');if(mvt)mvt.textContent=id?'Editar Vehículo':'Nuevo Vehículo';
- const csel=document.getElementById('v-cl');csel.innerHTML='<option value="">— Cliente —</option>';S.clientes.sort((a,z)=>a.nombre.localeCompare(z.nombre)).forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.nombre;if(veh.clienteDoc===c.cedula||veh.clienteId===c.id)o.selected=true;csel.add(o);});
+ const csel=document.getElementById('v-cl');csel.innerHTML='<option value="">— Cliente —</option>';S.clientes.sort((a,z)=>String(a&&a.nombre||'').localeCompare(String(z&&z.nombre||''))).forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.nombre;if(veh.clienteDoc===c.cedula||veh.clienteId===c.id)o.selected=true;csel.add(o);});
  SVal('v-pl',veh.placa);SVal('v-so',veh.soat);SVal('v-te',veh.tecno);SVal('v-im',veh.imp);
  OM('mv');
 }
@@ -5243,8 +5243,8 @@ function OT(id,x,tipoRel,relId){OT_open(id||'',tipoRel||'',relId||'');}
 function updTRelSel(tipo,selId){
  const sel=document.getElementById('t-relid');if(!sel)return;
  sel.innerHTML='<option value="">— Seleccionar —</option>';
- if(tipo==='cliente')S.clientes.sort((a,z)=>a.nombre.localeCompare(z.nombre)).forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.nombre;if(c.id===selId)o.selected=true;sel.add(o);});
- else if(tipo==='prospecto')S.prospectos.sort((a,z)=>a.nombre.localeCompare(z.nombre)).forEach(p=>{const o=document.createElement('option');o.value=p.id;o.textContent=p.nombre;if(p.id===selId)o.selected=true;sel.add(o);});
+ if(tipo==='cliente')S.clientes.sort((a,z)=>String(a&&a.nombre||'').localeCompare(String(z&&z.nombre||''))).forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.nombre;if(c.id===selId)o.selected=true;sel.add(o);});
+ else if(tipo==='prospecto')S.prospectos.sort((a,z)=>String(a&&a.nombre||'').localeCompare(String(z&&z.nombre||''))).forEach(p=>{const o=document.createElement('option');o.value=p.id;o.textContent=p.nombre;if(p.id===selId)o.selected=true;sel.add(o);});
  else if(tipo==='poliza')S.polizas.forEach(p=>{const cl=GC(p.clienteId);const o=document.createElement('option');o.value=p.id;o.textContent=`${p.num} — ${cl.nombre||p.nombreCliente||''}`;if(p.id===selId)o.selected=true;sel.add(o);});
 }
 function ST2(){
@@ -6462,8 +6462,8 @@ function renderInfProd(){
 function renderInfRen(){
  const hoy=new Date().toISOString().split('T')[0];
  const en90=addDays(hoy,90);
- const pronto=S.polizas.filter(p=>p.fechaFin&&p.fechaFin>=hoy&&p.fechaFin<=en90&&p.estado!=='Cancelada').sort((a,b)=>a.fechaFin.localeCompare(b.fechaFin));
- const venc=S.polizas.filter(p=>p.fechaFin&&p.fechaFin<hoy&&p.estado!=='Cancelada').sort((a,b)=>b.fechaFin.localeCompare(a.fechaFin));
+ const pronto=S.polizas.filter(p=>p.fechaFin&&p.fechaFin>=hoy&&p.fechaFin<=en90&&p.estado!=='Cancelada').sort((a,b)=>String(a&&a.fechaFin||'').localeCompare(String(b&&b.fechaFin||'')));
+ const venc=S.polizas.filter(p=>p.fechaFin&&p.fechaFin<hoy&&p.estado!=='Cancelada').sort((a,b)=>String(b&&b.fechaFin||'').localeCompare(String(a&&a.fechaFin||'')));
  const cl=id=>S.clientes.find(c=>c.id===id)||{nombre:'—'};
  const rTbl=document.getElementById('inf-ren-tbl');
  if(rTbl)rTbl.innerHTML=pronto.map(p=>{const d=dFrom(p.fechaFin);return`<tr>
@@ -6499,7 +6499,7 @@ function renderInfCli(){
   let fecha=c.fechaCreacion||c.createdAt||'';
   if(!fecha){
    // fallback: find earliest policy for this client
-   const pol=S.polizas.filter(p=>p.clienteId===c.id&&p.fechaInicio).sort((a,b)=>a.fechaInicio.localeCompare(b.fechaInicio));
+   const pol=S.polizas.filter(p=>p.clienteId===c.id&&p.fechaInicio).sort((a,b)=>String(a&&a.fechaInicio||'').localeCompare(String(b&&b.fechaInicio||'')));
    if(pol.length)fecha=pol[0].fechaInicio;
   }
   if(fecha&&fecha.startsWith(yr)){
@@ -10939,7 +10939,7 @@ function calAbrirDiaCompleto(d){
  var conHora=[], sinHora=[];
  reuniones.forEach(function(r){ if(r.hora) conHora.push({hora:r.hora,tipo:'reun',item:r}); else sinHora.push({tipo:'reun',item:r}); });
  tareasDia.forEach(function(t){ if(t.hora) conHora.push({hora:t.hora,tipo:'tarea',item:t}); else sinHora.push({tipo:'tarea',item:t}); });
- conHora.sort(function(a,b){return a.hora.localeCompare(b.hora);});
+ conHora.sort(function(a,b){return String(a&&a.hora||'').localeCompare(String(b&&b.hora||''));});
  function cardReun(it){ return '<div style="background:#EFF6FF;border-left:3px solid #1D4ED8;border-radius:6px;padding:6px 10px;margin-bottom:4px;font-size:12px">🤝 '+esc(it.titulo||it.nombreCliente||'Reunión')+'</div>'; }
  function cardTarea(it){ var pr=it.prioridad||''; var col=pr==='Alta'?'#DC2626':pr==='Media'?'#D97706':'#16A34A'; return '<div style="background:#F8FAFC;border-left:3px solid '+col+';border-radius:6px;padding:6px 10px;margin-bottom:4px;font-size:12px">✅ '+esc(it.titulo||it.desc||'Tarea')+'</div>'; }
  var old=document.getElementById('cal-dia-completo-overlay'); if(old)old.remove();
@@ -12576,6 +12576,59 @@ document.addEventListener('click', function(e){
     } catch (e) {}
     return lista;
   }
+  /* ==================================================================
+     FICHAS DE CLIENTE SIN NOMBRE
+     ------------------------------------------------------------------
+     Una ficha de cliente con el nombre vacio tumbaba el formulario de
+     poliza entero: OP() ordena la lista de clientes con
+     a.nombre.localeCompare(...) y sobre un nombre indefinido eso lanza
+     "Cannot read properties of undefined (reading 'localeCompare')".
+     El formulario no llegaba a abrirse — "no puedo entrar a editar".
+
+     De donde salieron: al quitar los datos personales del archivo
+     publicado, los reportes de aseguradora dejaron de traer el nombre, y
+     los importadores siguieron dando de alta clientes con ese campo en
+     blanco. Las altas ya estan tapadas arriba; esto repara lo que quedo.
+
+     No se borra ninguna ficha: se le pone un nombre con lo que haya
+     (el titular de alguna de sus polizas, su cedula, o su correo) y, si
+     no hay absolutamente nada, queda como "(sin nombre)" con su id, para
+     que se vea en la lista y se pueda arreglar o borrar a mano.
+     ================================================================== */
+  function _repararClientesSinNombre() {
+    var st = (typeof S !== 'undefined') ? S : null;
+    if (!st || !Array.isArray(st.clientes)) return 0;
+    var arreglados = 0;
+    for (var i = 0; i < st.clientes.length; i++) {
+      var c = st.clientes[i];
+      if (!c) continue;
+      if (String(c.nombre == null ? '' : c.nombre).trim()) continue;
+      var nuevo = '';
+      try {
+        var pol = (st.polizas || []).filter(function (x) {
+          return String(x.clienteId) === String(c.id) &&
+                 String(x.nombreCliente || x.tomador || x.nombreAsegurado || '').trim();
+        })[0];
+        if (pol) nuevo = String(pol.nombreCliente || pol.tomador || pol.nombreAsegurado).trim();
+      } catch (e) {}
+      if (!nuevo && String(c.cedula || '').trim()) nuevo = 'Cédula ' + String(c.cedula).trim();
+      if (!nuevo && String(c.email || '').trim()) nuevo = String(c.email).trim();
+      if (!nuevo) nuevo = '(sin nombre) ' + String(c.id || '').slice(-6);
+      c.nombre = nuevo;
+      c.obs = (c.obs ? c.obs + ' · ' : '') + 'Nombre repuesto automáticamente el '
+            + new Date().toISOString().slice(0, 10) + ': la ficha estaba sin nombre. Revisar.';
+      arreglados++;
+    }
+    if (arreglados) {
+      window.__jacClientesSinNombre = arreglados;
+      log('warn', '[JAC] ' + arreglados + ' ficha(s) de cliente estaban sin nombre y rompian el '
+        + 'formulario de poliza. Se les puso un nombre provisional; quedan marcadas en Observaciones.');
+      try { if (window.toast) toast(arreglados + ' cliente(s) sin nombre reparado(s)', 'ok'); } catch (e) {}
+    }
+    return arreglados;
+  }
+  window.jacRepararClientesSinNombre = _repararClientesSinNombre;
+
   window.jacColapsarIdsRepetidos = function () {
     var r = {};
     for (var c in TABLAS) {
@@ -12680,6 +12733,7 @@ document.addEventListener('click', function(e){
       }
 
       _avisoSesion = false;
+      try { _repararClientesSinNombre(); } catch (e) {}
       var _saltadasEnEstaVuelta = 0;
       for (var clave in TABLAS) {
         var tabla = TABLAS[clave];
@@ -13364,6 +13418,7 @@ document.addEventListener('click', function(e){
       claves.forEach(function (clave) {
         try { _colapsarIdsRepetidos(clave, TABLAS[clave]); } catch (e) {}
       });
+      try { _repararClientesSinNombre(); } catch (e) {}
 
       claves.forEach(function (clave, k) {
         var tabla = TABLAS[clave], filas = lotes[k].filas || [];
@@ -15939,7 +15994,7 @@ document.addEventListener('click', function(e){
       sincronizacion, sin tener que cambiar de pantalla.
    ============================================================ */
 (function(){
-  var MARCA = 'JAC-BUILD-2026-10-06-FE';   /* cambia en cada publicacion */
+  var MARCA = 'JAC-BUILD-2026-10-06-FF';   /* cambia en cada publicacion */
   window.JAC_BUILD = MARCA;
 
   /* ==================================================================
@@ -18771,6 +18826,17 @@ img, video, canvas, svg { max-width: 100%; height: auto; }
       var cl=null, L=clis(), i, fc=ced(f.ced);
       for(i=0;i<L.length;i++) if(fc && ced(L[i].cedula)===fc){ cl=L[i]; break; }
       if(!cl){
+        /* Los reportes de aseguradora ya NO llevan nombre ni cedula: se les
+           quitaron por privacidad, porque este archivo es publico. Sin nombre
+           no se puede dar de alta a nadie — antes se creaba el cliente con el
+           nombre en blanco, y una ficha sin nombre tumbaba el formulario de
+           poliza al ordenar la lista de clientes. Si no hay con quien casar,
+           se reporta y se sigue. */
+        if(!String(f.cli||'').trim()){
+          r.sinCliente=(r.sinCliente||0)+1;
+          (r.sinClienteNums=r.sinClienteNums||[]).push(f.num);
+          return;
+        }
         cl={ id:'CLI_CC_'+Math.random().toString(36).slice(2,10),
              nombre:f.cli, cedula:f.ced, email:f.mail, cel:f.cel, tel:f.tel,
              telefono:f.tel, fNac:f.nac, dob:f.nac,
@@ -22380,6 +22446,8 @@ img, video, canvas, svg { max-width: 100%; height: auto; }
       }
     }
     if(!hit){
+      /* sin nombre no se da de alta a nadie: ver la nota del reporte CAPITAL CARE */
+      if(!String(f.cli||'').trim()) return null;
       hit={ id:nid('cw'), nombre:titulo(f.cli), tipo:'Natural', estadoCli:'Activo',
             estadoComercial:'Cliente' };
       C().push(hit);
@@ -22402,6 +22470,9 @@ img, video, canvas, svg { max-width: 100%; height: auto; }
     var r={creadas:[], actualizadas:[], clientesNuevos:0, cambios:{}, pagosPend:0};
     PORTAL.forEach(function(f){
       var cli=cliente(f);
+      /* cliente() devuelve null cuando el reporte no trae nombre: sin con quien
+         casar no se toca nada, se cuenta y se sigue con la siguiente fila */
+      if(!cli){ r.sinCliente=(r.sinCliente||0)+1; (r.sinClienteNums=r.sinClienteNums||[]).push(f.num); return; }
       if(cli.__nuevo){ r.clientesNuevos++; delete cli.__nuevo; }
 
       var p=P().filter(function(x){ return k(x.num)===k(f.num); })[0];
@@ -23475,6 +23546,8 @@ img, video, canvas, svg { max-width: 100%; height: auto; }
       })[0];
     }
     if(!hit){
+      /* sin nombre no se da de alta a nadie: ver la nota del reporte CAPITAL CARE */
+      if(!String(f.cli||'').trim()) return null;
       hit={ id:nid('ca'), nombre:titulo(f.cli), cedula:f.ced, tipo:'Natural',
             estadoCli:'Activo', estadoComercial:'Cliente' };
       C().push(hit); hit.__nuevo=true;
@@ -23493,6 +23566,9 @@ img, video, canvas, svg { max-width: 100%; height: auto; }
          comisión los manda el informe de la agencia, no ASSA. */
       if(p && p.coCor){ r.saltadas.push(f.num); return; }
       var cli=cliente(f);
+      /* cliente() devuelve null cuando el reporte no trae nombre: sin con quien
+         casar no se toca nada, se cuenta y se sigue con la siguiente fila */
+      if(!cli){ r.sinCliente=(r.sinCliente||0)+1; (r.sinClienteNums=r.sinClienteNums||[]).push(f.num); return; }
       if(cli.__nuevo){ r.clientesNuevos++; delete cli.__nuevo; }
       if(!p){ p={id:nid('pa'), num:f.num}; P().push(p); r.creadas.push(f.num); }
       else r.actualizadas.push(f.num);
@@ -25736,7 +25812,7 @@ img, video, canvas, svg { max-width: 100%; height: auto; }
         if(b && LISTA.indexOf(b)<0) extra[b]=1;         /* alguna suya que no esté en la lista */
       });
       var full=LISTA.concat(Object.keys(extra)).sort(function(a,b){
-        return a.localeCompare(b,'es'); });
+        return String(a||'').localeCompare(String(b||''),'es'); });
       S.aseguradoras=full.map(function(x){ return obj?{nombre:x}:x; });
     }
     return {cambios:n, detalle:det};
@@ -29921,7 +29997,7 @@ img, video, canvas, svg { max-width: 100%; height: auto; }
 (function(){
   'use strict';
 
-  var VERSION='JAC-BUILD-2026-10-06-FE';
+  var VERSION='JAC-BUILD-2026-10-06-FF';
 
   window.jacVersion=function(){ return VERSION; };
 
