@@ -1,0 +1,11 @@
+node_modules
+dist
+.env
+.env.*
+!.env.example
+*.keystore
+*.jks
+android/app/release
+android/keystore.properties
+ios/App/Pods
+*.tsbuildinfo

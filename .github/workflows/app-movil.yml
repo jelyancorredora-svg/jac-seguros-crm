@@ -1,0 +1,80 @@
+name: App móvil (Android)
+
+on:
+  push:
+    paths: ['app-movil/**', '.github/workflows/app-movil.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app-movil
+    env:
+      KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app-movil/package-lock.json
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Pruebas y tipos
+        run: npm run typecheck && npm test
+
+      - name: Compilar web y sincronizar Android
+        run: |
+          cp .env.example .env
+          npm run build
+          npx cap sync android
+
+      - name: Preparar firma (solo si hay secretos configurados)
+        if: ${{ env.KEYSTORE_B64 != '' }}
+        env:
+          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          echo "$KEYSTORE_B64" | base64 -d > android/app/release.keystore
+          {
+            echo "storeFile=release.keystore"
+            echo "storePassword=$STORE_PASSWORD"
+            echo "keyAlias=$KEY_ALIAS"
+            echo "keyPassword=$KEY_PASSWORD"
+          } > android/keystore.properties
+
+      - name: Compilar APK / AAB
+        working-directory: app-movil/android
+        run: |
+          chmod +x gradlew
+          if [ -f keystore.properties ]; then
+            ./gradlew --no-daemon bundleRelease assembleRelease
+          else
+            ./gradlew --no-daemon assembleDebug
+          fi
+
+      - name: Borrar llave de firma
+        if: always()
+        run: rm -f android/app/release.keystore android/keystore.properties
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: jac-seguros-android
+          path: |
+            app-movil/android/app/build/outputs/apk/**/*.apk
+            app-movil/android/app/build/outputs/bundle/**/*.aab
+          retention-days: 14
