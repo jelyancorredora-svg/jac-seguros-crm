@@ -15994,7 +15994,7 @@ document.addEventListener('click', function(e){
       sincronizacion, sin tener que cambiar de pantalla.
    ============================================================ */
 (function(){
-  var MARCA = 'JAC-BUILD-2026-10-21-FH';   /* cambia en cada publicacion */
+  var MARCA = 'JAC-BUILD-2026-10-21-FI';   /* cambia en cada publicacion */
   window.JAC_BUILD = MARCA;
 
   /* ==================================================================
@@ -18592,6 +18592,11 @@ img, video, canvas, svg { max-width: 100%; height: auto; }
      Los nombres de campo son los que lee el formulario de póliza.
      ============================================================ */
   function _frecOk(v){ try{ return (window.jacCanonFrecuencia && window.jacCanonFrecuencia(v)) || v; }catch(e){ return v; } }
+  /* cuantas letras implica una periodicidad. 'Fraccionado' no dice cada
+     cuanto, asi que devuelve 0 y no opina. */
+  var _NCUOTAS={ 'Mensual':12, 'Bimensual':6, 'Trimestral':4, 'Cuatrimestral':3,
+                 'Semestral':2, 'Anual':1, 'Contado':1, 'Único':1 };
+  function _cuotasDe(et){ return _NCUOTAS[et] || 0; }
   function volcar(p, f, cambios){
     function set(k,v){
       if(v===null||v===undefined||v==='') return;
@@ -18657,10 +18662,34 @@ img, video, canvas, svg { max-width: 100%; height: auto; }
       set('cuotaTrimestral', +(f.total/4).toFixed(2));
       set('cuotaMensual',    +(f.total/12).toFixed(2));
     }
-    if(f.letras>0){
-      set('numPagos', f.letras);
-      set('cuotas', f.letras);
-      if(f.total>0) set('letraPrima', +(f.total/f.letras).toFixed(2));
+    /* ================================================================
+       EL PLAN DE PAGOS DEL REPORTE TAMPOCO PISA EL DEL CRM
+       ----------------------------------------------------------------
+       Esto era lo que quedaba de la rotacion: 114 filas de polizas
+       reescritas en CADA carga — 57 polizas, dos veces cada una. Medido
+       con el rastro de llamadas de cada subida, sobre su propia cartera:
+
+         jacAplicarFrecuencias -> jacGuardarYa    subia 12 letras de 15.25
+         este importador       -> jacCapitalCare  subia  1 letra  de 183
+
+       La misma pelea que la del ramo, en otro campo. Y el reporte se
+       contradice solo: la misma linea dice periodo MENSUAL y a la vez
+       una sola letra. Son las polizas que ella veia como pago anual
+       cuando se cobran cada mes (37 en la cartera de hoy). El modulo de
+       frecuencias existe justo para arreglar eso, asi que manda el.
+
+       1. si el reporte trae periodicidad, el numero de letras se saca de
+          ella (MENSUAL = 12) y no del campo que la contradice;
+       2. el plan solo se escribe si la poliza no tiene ninguno. Misma
+          regla que el ramo: un reporte no sobrescribe lo que ya esta.
+       ================================================================ */
+    var _nLetras = f.letras;
+    var _ncFrec  = _cuotasDe(_frecOk(f.forma));
+    if(_ncFrec>0) _nLetras = _ncFrec;          /* la periodicidad manda */
+    if(_nLetras>0 && !(parseFloat(p.numPagos)>0)){
+      set('numPagos', _nLetras);
+      set('cuotas', _nLetras);
+      if(f.total>0) set('letraPrima', +(f.total/_nLetras).toFixed(2));
     }
 
     /* forma de cobro */
@@ -30087,7 +30116,7 @@ img, video, canvas, svg { max-width: 100%; height: auto; }
 (function(){
   'use strict';
 
-  var VERSION='JAC-BUILD-2026-10-21-FH';
+  var VERSION='JAC-BUILD-2026-10-21-FI';
 
   window.jacVersion=function(){ return VERSION; };
 
