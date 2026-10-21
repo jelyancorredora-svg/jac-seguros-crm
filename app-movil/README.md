@@ -28,7 +28,8 @@ no toca los adjuntos ni el historial que guarda el CRM web.
 1. **Inicio de sesión** con el mismo correo y contraseña del CRM. Tras 3 fallos se
    impone una espera creciente (30 s → 15 min). El mensaje de error no revela si el correo existe.
 2. **Verificación en dos pasos (TOTP)** con Google/Microsoft Authenticator. Si está
-   activada, no se entra sin el código. Si no se puede comprobar, no se entra.
+   activada, no se entra a la app sin el código. Si no se puede comprobar, no se entra.
+   (El CRM web aún no pide el código.)
 3. **Huella / Face ID / PIN del teléfono** al abrir la app y al volver después de
    30 s en segundo plano. Si el teléfono no tiene bloqueo de pantalla, la app no abre.
 4. **Bloqueo automático** a los 5 min sin uso y **sesión máxima de 12 h** (luego pide contraseña).
@@ -42,7 +43,12 @@ no toca los adjuntos ni el historial que guarda el CRM web.
 10. **Política de contenido (CSP)**: la app solo puede hablar con tu Supabase.
 11. Código ofuscado en Android, depuración desactivada, sin mapas de código fuente.
 
-### ⚠️ Lo más importante: proteger la base de datos
+### Protección de la base de datos
+
+**Revisado el 21 oct 2026:** RLS activo en todas las tablas, acceso solo para el
+usuario dueño, sin permisos anónimos y adjuntos privados. No hace falta `2-proteger.sql`
+mientras solo entre una persona.
+
 
 La clave de Supabase está en el código del sitio web (y en cualquier app); es
 pública por diseño. **Lo que protege los datos son las políticas RLS de la base.**

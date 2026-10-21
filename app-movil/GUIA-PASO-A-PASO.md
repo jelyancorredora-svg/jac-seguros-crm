@@ -5,36 +5,21 @@ No hace falta saber programar.
 
 ---
 
-## Paso 1 · Proteger la base de datos (10 minutos) — EL MÁS IMPORTANTE
+## Paso 1 · Ajustes de seguridad en Supabase (2 minutos)
 
-Hoy la clave de tu CRM está a la vista en el sitio web. Este paso hace que **solo tu
-equipo** pueda ver los datos de los clientes, aunque alguien tenga esa clave.
+✅ **Revisado el 21 oct 2026: la base de datos ya está protegida.** Todas las tablas
+tienen RLS y solo tu usuario puede leer o escribir. Los adjuntos son privados.
+**No hace falta correr `2-proteger.sql`.**
 
-1. Entra a **https://supabase.com/dashboard** con tu cuenta.
-2. Abre el proyecto de tu CRM (el que termina en `xiogddofwmwfacmnsojg`).
-3. En el menú de la izquierda, haz clic en **SQL Editor** (ícono `>_`).
-4. Haz clic en **+ New query**.
-5. **Primero, revisar:** abre el archivo
-   [`supabase/1-verificar.sql`](supabase/1-verificar.sql) en GitHub, copia todo el texto,
-   pégalo en Supabase y pulsa **Run**. Toma una captura del resultado (por si acaso).
-6. **Ahora, proteger:** abre [`supabase/2-proteger.sql`](supabase/2-proteger.sql), cópialo y pégalo en una consulta nueva.
-7. Busca la línea que dice `>>> CAMBIAR POR LOS CORREOS DEL EQUIPO <<<`. Debajo está tu correo.
-   Si alguien más de tu equipo entra al CRM, agrega una línea por persona, así:
-   ```sql
-     ('jelyancorredora@gmail.com', 'Jelyan'),
-     ('asistente@jacsegurospa.com', 'Asistente')
-   ```
-   (todas las líneas terminan en coma, menos la última).
-8. Pulsa **Run**. Debe decir **Success**.
-9. **Comprueba:** abre **crm.jacsegurospa.com**, entra y revisa que se vean tus clientes y pólizas.
-   - ✅ Si todo carga: listo.
-   - ❌ Si algo no carga: en Supabase, pega y corre [`supabase/3-revertir.sql`](supabase/3-revertir.sql)
-     y avísame qué pantalla falló.
-10. Todavía en Supabase, en el menú izquierdo ve a **Authentication**:
-    - **Sign In / Providers → Email**: desactiva **Allow new users to sign up** → Save.
-    - **Multi-Factor**: activa **TOTP (App Authenticator)** → Save.
-    - **Policies / Passwords** (si aparece): mínimo 12 caracteres y activa
-      **Leaked password protection**.
+Solo falta esto:
+
+1. Entra a **https://supabase.com/dashboard** y abre el proyecto del CRM.
+2. Menú izquierdo → **Authentication**:
+   - **Sign In / Providers → Email**: desactiva **Allow new users to sign up** → Save.
+   - **Multi-Factor**: confirma que **TOTP (App Authenticator)** esté activado → Save.
+
+Para volver a revisar en el futuro, corre [`supabase/1-verificar.sql`](supabase/1-verificar.sql)
+(solo lee, no cambia nada).
 
 ---
 
@@ -65,7 +50,7 @@ equipo** pueda ver los datos de los clientes, aunque alguien tenga esa clave.
    - **Activar verificación en dos pasos**: instala *Google Authenticator* o
      *Microsoft Authenticator* en el teléfono, escanea el código que muestra la app (o
      copia la clave) y escribe el número de 6 dígitos. A partir de ahí, cada vez que
-     inicies sesión te pedirá ese número. Esto protege también el CRM web.
+     inicies sesión en la app te pedirá ese número. (El CRM web todavía no lo pide.)
    - **Activar avisos diarios**: acepta las notificaciones. Cada día a las 8:00 te
      dice cuántas pólizas vencen, tareas del día y prospectos por llamar.
 3. Cierra la app y vuelve a abrirla: te pedirá huella o Face ID. ✅
@@ -98,20 +83,16 @@ es la que necesitarás para publicarla en Google Play.
 
 ## Paso 5 · Darle la app a tu equipo
 
-1. Agrega su correo en Supabase (Paso 1, punto 7) y corre de nuevo solo este bloque en el SQL Editor:
-   ```sql
-   insert into public.equipo_autorizado (email, nombre) values ('correo@ejemplo.com', 'Nombre');
-   ```
-2. Créale su usuario en Supabase → **Authentication → Users → Add user**
-   (con el registro público desactivado, solo tú puedes crear usuarios).
+Hoy las reglas de la base dejan entrar **solo a tu usuario**. Para sumar a alguien:
+
+1. Créale su usuario en Supabase → **Authentication → Users → Add user**.
+2. Pide que te preparen el cambio de reglas con su correo (es el script
+   [`supabase/2-proteger.sql`](supabase/2-proteger.sql) con los correos del equipo).
+   **No lo corras sin revisarlo antes**: cambia quién puede ver los datos.
 3. Envíale el archivo **JAC-Seguros.apk** y esta guía (Pasos 2 y 3).
 
-**Si alguien deja el equipo o pierde el teléfono:** en Supabase → Authentication → Users,
-bórralo o cámbiale la contraseña, y quita su correo de la lista:
-```sql
-delete from public.equipo_autorizado where email = 'correo@ejemplo.com';
-```
-Pierde el acceso de inmediato, también en el CRM web.
+**Si pierdes el teléfono:** en Supabase → Authentication → Users, cambia tu contraseña.
+La app pide huella o PIN para abrirse, así que nadie más puede usarla.
 
 ---
 
@@ -148,7 +129,7 @@ Solo si quieres instalarla desde la tienda en vez de con el archivo:
 | "Correo o contraseña incorrectos" | Usa los mismos datos del CRM web. Tras 3 fallos hay que esperar unos segundos. |
 | "Tu teléfono no tiene bloqueo de pantalla" | Ajustes del teléfono → Seguridad → configura PIN o huella. |
 | "No se pudo conectar con el CRM" | Revisa internet y toca el botón ↻ arriba a la derecha. |
-| "No tienes permiso" | Tu correo no está en la lista del Paso 1. Agrégalo. |
+| "No tienes permiso" | Ese usuario no está autorizado en la base (ver Paso 5). |
 | No veo un cambio que hice en la web | Toca ↻ en la app. |
 | No veo en la web un cambio que hice en la app | Recarga la página del CRM web. |
-| Perdí el teléfono | Supabase → Authentication → Users → cambia tu contraseña. La app pide huella, así que nadie puede abrirla. |
+| Perdí el teléfono | Supabase → Authentication → Users → cambia tu contraseña. La app pide huella o PIN, así que nadie puede abrirla. |
