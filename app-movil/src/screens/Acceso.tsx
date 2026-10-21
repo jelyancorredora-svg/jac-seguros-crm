@@ -1,14 +1,14 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Icono } from '../components/Icono';
+import { Logo } from '../components/Logo';
 import { esperaParaIntentar, iniciarSesion, verificarMfa } from '../lib/auth';
-import { desbloquear, esAppNativa } from '../lib/bloqueo';
+import { desbloquear } from '../lib/bloqueo';
 
-function Marca({ sub }: { sub: string }) {
+function Marca({ sub }: { sub?: string }) {
   return (
     <div className="marca">
-      <div className="marca-logo">JAC</div>
-      <h1>JAC SEGUROS</h1>
-      <p>{sub}</p>
+      <Logo />
+      {sub && <p>{sub}</p>}
     </div>
   );
 }
@@ -56,7 +56,7 @@ export function Login({ onEntrar }: { onEntrar: () => Promise<void> }) {
   return (
     <main className="acceso">
       <form className="acceso-caja" onSubmit={enviar} autoComplete="on">
-        <Marca sub="Acceso para el equipo" />
+        <Marca />
         {error && <div className="error" role="alert">{error}</div>}
         <label className="campo">
           <span>Correo</span>
@@ -71,12 +71,6 @@ export function Login({ onEntrar }: { onEntrar: () => Promise<void> }) {
         <button className="boton" type="submit" disabled={ocupado || espera > 0}>
           {ocupado ? 'Entrando…' : espera > 0 ? `Espera ${espera} s` : 'Entrar'}
         </button>
-        {!esAppNativa && (
-          <p className="pie-legal">
-            Por seguridad la sesión se cierra al salir de la app. Para entrar rápido, guarda la
-            contraseña cuando Safari te lo ofrezca: luego se rellena con Face ID.
-          </p>
-        )}
         <p className="pie-legal">{LEGAL}</p>
       </form>
     </main>

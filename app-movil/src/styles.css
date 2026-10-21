@@ -43,7 +43,7 @@
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 html, body, #root { height: 100%; }
 body {
-  font: 16px/1.4 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font: 16px/1.4 Outfit, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   background: var(--fondo);
   color: var(--texto);
   overscroll-behavior: none;
@@ -69,15 +69,15 @@ a { color: inherit; text-decoration: none; }
   border-radius: 18px;
   padding: 28px 22px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  /* La tarjeta de acceso siempre en claro: el logo es oscuro sobre blanco. */
+  color-scheme: light;
+  --tarjeta: #ffffff; --texto: #18264b; --borde: #d4def0; --suave: #5a6a8a; --fondo: #eef2f8;
+  --peligro: #b91c1c; --peligro-f: #fee2e2; --info: #1d4ed8; --info-f: #dbeafe;
+  color: var(--texto);
 }
 .marca { text-align: center; margin-bottom: 22px; }
-.marca-logo {
-  width: 64px; height: 64px; border-radius: 16px; margin: 0 auto 10px;
-  display: grid; place-items: center; background: var(--azul); color: #fff;
-  font-weight: 900; font-size: 22px; letter-spacing: 1px;
-}
-.marca h1 { font-size: 20px; font-weight: 800; letter-spacing: 0.5px; }
-.marca p { font-size: 13px; color: var(--suave); margin-top: 2px; }
+.marca svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+.marca p { font-size: 13px; color: var(--suave); margin-top: 8px; }
 .pie-legal { margin-top: 18px; font-size: 11px; color: var(--suave); text-align: center; }
 
 /* ---------- formularios ---------- */
