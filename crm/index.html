@@ -15994,7 +15994,7 @@ document.addEventListener('click', function(e){
       sincronizacion, sin tener que cambiar de pantalla.
    ============================================================ */
 (function(){
-  var MARCA = 'JAC-BUILD-2026-10-07-FG';   /* cambia en cada publicacion */
+  var MARCA = 'JAC-BUILD-2026-10-21-FH';   /* cambia en cada publicacion */
   window.JAC_BUILD = MARCA;
 
   /* ==================================================================
@@ -18591,17 +18591,46 @@ img, video, canvas, svg { max-width: 100%; height: auto; }
      Volcar una fila del Excel en la póliza
      Los nombres de campo son los que lee el formulario de póliza.
      ============================================================ */
+  function _frecOk(v){ try{ return (window.jacCanonFrecuencia && window.jacCanonFrecuencia(v)) || v; }catch(e){ return v; } }
   function volcar(p, f, cambios){
     function set(k,v){
       if(v===null||v===undefined||v==='') return;
       if(String(p[k]==null?'':p[k])!==String(v)){ cambios.push(k); p[k]=v; }
     }
+    /* ================================================================
+       EL RAMO Y EL SUBRAMO DEL REPORTE NO PISAN LOS DEL CRM
+       ----------------------------------------------------------------
+       Aqui estaba el fallo de "agrego el ramo y el subramo, guardo, y al
+       refrescar desaparecen". Medido sobre su propia cartera: en CADA
+       carga este importador reescribia 75 polizas poniendo el ramo tal
+       como viene en el reporte — INCENDIO, AUTOMOVIL, FIANZA — y la
+       aseguradora en su forma corta (Internacional, ACERTA, La Regional).
+       Treinta segundos despues, jacUnificarNombres() los devolvia al
+       vocabulario oficial (INCENDIO Y LINEAS ALIADAS, AUTOS/VEHICULOS,
+       Cia Internacional De Seguros S.A.). Los dos subian a la nube, asi
+       que cada apertura del CRM escribia 213 filas para dejarlo todo
+       como estaba, y por el camino se llevaba por delante el ramo y el
+       subramo que ella acababa de elegir a mano.
+
+       Dos cambios:
+       1. lo que venga del reporte pasa por el vocabulario oficial, para
+          que los dos correctores digan lo mismo y deje de haber tira y
+          afloja;
+       2. el ramo y el subramo del reporte SOLO rellenan si la poliza no
+          tiene nada. Es la misma regla que ella fijo en agosto: un
+          reporte nunca sobrescribe un dato que ya esta.
+       ================================================================ */
+    function canonR(v){ try{ return (window.jacCanonRamo && window.jacCanonRamo(v)) || v; }catch(e){ return v; } }
+    function canonA(v){ try{ return (window.jacCanonAseg && window.jacCanonAseg(v)) || v; }catch(e){ return v; } }
+    function rellenar(k, v){ if(v===null||v===undefined||v==='') return;
+      if(String(p[k]==null?'':p[k]).trim()) return;   /* ya tiene dato: no se toca */
+      set(k, v); }
     /* identificación */
     set('num', f.num);
     if(f.ant) set('numAnterior', f.ant);
-    set('aseg', f.aseg); set('aseguradora', f.aseg);
-    if(f.ramo) set('ramo', f.ramo);
-    if(f.sub)  set('subramo', f.sub);
+    set('aseg', canonA(f.aseg)); set('aseguradora', canonA(f.aseg));
+    if(f.ramo) rellenar('ramo', canonR(f.ramo));
+    if(f.sub)  rellenar('subramo', f.sub);
     if(f.tipo) set('nueva', /renovac/i.test(f.tipo) ? 'Renovada' : 'Nueva');
     if(f.ren>0) set('numRenovacion', f.ren);
 
@@ -18635,7 +18664,11 @@ img, video, canvas, svg { max-width: 100%; height: auto; }
     }
 
     /* forma de cobro */
-    if(f.forma) set('periodo', f.forma);        /* Periodicidad: MENSUAL / ANUAL */
+    /* El reporte escribe la periodicidad en mayusculas (MENSUAL, ANUAL) y
+       jacAplicarFrecuencias la deja en "Mensual". Los dos se pisaban en cada
+       carga: 114 filas reescritas por nada, en su base, cada vez que abria el
+       CRM. Se escribe ya con la misma grafia. */
+    if(f.forma) set('periodo', _frecOk(f.forma));
     if(f.forma) set('formaPago', f.forma);
     if(f.medio){ set('medio', f.medio); set('medioPago', f.medio); }
     if(f.tpp)   set('tipoPago', f.tpp);         /* PAGO PLANIFICADO */
@@ -22162,9 +22195,14 @@ img, video, canvas, svg { max-width: 100%; height: auto; }
         if(v===null||v===undefined||v==='') return;
         if(String(p[k]==null?'':p[k])!==String(v)){ cambios.push(k); p[k]=v; }
       }
+      function _frecOk(v){ try{ return (window.jacCanonFrecuencia && window.jacCanonFrecuencia(v)) || v; }catch(e){ return v; } }
+      /* mismo criterio que en el importador de Capital Care: el nombre va
+         en el vocabulario oficial, y el ramo del reporte solo rellena. */
+      function canonR2(v){ try{ return (window.jacCanonRamo && window.jacCanonRamo(v)) || v; }catch(e){ return v; } }
+      function canonA2(v){ try{ return (window.jacCanonAseg && window.jacCanonAseg(v)) || v; }catch(e){ return v; } }
       set('num', f.num);
-      set('aseg', aseg); set('aseguradora', aseg);
-      if(f.ramo) set('ramo', f.ramo);
+      set('aseg', canonA2(aseg)); set('aseguradora', canonA2(aseg));
+      if(f.ramo && !String(p.ramo==null?'':p.ramo).trim()) set('ramo', canonR2(f.ramo));
       set('fechaInicio', f.ini);
       set('fechaFin', f.fin);
       if(f.prima>0) set('prima', f.prima);
@@ -22172,7 +22210,7 @@ img, video, canvas, svg { max-width: 100%; height: auto; }
       if(f.pagado>0) set('pagado', f.pagado);
       if(f.pagado>0||f.saldo>0) set('saldo', f.saldo);
       if(f.suma>0){ set('sumaAsegurada', f.suma); set('valorRiesgo', f.suma); }
-      if(f.forma){ set('periodo', f.forma); set('formaPago', f.forma); }
+      if(f.forma){ var _ff=_frecOk(f.forma); set('periodo', _ff); set('formaPago', _ff); }
       if(f.medio){ set('medio', f.medio); set('medioPago', f.medio); }
       if(f.cli){ set('nombreCliente', f.cli); set('nombreAsegurado', f.cli); }
       if(f.ced){ set('cedCliente', f.ced); set('docAsegurado', f.ced); }
@@ -22489,7 +22527,13 @@ img, video, canvas, svg { max-width: 100%; height: auto; }
       p.nombreAsegurado=titulo(f.cli);
       p.tomador=titulo(f.cli);
       p.celCliente=f.t1||p.celCliente||'';
-      p.ramo=f.ramo; p.subramo=f.sub; p.cobertura=f.prod;
+      /* el ramo y el subramo del portal solo rellenan: no pisan lo del CRM */
+      try{
+        var _cr=(window.jacCanonRamo && window.jacCanonRamo(f.ramo)) || f.ramo;
+        if(f.ramo && !String(p.ramo==null?'':p.ramo).trim()) p.ramo=_cr;
+        if(f.sub  && !String(p.subramo==null?'':p.subramo).trim()) p.subramo=f.sub;
+      }catch(e){}
+      p.cobertura=f.prod;
       p.moneda='USD';
       p.fechaInicio=f.ini; p.fechaFin=f.fin;
       p.estado='Vigente'; p.estadoCartera='Vigente'; p.etapa='Emitida';
@@ -24176,6 +24220,17 @@ img, video, canvas, svg { max-width: 100%; height: auto; }
     return (c && c!==s) ? c : (c||null);
   }
   window.jacEsProtegida=protegida;
+  /* La periodicidad, escrita siempre igual. MENSUAL, mensual y Mensual son
+     lo mismo, y tenerlas de dos formas hacia que dos correctores se
+     turnaran para reescribir las mismas filas en cada carga. */
+  window.jacCanonFrecuencia=function(v){
+    var k=String(v==null?'':v).trim().toUpperCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    var T={ 'MENSUAL':'Mensual','BIMENSUAL':'Bimensual','TRIMESTRAL':'Trimestral',
+            'CUATRIMESTRAL':'Cuatrimestral','SEMESTRAL':'Semestral','ANUAL':'Anual',
+            'UNICO':'Único','UNICA':'Único','CONTADO':'Contado','FRACCIONADO':'Fraccionado' };
+    return T[k] || (v==null?'':String(v));
+  };
   window.jacCanonAseg=function(v){ return canon(v, ASEG); };
   window.jacCanonRamo=function(v){ return canon(v, RAMO); };
 
@@ -30032,7 +30087,7 @@ img, video, canvas, svg { max-width: 100%; height: auto; }
 (function(){
   'use strict';
 
-  var VERSION='JAC-BUILD-2026-10-07-FG';
+  var VERSION='JAC-BUILD-2026-10-21-FH';
 
   window.jacVersion=function(){ return VERSION; };
 
