@@ -1,5 +1,7 @@
 # JAC Seguros — App móvil (Android + iPhone)
 
+👉 **¿Primera vez? Lee la [Guía paso a paso](GUIA-PASO-A-PASO.md).**
+
 App para el equipo de JAC Seguros. Usa **la misma base de datos** que
 crm.jacsegurospa.com: lo que se cambia en el teléfono aparece en el CRM web y al revés.
 
@@ -9,10 +11,14 @@ crm.jacsegurospa.com: lo que se cambia en el teléfono aparece en el CRM web y a
 |---|---|---|
 | Inicio | Pólizas vigentes, las que vencen en 30 días, siniestros abiertos, tareas atrasadas | — |
 | Clientes | Buscador por nombre, cédula o celular. Ficha con pólizas, siniestros, vehículos y pagos. Botones para llamar, WhatsApp y correo | Celular, teléfono, correo y dirección |
-| Pólizas | Filtros: vencen en 30 días, vigentes, vencidas, todas. Detalle con pagos | — |
-| Siniestros | Abiertos / todos, con detalle y seguimiento | Estado y notas de seguimiento (se agregan, nunca se borran) |
+| Pólizas | Filtros: vencen en 30 días, vigentes, vencidas, todas. Detalle con pagos | Registrar pagos |
 | Tareas | Pendientes y cerradas | Crear tareas, marcarlas hechas, en proceso o en seguimiento |
-| Ajustes | Estado de seguridad | Activar verificación en dos pasos, cambiar contraseña, cerrar sesión |
+| Más → Siniestros | Abiertos / todos, con detalle y seguimiento | Estado y notas de seguimiento (se agregan, nunca se borran) |
+| Más → Prospectos | En curso / cerrados, los que toca llamar hoy | Crear prospectos, cambiar etapa, programar seguimiento |
+| Más → Ajustes | Estado de seguridad | Avisos diarios, verificación en dos pasos, contraseña, cerrar sesión |
+
+**Avisos diarios a las 8:00**: pólizas que vencen, tareas del día y prospectos por
+contactar. Solo cantidades, nunca nombres (se ven con el teléfono bloqueado).
 
 La app **no borra** nada. Al editar solo envía los campos que cambiaste, así que
 no toca los adjuntos ni el historial que guarda el CRM web.
@@ -68,23 +74,13 @@ almacén cifrado solo funcionan en el teléfono.
 
 ### Compilación automática (Android)
 
-Cada vez que se sube un cambio a `app-movil/`, GitHub Actions genera el APK
-(pestaña **Actions → App móvil → Artifacts**). Para que salga firmado y listo para
-Google Play, agrega estos secretos en GitHub (Settings → Secrets → Actions):
+Cada vez que se sube un cambio a `app-movil/`, GitHub Actions genera
+`JAC-Seguros.apk` (para instalar) y `JAC-Seguros-GooglePlay.aab` (para la tienda),
+en **Actions → App móvil → Artifacts**. También comprueba que el proyecto de iPhone compila.
 
-| Secreto | Valor |
-|---|---|
-| `ANDROID_KEYSTORE_B64` | El archivo `.keystore` en base64 (`base64 -w0 mi.keystore`) |
-| `ANDROID_KEYSTORE_PASSWORD` | Contraseña del keystore |
-| `ANDROID_KEY_ALIAS` | Alias de la llave |
-| `ANDROID_KEY_PASSWORD` | Contraseña de la llave |
-
-Crear el keystore (una sola vez, guárdalo en un lugar seguro; si se pierde no se
-puede actualizar la app en Google Play):
-
-```bash
-keytool -genkey -v -keystore jac-seguros.keystore -alias jac -keyalg RSA -keysize 4096 -validity 10000
-```
+Firma: con los secretos `ANDROID_KEYSTORE_B64` y `ANDROID_KEYSTORE_PASSWORD`
+(alias `jac`) usa la llave oficial. Sin ellos firma con una llave temporal: la app
+funciona, pero para actualizar hay que desinstalar la versión anterior.
 
 ### Publicar
 

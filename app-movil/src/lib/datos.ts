@@ -1,4 +1,8 @@
-import { limpiarTexto, nuevoId } from './formato';
+import { hoyISO, limpiarTexto, nuevoId } from './formato';
+import type { Cliente, Pago, Poliza, Prospecto, Siniestro, Tarea, Vehiculo } from './tipos';
+
+export * from './tipos';
+export { polizaVigente, prospectoAbierto, siniestroAbierto, tareaAbierta } from './reglas';
 import { db } from './supabase';
 
 /*
@@ -12,41 +16,6 @@ import { db } from './supabase';
  *  - La app no borra registros.
  */
 
-export type Cliente = {
-  id: string; nombre: string | null; alias: string | null; cedula: string | null; tipo: string | null;
-  cel: string | null; tel: string | null; email: string | null; dir: string | null; ciudad: string | null;
-  provincia: string | null; f_nac: string | null; ocupacion: string | null; obs: string | null;
-  estado_cli: string | null;
-};
-
-export type Poliza = {
-  id: string; cliente_id: string | null; nombre_cliente: string | null; num: string | null;
-  aseg: string | null; ramo: string | null; subramo: string | null; prima: number | null; total: number | null;
-  comision: number | null; forma_pago: string | null; fecha_inicio: string | null; fecha_fin: string | null;
-  estado: string | null; riesgo: string | null; cobertura: string | null; obs: string | null;
-  cel_cliente: string | null; email_cliente: string | null; vendedor: string | null;
-};
-
-export type Siniestro = {
-  id: string; cliente_id: string | null; num_sin: string | null; num_cia: string | null; nombre: string | null;
-  fecha_sin: string | null; poliza: string | null; asegurado: string | null; monto_reclamo: number | null;
-  val_ind: number | null; deducible: number | null; cliente: string | null; cel: string | null;
-  aseg: string | null; estado: string | null; desc: string | null; seguimiento: string | null;
-};
-
-export type Pago = {
-  id: string; cliente_id: string | null; poliza_id: string | null; monto: number | null; fecha: string | null;
-  metodo: string | null; referencia: string | null; estado: string | null;
-};
-
-export type Tarea = {
-  id: string; titulo: string | null; desc: string | null; tipo_rel: string | null; rel_id: string | null;
-  cliente_id: string | null; tipo: string | null; prioridad: string | null; etapa_tarea: string | null;
-  fecha_limite: string | null; estado: string | null;
-};
-
-export type Vehiculo = { id: string; cliente_id: string | null; placa: string | null; cliente_nom: string | null };
-
 const COLUMNAS = {
   clientes: 'id,nombre,alias,cedula,tipo,cel,tel,email,dir,ciudad,provincia,f_nac,ocupacion,obs,estado_cli',
   polizas:
@@ -56,6 +25,8 @@ const COLUMNAS = {
   pagos: 'id,cliente_id,poliza_id,monto,fecha,metodo,referencia,estado',
   tareas: 'id,titulo,desc,tipo_rel,rel_id,cliente_id,tipo,prioridad,etapa_tarea,fecha_limite,estado',
   vehiculos: 'id,cliente_id,placa,cliente_nom',
+  prospectos:
+    'id,nombre,cedula,cel,tel,email,tipo,fuente,etapa_venta,prioridad,probabilidad,monto_estimado,aseg_preferida,f_contacto,f_seguimiento,estado_comercial',
 } as const;
 
 type Tabla = keyof typeof COLUMNAS;
@@ -81,20 +52,21 @@ function mensajeError(e: { message?: string; code?: string }): string {
 
 export type Cartera = {
   clientes: Cliente[]; polizas: Poliza[]; siniestros: Siniestro[]; pagos: Pago[]; tareas: Tarea[];
-  vehiculos: Vehiculo[]; cargadoEn: number;
+  vehiculos: Vehiculo[]; prospectos: Prospecto[]; cargadoEn: number;
 };
 
 export async function cargarCartera(): Promise<Cartera> {
-  const [clientes, polizas, siniestros, pagos, tareas, vehiculos] = await Promise.all([
+  const [clientes, polizas, siniestros, pagos, tareas, vehiculos, prospectos] = await Promise.all([
     leerTodo<Cliente>('clientes'),
     leerTodo<Poliza>('polizas'),
     leerTodo<Siniestro>('siniestros'),
     leerTodo<Pago>('pagos'),
     leerTodo<Tarea>('tareas'),
     leerTodo<Vehiculo>('vehiculos'),
+    leerTodo<Prospecto>('prospectos'),
   ]);
   clientes.sort((a, b) => (a.nombre ?? '').localeCompare(b.nombre ?? '', 'es'));
-  return { clientes, polizas, siniestros, pagos, tareas, vehiculos, cargadoEn: Date.now() };
+  return { clientes, polizas, siniestros, pagos, tareas, vehiculos, prospectos, cargadoEn: Date.now() };
 }
 
 /* ---------------- Estados (mismos textos que el CRM web) ---------------- */
@@ -104,14 +76,17 @@ export const PRIORIDADES = ['Alta', 'Media', 'Baja'] as const;
 export const TIPOS_TAREA = ['Llamada', 'Seguimiento', 'Renovación', 'Cobro', 'Reunión', 'Trámite', 'Otro'] as const;
 export const ESTADOS_SINIESTRO = ['En proceso', 'Pendiente docs', 'Pagado', 'Rechazado', 'Cerrado'] as const;
 
-const TAREA_CERRADA = /^(hecho|completad[ao]|realizado|finalizado|cancelada|done)$/i;
-export const tareaAbierta = (t: Tarea) =>
-  !TAREA_CERRADA.test(t.estado ?? '') && !TAREA_CERRADA.test(t.etapa_tarea ?? '');
+export const ETAPAS_VENTA = [
+  'Contacto inicial', 'Prospecto', 'Calificación', 'Cotización', 'Propuesta enviada', 'Negociación',
+  'Cierre', 'Cliente ganado', 'Perdido',
+] as const;
+export const FUENTES = [
+  'Referido', 'Facebook', 'Instagram', 'WhatsApp', 'Llamada entrante', 'Web', 'Evento', 'Venta Cruzada',
+  'Cold call', 'Otro',
+] as const;
+export const METODOS_PAGO = ['ACH', 'Transferencia', 'Yappy', 'Tarjeta', 'Efectivo', 'Cheque', 'Descuento directo'] as const;
+export const ESTADOS_PAGO = ['Pagado', 'Pendiente'] as const;
 
-export const polizaVigente = (p: Poliza) => /^(vigente|activa|renovada)$/i.test(p.estado ?? '');
-
-const SINIESTRO_CERRADO = /^(pagado|rechazado|cerrado)$/i;
-export const siniestroAbierto = (s: Siniestro) => !SINIESTRO_CERRADO.test(s.estado ?? '');
 
 /* ---------------- Escrituras ---------------- */
 
@@ -179,5 +154,98 @@ export async function actualizarContactoCliente(id: string, c: ContactoCliente):
     dir: limpiarTexto(c.dir ?? '', 300) || null,
   };
   await actualizar('clientes', id, cambios);
+  return cambios;
+}
+
+/* ---------------- Pagos ---------------- */
+
+export type NuevoPago = {
+  poliza: Poliza; monto: string; fecha: string; metodo: string; referencia: string; estado: string; notas: string;
+};
+
+export async function registrarPago(n: NuevoPago, nombreCliente: string): Promise<Pago> {
+  const monto = Number(n.monto.replace(',', '.'));
+  if (!isFinite(monto) || monto <= 0 || monto > 1_000_000) throw new ErrorDatos('Monto inválido.');
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(n.fecha)) throw new ErrorDatos('Fecha inválida.');
+  if (!(METODOS_PAGO as readonly string[]).includes(n.metodo)) throw new ErrorDatos('Método inválido.');
+  if (!(ESTADOS_PAGO as readonly string[]).includes(n.estado)) throw new ErrorDatos('Estado inválido.');
+  const pago: Pago = {
+    id: nuevoId('PAG'),
+    cliente_id: n.poliza.cliente_id,
+    poliza_id: n.poliza.id,
+    monto: Math.round(monto * 100) / 100,
+    fecha: n.fecha,
+    metodo: n.metodo,
+    referencia: limpiarTexto(n.referencia, 80) || null,
+    estado: n.estado,
+  };
+  // Lo que el CRM web guarda fuera de columnas va en 'extra', igual que alla.
+  const extra = {
+    notas: limpiarTexto(n.notas, 500), cuota: '', aseg: n.poliza.aseg ?? '', ramo: n.poliza.ramo ?? '',
+    cliente: nombreCliente, periodo: n.poliza.forma_pago ?? '', creadoDesde: 'app-movil',
+  };
+  const { error } = await db.from('pagos').insert({ ...pago, extra });
+  if (error) throw new ErrorDatos(mensajeError(error));
+  return pago;
+}
+
+/* ---------------- Prospectos ---------------- */
+
+export type NuevoProspecto = {
+  nombre: string; cel: string; email: string; fuente: string; prioridad: string; interes: string;
+  monto_estimado: string; f_seguimiento: string; notas: string;
+};
+
+export async function crearProspecto(n: NuevoProspecto): Promise<Prospecto> {
+  const nombre = limpiarTexto(n.nombre, 150);
+  if (!nombre) throw new ErrorDatos('El nombre es obligatorio.');
+  if (!(FUENTES as readonly string[]).includes(n.fuente)) throw new ErrorDatos('Fuente inválida.');
+  if (!(PRIORIDADES as readonly string[]).includes(n.prioridad)) throw new ErrorDatos('Prioridad inválida.');
+  if (n.f_seguimiento && !/^\d{4}-\d{2}-\d{2}$/.test(n.f_seguimiento)) throw new ErrorDatos('Fecha inválida.');
+  const monto = n.monto_estimado ? Number(n.monto_estimado.replace(',', '.')) : 0;
+  if (!isFinite(monto) || monto < 0) throw new ErrorDatos('Monto inválido.');
+  const hoy = hoyISO();
+  const prospecto: Prospecto = {
+    id: nuevoId('PR'),
+    nombre,
+    cedula: null,
+    cel: limpiarTexto(n.cel, 30) || null,
+    tel: null,
+    email: limpiarTexto(n.email, 120).toLowerCase() || null,
+    tipo: 'Personal',
+    fuente: n.fuente,
+    etapa_venta: 'Contacto inicial',
+    prioridad: n.prioridad,
+    probabilidad: 20,
+    monto_estimado: monto,
+    aseg_preferida: null,
+    f_contacto: hoy,
+    f_seguimiento: n.f_seguimiento || null,
+    estado_comercial: null,
+  };
+  // Mismas listas que crea el CRM web, para que la ficha abra completa alla.
+  const extra = {
+    notas: limpiarTexto(n.notas),
+    interes: n.interes ? [limpiarTexto(n.interes, 60)] : [],
+    historial: [{ fecha: hoy, accion: '✨ Prospecto creado (app móvil)', resultado: '', tipo: 'sistema' }],
+    tareas: [], archivos: [], etiquetas: [], asegPreferidas: [],
+    esVentaCruzada: false, clienteIdVinculado: '',
+  };
+  const { error } = await db.from('prospectos').insert({ ...prospecto, es_venta_cruzada: false, extra });
+  if (error) throw new ErrorDatos(mensajeError(error));
+  return prospecto;
+}
+
+export async function cambiarEtapaProspecto(id: string, etapa: string): Promise<Partial<Prospecto>> {
+  if (!(ETAPAS_VENTA as readonly string[]).includes(etapa)) throw new ErrorDatos('Etapa inválida.');
+  const cambios = { etapa_venta: etapa };
+  await actualizar('prospectos', id, cambios);
+  return cambios;
+}
+
+export async function fijarSeguimientoProspecto(id: string, f: string): Promise<Partial<Prospecto>> {
+  if (f && !/^\d{4}-\d{2}-\d{2}$/.test(f)) throw new ErrorDatos('Fecha inválida.');
+  const cambios = { f_seguimiento: f || null };
+  await actualizar('prospectos', id, cambios);
   return cambios;
 }

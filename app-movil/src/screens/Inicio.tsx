@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { EtiquetaEstado, EtiquetaVence, Fila, Vacio } from '../components/Piezas';
-import { polizaVigente, siniestroAbierto, tareaAbierta, type Cartera } from '../lib/datos';
+import { polizaVigente, prospectoAbierto, siniestroAbierto, tareaAbierta, type Cartera } from '../lib/datos';
 import { diasHasta, fecha } from '../lib/formato';
 import type { Abrir, Pestana } from '../App';
 
@@ -18,7 +18,12 @@ export function Inicio({ cartera, abrir, irA }: { cartera: Cartera; abrir: Abrir
       const d = diasHasta(t.fecha_limite);
       return d !== null && d <= 0;
     });
+    const contactar = cartera.prospectos.filter((p) => {
+      const d = diasHasta(p.f_seguimiento);
+      return prospectoAbierto(p) && d !== null && d <= 0;
+    });
     return {
+      contactar,
       vigentes: vigentes.length,
       porVencer,
       siniestros: cartera.siniestros.filter(siniestroAbierto).length,
@@ -36,7 +41,7 @@ export function Inicio({ cartera, abrir, irA }: { cartera: Cartera; abrir: Abrir
         <button className={`kpi${r.porVencer.length ? ' alerta' : ''}`} type="button" onClick={() => irA('polizas')}>
           <b>{r.porVencer.length}</b><span>Vencen en 30 días</span>
         </button>
-        <button className="kpi" type="button" onClick={() => irA('siniestros')}>
+        <button className="kpi" type="button" onClick={() => abrir({ tipo: 'siniestros' })}>
           <b>{r.siniestros}</b><span>Siniestros abiertos</span>
         </button>
         <button className={`kpi${r.vencidasHoy.length ? ' alerta' : ''}`} type="button" onClick={() => irA('tareas')}>
@@ -67,6 +72,18 @@ export function Inicio({ cartera, abrir, irA }: { cartera: Cartera; abrir: Abrir
         </div>
       ) : (
         <Vacio>Nada atrasado. ¡Buen trabajo!</Vacio>
+      )}
+
+      {r.contactar.length > 0 && (
+        <>
+          <h3 className="seccion">Prospectos por contactar</h3>
+          <div className="lista">
+            {r.contactar.slice(0, 15).map((p) => (
+              <Fila key={p.id} titulo={p.nombre || 'Prospecto'} sub={`${p.etapa_venta ?? ''} · ${fecha(p.f_seguimiento)}`}
+                onClick={() => abrir({ tipo: 'prospecto', id: p.id })} />
+            ))}
+          </div>
+        </>
       )}
     </>
   );

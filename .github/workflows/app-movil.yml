@@ -1,4 +1,4 @@
-name: App móvil (Android)
+name: App móvil
 
 on:
   push:
@@ -10,22 +10,24 @@ permissions:
 
 jobs:
   android:
+    name: Android (APK)
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: app-movil
     env:
       KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+      KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
           cache-dependency-path: app-movil/package-lock.json
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 21
@@ -42,39 +44,83 @@ jobs:
           npm run build
           npx cap sync android
 
-      - name: Preparar firma (solo si hay secretos configurados)
-        if: ${{ env.KEYSTORE_B64 != '' }}
-        env:
-          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+      # Con la llave oficial (secretos configurados) cada version se instala
+      # encima de la anterior. Sin ella se firma con una llave temporal: la
+      # app funciona igual, pero para actualizar hay que desinstalar antes.
+      - name: Preparar firma
         run: |
-          echo "$KEYSTORE_B64" | base64 -d > android/app/release.keystore
+          if [ -n "$KEYSTORE_B64" ] && [ -n "$KEYSTORE_PASSWORD" ]; then
+            echo "$KEYSTORE_B64" | base64 -d > android/app/release.keystore
+            echo "FIRMA=oficial" >> "$GITHUB_ENV"
+            PASS="$KEYSTORE_PASSWORD"
+          else
+            PASS="$(openssl rand -hex 24)"
+            echo "::add-mask::$PASS"
+            keytool -genkeypair -keystore android/app/release.keystore -alias jac -keyalg RSA -keysize 4096 \
+              -validity 10000 -storepass "$PASS" -keypass "$PASS" -dname "CN=JAC Seguros, O=JAC Seguros, C=PA" >/dev/null
+            echo "FIRMA=temporal" >> "$GITHUB_ENV"
+          fi
           {
             echo "storeFile=release.keystore"
-            echo "storePassword=$STORE_PASSWORD"
-            echo "keyAlias=$KEY_ALIAS"
-            echo "keyPassword=$KEY_PASSWORD"
+            echo "storePassword=$PASS"
+            echo "keyAlias=jac"
+            echo "keyPassword=$PASS"
           } > android/keystore.properties
 
-      - name: Compilar APK / AAB
+      - name: Compilar APK firmado
         working-directory: app-movil/android
         run: |
           chmod +x gradlew
-          if [ -f keystore.properties ]; then
-            ./gradlew --no-daemon bundleRelease assembleRelease
-          else
-            ./gradlew --no-daemon assembleDebug
-          fi
+          ./gradlew --no-daemon assembleRelease bundleRelease
+          mkdir -p ../salida
+          cp app/build/outputs/apk/release/app-release.apk ../salida/JAC-Seguros.apk
+          cp app/build/outputs/bundle/release/app-release.aab ../salida/JAC-Seguros-GooglePlay.aab
 
       - name: Borrar llave de firma
         if: always()
         run: rm -f android/app/release.keystore android/keystore.properties
 
-      - uses: actions/upload-artifact@v4
+      - name: Resumen
+        run: |
+          {
+            echo "### App lista ✅"
+            echo "Descarga **JAC-Seguros-android** abajo en *Artifacts*. Dentro está \`JAC-Seguros.apk\`."
+            if [ "$FIRMA" = "temporal" ]; then
+              echo ""
+              echo "⚠️ Firmada con llave temporal: para instalar una versión nueva hay que desinstalar la anterior."
+              echo "Configura los secretos ANDROID_KEYSTORE_B64 y ANDROID_KEYSTORE_PASSWORD para la firma oficial."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v5
         with:
-          name: jac-seguros-android
-          path: |
-            app-movil/android/app/build/outputs/apk/**/*.apk
-            app-movil/android/app/build/outputs/bundle/**/*.aab
-          retention-days: 14
+          name: JAC-Seguros-android
+          path: app-movil/salida/
+          retention-days: 30
+
+  ios:
+    name: iPhone (comprobación)
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: app-movil
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app-movil/package-lock.json
+      - run: npm ci
+      - name: Compilar web y sincronizar iOS
+        run: |
+          cp .env.example .env
+          npm run build
+          npx cap sync ios
+      # Sin cuenta de Apple Developer no se puede firmar: solo se comprueba
+      # que el proyecto compila, para que este listo el dia que se publique.
+      - name: Compilar (sin firma)
+        working-directory: app-movil/ios/App
+        run: |
+          xcodebuild -project App.xcodeproj -scheme App -configuration Release \
+            -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO build | tail -20

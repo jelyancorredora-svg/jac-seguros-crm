@@ -4,14 +4,40 @@ import { Hoja } from '../components/Piezas';
 import {
   cambiarClave, desactivarMfa, factoresMfa, iniciarAltaMfa, validarClave, verificarMfa,
 } from '../lib/auth';
+import { activarAvisos, avisosActivos, desactivarAvisos, programarAvisos } from '../lib/avisos';
 import { estadoBiometria, type EstadoBiometria } from '../lib/bloqueo';
+import type { Cartera } from '../lib/datos';
 import { SEGURIDAD } from '../lib/config';
 import { fecha, hoyISO } from '../lib/formato';
 import type { Avisar } from '../App';
 
-export function Ajustes({ correo, cargadoEn, onSalir, avisar }: {
-  correo: string; cargadoEn: number; onSalir: () => void; avisar: Avisar;
+export function Ajustes({ correo, cartera, onSalir, avisar }: {
+  correo: string; cartera: Cartera; onSalir: () => void; avisar: Avisar;
 }) {
+  const cargadoEn = cartera.cargadoEn;
+  const [avisos, setAvisos] = useState<boolean | null>(null);
+  useEffect(() => {
+    void avisosActivos().then(setAvisos);
+  }, []);
+
+  async function cambiarAvisos() {
+    if (avisos) {
+      await desactivarAvisos();
+      setAvisos(false);
+      return avisar('Avisos desactivados');
+    }
+    const r = await activarAvisos();
+    if (r === 'ok') {
+      setAvisos(true);
+      await programarAvisos(cartera);
+      avisar('Te avisaremos cada día a las 8:00');
+    } else if (r === 'denegado') {
+      avisar('Permite las notificaciones de JAC Seguros en los ajustes del teléfono');
+    } else {
+      avisar('Los avisos funcionan solo en el teléfono');
+    }
+  }
+
   const [bio, setBio] = useState<EstadoBiometria | null>(null);
   const [factores, setFactores] = useState<Factor[] | null>(null);
   const [alta, setAlta] = useState(false);
@@ -60,6 +86,18 @@ export function Ajustes({ correo, cargadoEn, onSalir, avisar }: {
         </button>
       ))}
       <button className="boton secundario" type="button" onClick={() => setClave(true)}>Cambiar contraseña</button>
+
+      <h3 className="seccion">Avisos</h3>
+      <div className="tarjeta">
+        <dl className="datos">
+          <dt>Resumen diario 8:00</dt>
+          <dd>{avisos ? <span className="etiqueta e-ok">Activado</span> : <span className="etiqueta e-neutra">Desactivado</span>}</dd>
+        </dl>
+        <p className="sincro">Pólizas por vencer, tareas del día y prospectos por contactar. Solo muestra cantidades, nunca nombres.</p>
+      </div>
+      <button className={`boton${avisos ? ' secundario' : ''}`} type="button" onClick={cambiarAvisos} disabled={avisos === null}>
+        {avisos ? 'Desactivar avisos' : 'Activar avisos diarios'}
+      </button>
 
       <h3 className="seccion">Sesión</h3>
       <button className="boton peligro" type="button" onClick={onSalir}>Cerrar sesión</button>

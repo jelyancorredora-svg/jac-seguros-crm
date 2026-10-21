@@ -1,8 +1,10 @@
-import { useMemo, useState } from 'react';
-import { Accion, Datos, EtiquetaEstado, EtiquetaPoliza, Fila, Vacio } from '../components/Piezas';
-import { polizaVigente, type Cartera, type Poliza } from '../lib/datos';
-import { diasHasta, dinero, enlaceCorreo, enlaceLlamada, enlaceWhatsApp, fecha, normalizar } from '../lib/formato';
-import type { Abrir } from '../App';
+import { useMemo, useState, type FormEvent } from 'react';
+import { Accion, Datos, EtiquetaEstado, EtiquetaPoliza, Fila, Hoja, Vacio } from '../components/Piezas';
+import {
+  ErrorDatos, ESTADOS_PAGO, METODOS_PAGO, polizaVigente, registrarPago, type Cartera, type Pago, type Poliza,
+} from '../lib/datos';
+import { diasHasta, dinero, enlaceCorreo, enlaceLlamada, enlaceWhatsApp, fecha, hoyISO, normalizar } from '../lib/formato';
+import type { Abrir, Avisar } from '../App';
 
 type Filtro = 'vencen' | 'vigentes' | 'vencidas' | 'todas';
 const FILTROS: Array<[Filtro, string]> = [
@@ -59,7 +61,10 @@ export function Polizas({ cartera, abrir }: { cartera: Cartera; abrir: Abrir }) 
   );
 }
 
-export function PolizaDetalle({ poliza, cartera, abrir }: { poliza: Poliza; cartera: Cartera; abrir: Abrir }) {
+export function PolizaDetalle({ poliza, cartera, abrir, alPagar, avisar }: {
+  poliza: Poliza; cartera: Cartera; abrir: Abrir; alPagar: (p: Pago) => void; avisar: Avisar;
+}) {
+  const [pagando, setPagando] = useState(false);
   const cliente = cartera.clientes.find((c) => c.id === poliza.cliente_id);
   const cel = cliente?.cel || poliza.cel_cliente;
   const email = cliente?.email || poliza.email_cliente;
@@ -104,6 +109,8 @@ export function PolizaDetalle({ poliza, cartera, abrir }: { poliza: Poliza; cart
         </>
       )}
       <h3 className="seccion">Pagos</h3>
+      <button className="boton" type="button" onClick={() => setPagando(true)}>Registrar pago</button>
+      <div className="espacio" />
       {pagos.length ? (
         <div className="lista">
           {pagos.map((p) => (
@@ -112,6 +119,55 @@ export function PolizaDetalle({ poliza, cartera, abrir }: { poliza: Poliza; cart
           ))}
         </div>
       ) : <Vacio>Sin pagos registrados.</Vacio>}
+      {pagando && (
+        <RegistrarPago poliza={poliza} nombreCliente={cliente?.nombre || poliza.nombre_cliente || ''}
+          onCerrar={() => setPagando(false)}
+          onListo={(p) => { alPagar(p); setPagando(false); avisar('Pago registrado'); }} />
+      )}
     </>
+  );
+}
+
+function RegistrarPago({ poliza, nombreCliente, onCerrar, onListo }: {
+  poliza: Poliza; nombreCliente: string; onCerrar: () => void; onListo: (p: Pago) => void;
+}) {
+  const [f, setF] = useState({
+    monto: '', fecha: hoyISO(), metodo: 'ACH', referencia: '', estado: 'Pagado', notas: '',
+  });
+  const [error, setError] = useState('');
+  const [ocupado, setOcupado] = useState(false);
+  const set = (k: keyof typeof f) => (e: { target: { value: string } }) => setF({ ...f, [k]: e.target.value });
+
+  async function guardar(e: FormEvent) {
+    e.preventDefault();
+    setOcupado(true);
+    try {
+      onListo(await registrarPago({ ...f, poliza }, nombreCliente));
+    } catch (err) {
+      setError(err instanceof ErrorDatos ? err.message : 'No se pudo guardar.');
+      setOcupado(false);
+    }
+  }
+
+  return (
+    <Hoja titulo={`Pago · ${poliza.num ?? ''}`} onCerrar={onCerrar}>
+      <form onSubmit={guardar}>
+        {error && <div className="error">{error}</div>}
+        <label className="campo"><span>Monto (USD)</span>
+          <input inputMode="decimal" value={f.monto} onChange={set('monto')} required maxLength={12} autoFocus /></label>
+        <label className="campo"><span>Fecha</span>
+          <input type="date" value={f.fecha} onChange={set('fecha')} required /></label>
+        <label className="campo"><span>Método</span>
+          <select value={f.metodo} onChange={set('metodo')}>{METODOS_PAGO.map((x) => <option key={x}>{x}</option>)}</select></label>
+        <label className="campo"><span>Referencia / comprobante</span>
+          <input value={f.referencia} onChange={set('referencia')} maxLength={80} /></label>
+        <label className="campo"><span>Estado</span>
+          <select value={f.estado} onChange={set('estado')}>{ESTADOS_PAGO.map((x) => <option key={x}>{x}</option>)}</select></label>
+        <label className="campo"><span>Notas</span>
+          <textarea value={f.notas} onChange={set('notas')} maxLength={500} /></label>
+        <button className="boton" type="submit" disabled={ocupado}>{ocupado ? 'Guardando…' : 'Registrar'}</button>
+        <button className="boton secundario" type="button" onClick={onCerrar}>Cancelar</button>
+      </form>
+    </Hoja>
   );
 }
