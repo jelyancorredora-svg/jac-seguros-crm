@@ -23,10 +23,76 @@ Para volver a revisar en el futuro, corre [`supabase/1-verificar.sql`](supabase/
 
 ---
 
-## Paso 2 · Instalar en tu iPhone con tu Mac (gratis, 30–60 minutos la primera vez)
+## Paso 2 · Instalar en tu iPhone desde Safari (gratis, 2 minutos)
 
-Esta forma es gratis, pero **la app dura 7 días** en el iPhone. Luego se repiten
-los puntos 9 y 10 (2 minutos). Para que dure un año y llegue sola, ver el Paso 4.
+No necesitas cable, Xcode ni pagar nada.
+
+1. En el iPhone abre **Safari** (tiene que ser Safari, no Chrome).
+2. Entra a **crm.jacsegurospa.com/app**
+3. Toca el botón **Compartir** (el cuadrado con la flecha hacia arriba, abajo en el centro).
+4. Baja y toca **Agregar a inicio** → **Agregar**.
+5. Aparece el ícono azul **JAC** en tu pantalla de inicio. Ábrela desde ahí. ✅
+
+**Para entrar rápido:** la primera vez que pongas tu correo y contraseña, Safari te
+ofrecerá **guardar la contraseña**. Acepta. Desde entonces, al tocar el campo de
+contraseña, Face ID la rellena sola.
+
+**Por seguridad:** la app cierra la sesión cuando la cierras, cuando pasas más de 30 segundos
+en otra app o tras 5 minutos sin usarla. Así, si alguien toma tu iPhone desbloqueado,
+no encuentra tus clientes abiertos.
+
+---
+
+## Paso 3 · Primer uso (3 minutos)
+
+1. Abre la app y entra con **el mismo correo y contraseña del CRM**.
+2. Ve a **Más → Ajustes y seguridad**:
+   - **Activar verificación en dos pasos**: instala *Google Authenticator* o
+     *Microsoft Authenticator* en el teléfono, escanea el código que muestra la app (o
+     copia la clave) y escribe el número de 6 dígitos. A partir de ahí, cada vez que
+     inicies sesión en la app te pedirá ese número. (El CRM web todavía no lo pide.)
+3. Cierra la app y vuelve a abrirla: te pide entrar otra vez (Face ID rellena la contraseña). ✅
+
+---
+
+## Paso 4 · Darle la app a tu equipo
+
+Hoy las reglas de la base dejan entrar **solo a tu usuario**. Para sumar a alguien:
+
+1. Créale su usuario en Supabase → **Authentication → Users → Add user**.
+2. Pide que te preparen el cambio de reglas con su correo (es el script
+   [`supabase/2-proteger.sql`](supabase/2-proteger.sql) con los correos del equipo).
+   **No lo corras sin revisarlo antes**: cambia quién puede ver los datos.
+3. Mándale el enlace **crm.jacsegurospa.com/app** y el Paso 2 de esta guía.
+
+**Si pierdes el teléfono:** en Supabase → Authentication → Users, cambia tu contraseña.
+La app pide Face ID o código para abrirse, así que nadie más puede usarla.
+
+---
+
+## Anexo · App nativa para iPhone (USD 99/año, opcional, para el futuro)
+
+La versión de Safari ya cubre el trabajo diario. La nativa agrega avisos a las 8:00,
+bloqueo de capturas y Face ID propio. Con una cuenta de Apple Developer no necesitas cable ni Xcode: instalas la app
+desde **TestFlight** (app oficial de Apple) y las actualizaciones llegan solas.
+También sirve para darle la app a tu equipo sin publicarla en la App Store.
+
+1. Entra a **https://developer.apple.com/programs/enroll** con tu Apple ID.
+2. Inscríbete:
+   - **Como persona (Individual):** lo más rápido (1–2 días). Pagas con tarjeta.
+   - **Como empresa (Organization):** sale el nombre "JAC Seguros" en vez del tuyo, pero
+     pide número **D-U-N-S** (gratis, tarda 1–2 semanas).
+3. Cuando Apple te confirme por correo, **avísame**. Te diré exactamente qué crear en
+   App Store Connect (una "llave de API", 5 minutos) y dejo GitHub subiendo la app a
+   TestFlight automáticamente.
+
+
+---
+
+## Anexo · Instalar la app nativa con Xcode y cable (gratis, dura 7 días)
+
+Esta forma es gratis, pero **la app dura 7 días** en el iPhone. Luego hay que repetir el
+punto 10.
 
 **Necesitas:** tu Mac, tu iPhone y el cable para conectarlos.
 
@@ -73,52 +139,6 @@ los puntos 9 y 10 (2 minutos). Para que dure un año y llegue sola, ver el Paso 
 
 **Cuando pasen los 7 días** y la app no abra: conecta el iPhone, abre Xcode
 (Archivo → Abrir recientes → App) y pulsa **▶** otra vez.
-
----
-
-## Paso 3 · Primer uso (3 minutos)
-
-1. Abre la app y entra con **el mismo correo y contraseña del CRM**.
-2. Ve a **Más → Ajustes y seguridad**:
-   - **Activar verificación en dos pasos**: instala *Google Authenticator* o
-     *Microsoft Authenticator* en el teléfono, escanea el código que muestra la app (o
-     copia la clave) y escribe el número de 6 dígitos. A partir de ahí, cada vez que
-     inicies sesión en la app te pedirá ese número. (El CRM web todavía no lo pide.)
-   - **Activar avisos diarios**: acepta las notificaciones. Cada día a las 8:00 te
-     dice cuántas pólizas vencen, tareas del día y prospectos por llamar.
-3. Cierra la app y vuelve a abrirla: te pedirá Face ID. ✅
-
----
-
-## Paso 4 · Que la app dure un año y llegue sola (USD 99/año, recomendado)
-
-Con una cuenta de Apple Developer ya no necesitas cable ni Xcode: instalas la app
-desde **TestFlight** (app oficial de Apple) y las actualizaciones llegan solas.
-También sirve para darle la app a tu equipo sin publicarla en la App Store.
-
-1. Entra a **https://developer.apple.com/programs/enroll** con tu Apple ID.
-2. Inscríbete:
-   - **Como persona (Individual):** lo más rápido (1–2 días). Pagas con tarjeta.
-   - **Como empresa (Organization):** sale el nombre "JAC Seguros" en vez del tuyo, pero
-     pide número **D-U-N-S** (gratis, tarda 1–2 semanas).
-3. Cuando Apple te confirme por correo, **avísame**. Te diré exactamente qué crear en
-   App Store Connect (una "llave de API", 5 minutos) y dejo GitHub subiendo la app a
-   TestFlight automáticamente.
-
----
-
-## Paso 5 · Darle la app a tu equipo
-
-Hoy las reglas de la base dejan entrar **solo a tu usuario**. Para sumar a alguien:
-
-1. Créale su usuario en Supabase → **Authentication → Users → Add user**.
-2. Pide que te preparen el cambio de reglas con su correo (es el script
-   [`supabase/2-proteger.sql`](supabase/2-proteger.sql) con los correos del equipo).
-   **No lo corras sin revisarlo antes**: cambia quién puede ver los datos.
-3. Invítala por TestFlight (Paso 4) o, si tiene Android, mándale el APK (Anexo).
-
-**Si pierdes el teléfono:** en Supabase → Authentication → Users, cambia tu contraseña.
-La app pide Face ID o código para abrirse, así que nadie más puede usarla.
 
 ---
 
@@ -188,11 +208,10 @@ Solo si quieres instalarla desde la tienda en vez de con el archivo:
 | Pasa esto | Haz esto |
 |---|---|
 | "Correo o contraseña incorrectos" | Usa los mismos datos del CRM web. Tras 3 fallos hay que esperar unos segundos. |
-| "Tu teléfono no tiene bloqueo de pantalla" | Ajustes → Face ID y código → activa un código. |
 | "No se pudo conectar con el CRM" | Revisa internet y toca el botón ↻ arriba a la derecha. |
 | "No tienes permiso" | Ese usuario no está autorizado en la base (ver Paso 5). |
 | No veo un cambio que hice en la web | Toca ↻ en la app. |
 | No veo en la web un cambio que hice en la app | Recarga la página del CRM web. |
 | Perdí el teléfono | Supabase → Authentication → Users → cambia tu contraseña. La app pide Face ID o código, así que nadie puede abrirla. |
-| La app dejó de abrir (camino gratis) | Pasaron los 7 días: conecta el iPhone y pulsa ▶ en Xcode. |
-| Terminal dice "No such file or directory" | El .zip no está descomprimido en Descargas. Ábrelo con doble clic y repite el punto 5. |
+| Me pide entrar a cada rato | Es a propósito (seguridad). Guarda la contraseña en Safari y Face ID la rellena. |
+| No aparece "Agregar a inicio" | Abre la página en Safari, no en Chrome ni dentro de WhatsApp. |
