@@ -261,7 +261,10 @@ body.dark ::-webkit-scrollbar-thumb{background:#334155}
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJnIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjMWE1Mjc2Ii8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjMjk4MGI5Ii8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTAiIGZpbGw9InVybCgjZykiLz48dGV4dCB4PSIzMiIgeT0iNDQiIGZvbnQtZmFtaWx5PSJBcmlhbCxIZWx2ZXRpY2Esc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyNCIgZm9udC13ZWlnaHQ9IjkwMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2ZmZmZmZiIgbGV0dGVyLXNwYWNpbmc9Ii0xIj5KQUM8L3RleHQ+PC9zdmc+">
 <link rel="shortcut icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJnIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjMWE1Mjc2Ii8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjMjk4MGI5Ii8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTAiIGZpbGw9InVybCgjZykiLz48dGV4dCB4PSIzMiIgeT0iNDQiIGZvbnQtZmFtaWx5PSJBcmlhbCxIZWx2ZXRpY2Esc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyNCIgZm9udC13ZWlnaHQ9IjkwMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2ZmZmZmZiIgbGV0dGVyLXNwYWNpbmc9Ii0xIj5KQUM8L3RleHQ+PC9zdmc+" type="image/svg+xml">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
-<meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+<!-- X-Frame-Options se quito el 21-10-2026: como etiqueta <meta> el navegador
+     la ignora y ademas escupe un error en la consola en CADA carga, que tapa
+     los errores de verdad. Solo funciona como cabecera del servidor, y GitHub
+     Pages no manda cabeceras propias. -->
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -4821,7 +4824,7 @@ var _pagEditId=null;
 function OPag(id){
   _pagEditId=id||null;
   var psel=document.getElementById('pg-po');
-  psel.innerHTML='<option value="">— Póliza —</option>'+S.polizas.slice().sort(function(a,b){return (a.num||"").localeCompare(b.num||"");}).map(function(p){return '<option value="'+p.id+'">'+( p.num||p.id)+' · '+(p.tomador||p.aseg||"")+'</option>';}).join("");
+  psel.innerHTML='<option value="">— Póliza —</option>'+S.polizas.slice().sort(function(a,b){return (a.num||"").localeCompare(b.num||"");}).map(function(p){return '<option value="'+esc(p.id)+'">'+esc((p.num||p.id)+' · '+(p.tomador||p.aseg||""))+'</option>';}).join("");
   if(id){
     var pg=S.pagos.find(function(x){return x.id===id;});
     if(pg){
@@ -6446,12 +6449,15 @@ function renderInfProd(){
  const tbody=document.getElementById('inf-prod-tbl');
  if(!tbody)return;
  const cl=id=>S.clientes.find(c=>c.id===id)||{nombre:'—'};
+ /* Todo lo que viene de un registro pasa por esc(): sin esto, un dato con
+    etiquetas HTML dentro (de un reporte o de un portal) se ejecutaba al
+    pintar esta tabla. Medido con una poliza envenenada el 21-10-2026. */
  tbody.innerHTML=filtered.map(p=>`<tr>
- <td style="font-family:monospace;font-size:11px">${p.num||p.numero||'—'}</td><td>${esc(cl(p.clienteId).nombre)}</td>
- <td>${p.aseg||'—'}</td><td>${p.ramo||'—'}</td>
+ <td style="font-family:monospace;font-size:11px">${esc(p.num||p.numero||'—')}</td><td>${esc(cl(p.clienteId).nombre)}</td>
+ <td>${esc(p.aseg||'—')}</td><td>${esc(p.ramo||'—')}</td>
  <td>$${fmt2(p.prima||0)}</td><td style="color:#15803D;font-weight:700">$${fmt2(p.comision||0)}</td>
- <td>${p.fechaInicio||'—'}</td>
- <td><span class="b ${p.estado==='Vigente'?'bgn':p.estado==='Vencida'?'bdg':'bgr'}">${p.estado||'—'}</span></td>
+ <td>${esc(p.fechaInicio||'—')}</td>
+ <td><span class="b ${p.estado==='Vigente'?'bgn':p.estado==='Vencida'?'bdg':'bgr'}">${esc(p.estado||'—')}</span></td>
  </tr>`).join('');
  const totPrima=filtered.reduce((s,p)=>s+(+p.prima||0),0);
  const totCom=filtered.reduce((s,p)=>s+(+p.comision||0),0);
@@ -6467,15 +6473,15 @@ function renderInfRen(){
  const cl=id=>S.clientes.find(c=>c.id===id)||{nombre:'—'};
  const rTbl=document.getElementById('inf-ren-tbl');
  if(rTbl)rTbl.innerHTML=pronto.map(p=>{const d=dFrom(p.fechaFin);return`<tr>
- <td>${p.numero||'—'}</td><td>${esc(cl(p.clienteId).nombre)}</td>
- <td>${p.aseg||'—'}</td><td>${p.ramo||'—'}</td>
- <td>$${fmt2(p.prima||0)}</td><td>${p.fechaFin}</td>
+ <td>${esc(p.numero||'—')}</td><td>${esc(cl(p.clienteId).nombre)}</td>
+ <td>${esc(p.aseg||'—')}</td><td>${esc(p.ramo||'—')}</td>
+ <td>$${fmt2(p.prima||0)}</td><td>${esc(p.fechaFin)}</td>
  <td><span class="b ${d<=7?'brd':d<=30?'bcy':'bgn'}">${d}d</span></td>
  </tr>`}).join('');
  const vTbl=document.getElementById('inf-venc-tbl');
  if(vTbl)vTbl.innerHTML=venc.slice(0,30).map(p=>`<tr>
- <td>${p.numero||'—'}</td><td>${esc(cl(p.clienteId).nombre)}</td>
- <td>${p.aseg||'—'}</td><td>$${fmt2(p.prima||0)}</td><td style="color:var(--rd)">${p.fechaFin}</td>
+ <td>${esc(p.numero||'—')}</td><td>${esc(cl(p.clienteId).nombre)}</td>
+ <td>${esc(p.aseg||'—')}</td><td>$${fmt2(p.prima||0)}</td><td style="color:var(--rd)">${esc(p.fechaFin)}</td>
  </tr>`).join('');
 }
 
@@ -15994,7 +16000,7 @@ document.addEventListener('click', function(e){
       sincronizacion, sin tener que cambiar de pantalla.
    ============================================================ */
 (function(){
-  var MARCA = 'JAC-BUILD-2026-10-21-FI';   /* cambia en cada publicacion */
+  var MARCA = 'JAC-BUILD-2026-10-21-FJ';   /* cambia en cada publicacion */
   window.JAC_BUILD = MARCA;
 
   /* ==================================================================
@@ -16538,8 +16544,12 @@ document.addEventListener('click', function(e){
     if(!(ses&&ses.data&&ses.data.session)) return {ok:false,motivo:'sin sesión de nube'};
     var uid=ses.data.session.user.id;
     var pend=[];
+    /* La marca de "ya subido" es la RUTA, no la url: el deposito es privado
+       desde septiembre, asi que la url publica no abre nada y otra rutina la
+       borra despues. Si la marca fuera la url, al borrarla se volverian a
+       subir todos los adjuntos en cada vuelta. */
     recorrer(S,function(f,reg,col){
-      if(!f.b64||f.url) return;
+      if(!f.b64||f.path||f.url) return;
       pend.push({f:f,col:col,rid:reg.id||'sin-id'});
     });
     var subidos=0, fallos=[];
@@ -16552,9 +16562,10 @@ document.addEventListener('click', function(e){
         var ruta=uid+'/'+it.col+'/'+it.rid+'/'+(f.id||('F'+i))+'-'+String(f.name||'archivo').replace(/[^\w.\-]/g,'_');
         var r=await window.db.storage.from(BUCKET).upload(ruta,new Blob([u],{type:f.type||'application/octet-stream'}),{upsert:true});
         if(r.error){ fallos.push({name:f.name,error:r.error.message}); continue; }
-        var pu=window.db.storage.from(BUCKET).getPublicUrl(ruta);
+        /* nada de getPublicUrl: en un deposito privado devuelve un enlace
+           que no abre. Para ver el archivo esta jacEnlaceAdjunto(), que pide
+           un enlace firmado que caduca. */
         f.path=ruta;
-        f.url=(pu&&pu.data&&pu.data.publicUrl)||'';
         subidos++;
       }catch(e){ fallos.push({name:f.name,error:e.message}); }
     }
@@ -16571,7 +16582,7 @@ document.addEventListener('click', function(e){
     var enIdb=0, pesoIdb=0;
     try{ var t=await leerTodos(); enIdb=t.length; t.forEach(function(r){pesoIdb+=(r.b64||'').length;}); }catch(e){}
     var enMemoria=0, sinSubir=0;
-    try{ recorrer(S,function(f){ if(f.b64)enMemoria++; if(f.b64&&!f.url)sinSubir++; }); }catch(e){}
+    try{ recorrer(S,function(f){ if(f.b64)enMemoria++; if(f.b64&&!f.path&&!f.url)sinSubir++; }); }catch(e){}
     return {
       localStorageMB:+(uso/1048576).toFixed(2),
       limiteLocalStorageMB:5,
@@ -25933,9 +25944,12 @@ img, video, canvas, svg { max-width: 100%; height: auto; }
              return o.value===LISTA[i-(cabecera?1:0)]; });
       if(yaIgual) return;
       var h='';
-      if(cabecera) h+='<option value="'+cabecera.v.replace(/"/g,'&quot;')+'">'+cabecera.t+'</option>';
+      /* texto escapado: el catalogo puede traer etiquetas HTML dentro */
+      var _eo=function(v){ return String(v==null?'':v).replace(/&/g,'&amp;')
+        .replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
+      if(cabecera) h+='<option value="'+_eo(cabecera.v)+'">'+_eo(cabecera.t)+'</option>';
       LISTA.forEach(function(x){
-        h+='<option value="'+x.replace(/"/g,'&quot;')+'">'+x+'</option>'; });
+        h+='<option value="'+_eo(x)+'">'+_eo(x)+'</option>'; });
       sel.innerHTML=h;
       if(actual && LISTA.indexOf(actual)>=0) sel.value=actual;
       else if(cabecera) sel.value=cabecera.v;
@@ -26638,8 +26652,11 @@ img, video, canvas, svg { max-width: 100%; height: auto; }
           return o.value===L[i-(cab?1:0)]; });
       if(igual) return;
       var h='';
-      if(cab) h+='<option value="'+cab.v.replace(/"/g,'&quot;')+'">'+cab.t+'</option>';
-      L.forEach(function(x){ h+='<option value="'+x.replace(/"/g,'&quot;')+'">'+x+'</option>'; });
+      /* texto escapado: el catalogo puede traer etiquetas HTML dentro */
+      var _eo2=function(v){ return String(v==null?'':v).replace(/&/g,'&amp;')
+        .replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
+      if(cab) h+='<option value="'+_eo2(cab.v)+'">'+_eo2(cab.t)+'</option>';
+      L.forEach(function(x){ h+='<option value="'+_eo2(x)+'">'+_eo2(x)+'</option>'; });
       sel.innerHTML=h;
       /* Lo que estuviera elegido NO se pierde nunca. Antes, si el valor no
          estaba EXACTO en la lista, se caia al '— Seleccione —' y la
@@ -26702,6 +26719,14 @@ img, video, canvas, svg { max-width: 100%; height: auto; }
     return sel;
   }
 
+  /* El texto de cada opcion se escapa: un subramo guardado con etiquetas
+     HTML dentro (llega asi desde un reporte o un portal) se ejecutaba al
+     abrir el formulario de poliza. Medido el 21-10-2026. */
+  function _escOpc(v){
+    return String(v==null?'':v)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
   function pintarSub(ram, sub, valorForzado){
     if(!ram||!sub) return;
     if(sub.tagName!=='SELECT') return;
@@ -26712,11 +26737,11 @@ img, video, canvas, svg { max-width: 100%; height: auto; }
     var vistos={}, h='<option value="">— Subramo —</option>';
     subs.forEach(function(x){
       vistos[llave(x)]=1;
-      h+='<option value="'+String(x).replace(/"/g,'&quot;')+'">'+x+'</option>';
+      h+='<option value="'+_escOpc(x)+'">'+_escOpc(x)+'</option>';
     });
     /* lo que ya tenia la poliza, aunque no sea de la lista oficial */
     if(actual && !vistos[llave(actual)]){
-      h+='<option value="'+String(actual).replace(/"/g,'&quot;')+'">'+actual+' (propio)</option>';
+      h+='<option value="'+_escOpc(actual)+'">'+_escOpc(actual)+' (propio)</option>';
     }
     sub.innerHTML=h;
     if(actual){
@@ -30116,7 +30141,7 @@ img, video, canvas, svg { max-width: 100%; height: auto; }
 (function(){
   'use strict';
 
-  var VERSION='JAC-BUILD-2026-10-21-FI';
+  var VERSION='JAC-BUILD-2026-10-21-FJ';
 
   window.jacVersion=function(){ return VERSION; };
 
