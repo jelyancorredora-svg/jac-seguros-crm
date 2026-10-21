@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Icono } from '../components/Icono';
 import { esperaParaIntentar, iniciarSesion, verificarMfa } from '../lib/auth';
-import { desbloquear } from '../lib/bloqueo';
+import { desbloquear, esAppNativa } from '../lib/bloqueo';
 
 function Marca({ sub }: { sub: string }) {
   return (
@@ -71,6 +71,12 @@ export function Login({ onEntrar }: { onEntrar: () => Promise<void> }) {
         <button className="boton" type="submit" disabled={ocupado || espera > 0}>
           {ocupado ? 'Entrando…' : espera > 0 ? `Espera ${espera} s` : 'Entrar'}
         </button>
+        {!esAppNativa && (
+          <p className="pie-legal">
+            Por seguridad la sesión se cierra al salir de la app. Para entrar rápido, guarda la
+            contraseña cuando Safari te lo ofrezca: luego se rellena con Face ID.
+          </p>
+        )}
         <p className="pie-legal">{LEGAL}</p>
       </form>
     </main>

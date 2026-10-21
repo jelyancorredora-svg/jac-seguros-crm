@@ -6,6 +6,9 @@ import { SEGURIDAD } from './config';
 
 const nativo = Capacitor.isNativePlatform();
 
+/** true en la app instalada desde tienda/Xcode; false en la version web (Safari). */
+export const esAppNativa = nativo;
+
 /*
  * Pantalla privada: en Android bloquea capturas y grabacion de pantalla
  * (FLAG_SECURE); en iOS tapa el contenido en el selector de apps.

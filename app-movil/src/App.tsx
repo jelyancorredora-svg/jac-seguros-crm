@@ -3,7 +3,7 @@ import { App as CapApp } from '@capacitor/app';
 import { Icono, type NombreIcono } from './components/Icono';
 import { Cargando, Vacio } from './components/Piezas';
 import { cerrarSesion, nivelMfa, sesionCaducada } from './lib/auth';
-import { activarPantallaPrivada, vigilarBloqueo } from './lib/bloqueo';
+import { activarPantallaPrivada, esAppNativa, vigilarBloqueo } from './lib/bloqueo';
 import { cargarCartera, ErrorDatos, type Cartera } from './lib/datos';
 import { db } from './lib/supabase';
 import { Bloqueo, Login, SegundoPaso } from './screens/Acceso';
@@ -101,6 +101,12 @@ export default function App() {
         await cerrarSesion();
         return setFase({ f: 'login' });
       }
+      if (!esAppNativa) {
+        // Version web: no hay Face ID propio de la app, asi que al reabrirla
+        // siempre se pide la contraseña (el Llavero de iCloud la rellena con Face ID).
+        await cerrarSesion();
+        return setFase({ f: 'login' });
+      }
       setFase({ f: 'bloqueada' }); // con sesion guardada siempre se pide huella / Face ID
     })();
     const { data: sub } = db.auth.onAuthStateChange((evento, sesion) => {
@@ -136,8 +142,9 @@ export default function App() {
   /* Bloqueo por inactividad o por volver del segundo plano */
   useEffect(() => {
     if (fase.f !== 'dentro') return;
-    return vigilarBloqueo(() => setFase({ f: 'bloqueada' }));
-  }, [fase.f]);
+    // En la web "bloquear" es cerrar la sesion entera: no queda nada que robar.
+    return vigilarBloqueo(() => (esAppNativa ? setFase({ f: 'bloqueada' }) : void salir()));
+  }, [fase.f, salir]);
 
   /* Boton "atras" de Android */
   useEffect(() => {

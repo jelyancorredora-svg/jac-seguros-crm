@@ -5,7 +5,7 @@ import {
   cambiarClave, desactivarMfa, factoresMfa, iniciarAltaMfa, validarClave, verificarMfa,
 } from '../lib/auth';
 import { activarAvisos, avisosActivos, desactivarAvisos, programarAvisos } from '../lib/avisos';
-import { estadoBiometria, type EstadoBiometria } from '../lib/bloqueo';
+import { esAppNativa, estadoBiometria, type EstadoBiometria } from '../lib/bloqueo';
 import type { Cartera } from '../lib/datos';
 import { SEGURIDAD } from '../lib/config';
 import { fecha, hoyISO } from '../lib/formato';
@@ -68,11 +68,11 @@ export function Ajustes({ correo, cartera, onSalir, avisar }: {
       <div className="tarjeta">
         <dl className="datos">
           <dt>Desbloqueo</dt>
-          <dd>{bio ? (bio.disponible ? bio.tipo : bio.dispositivoSeguro ? 'PIN del teléfono' : 'No configurado') : '—'}</dd>
+          <dd>{!esAppNativa ? 'Contraseña (Face ID vía Llavero)' : bio ? (bio.disponible ? bio.tipo : bio.dispositivoSeguro ? 'PIN del teléfono' : 'No configurado') : '—'}</dd>
           <dt>Dos pasos</dt>
           <dd>{factores === null ? '…' : factores.length ? <span className="etiqueta e-ok">Activado</span> : <span className="etiqueta e-aviso">Desactivado</span>}</dd>
           <dt>Bloqueo automático</dt>
-          <dd>{min(SEGURIDAD.bloqueoPorInactividad)} min sin uso</dd>
+          <dd>{esAppNativa ? `${min(SEGURIDAD.bloqueoPorInactividad)} min sin uso` : `Cierra sesión a los ${min(SEGURIDAD.bloqueoPorInactividad)} min sin uso o al salir`}</dd>
           <dt>Sesión máxima</dt>
           <dd>{min(SEGURIDAD.duracionMaximaSesion) / 60} h</dd>
         </dl>
@@ -87,6 +87,7 @@ export function Ajustes({ correo, cartera, onSalir, avisar }: {
       ))}
       <button className="boton secundario" type="button" onClick={() => setClave(true)}>Cambiar contraseña</button>
 
+      {esAppNativa && (<>
       <h3 className="seccion">Avisos</h3>
       <div className="tarjeta">
         <dl className="datos">
@@ -98,6 +99,7 @@ export function Ajustes({ correo, cartera, onSalir, avisar }: {
       <button className={`boton${avisos ? ' secundario' : ''}`} type="button" onClick={cambiarAvisos} disabled={avisos === null}>
         {avisos ? 'Desactivar avisos' : 'Activar avisos diarios'}
       </button>
+      </>)}
 
       <h3 className="seccion">Sesión</h3>
       <button className="boton peligro" type="button" onClick={onSalir}>Cerrar sesión</button>

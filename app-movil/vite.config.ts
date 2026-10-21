@@ -20,6 +20,7 @@ function csp(supabaseUrl: string): Plugin {
     "form-action 'none'",
     "frame-src 'none'",
     "worker-src 'none'",
+    "manifest-src 'self'",
   ].join('; ');
   return {
     name: 'jac-csp',
