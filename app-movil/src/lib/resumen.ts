@@ -1,25 +1,25 @@
-import type { Poliza, Prospecto, Tarea } from './tipos';
+import type { Reg } from './datos';
 import { diasHasta } from './formato';
-import { polizaVigente, prospectoAbierto, tareaAbierta } from './reglas';
+import { polizaVigente, prospectoAbierto, seguimientoProspecto, tareaAbierta } from './reglas';
 
 export type Resumen = { vencenSemana: number; vencenHoy: number; tareas: number; seguimientos: number };
 
 /** Lo que tocara atender el dia `desplazamiento` (0 = hoy). Puro, con pruebas. */
-export function resumenDelDia(c: { polizas: Poliza[]; tareas: Tarea[]; prospectos: Prospecto[] }, desplazamiento: number, ahora = new Date()): Resumen {
-  const dia = (iso: string | null) => {
-    const d = diasHasta(iso, ahora);
+export function resumenDelDia(c: { polizas: Reg[]; tareas: Reg[]; prospectos: Reg[] }, desplazamiento: number, ahora = new Date()): Resumen {
+  const dia = (iso: unknown) => {
+    const d = diasHasta(typeof iso === 'string' ? iso : null, ahora);
     return d === null ? null : d - desplazamiento;
   };
   let vencenSemana = 0, vencenHoy = 0;
   for (const p of c.polizas) {
     if (!polizaVigente(p)) continue;
-    const d = dia(p.fecha_fin);
+    const d = dia(p.fechaFin);
     if (d === null) continue;
     if (d === 0) vencenHoy++;
     if (d >= 0 && d <= 7) vencenSemana++;
   }
-  const tareas = c.tareas.filter((t) => tareaAbierta(t) && dia(t.fecha_limite) === 0).length;
-  const seguimientos = c.prospectos.filter((p) => prospectoAbierto(p) && dia(p.f_seguimiento) === 0).length;
+  const tareas = c.tareas.filter((x) => tareaAbierta(x) && dia(x.fechaLimite) === 0).length;
+  const seguimientos = c.prospectos.filter((p) => prospectoAbierto(p) && dia(seguimientoProspecto(p)) === 0).length;
   return { vencenSemana, vencenHoy, tareas, seguimientos };
 }
 

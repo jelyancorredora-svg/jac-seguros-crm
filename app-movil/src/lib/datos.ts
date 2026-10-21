@@ -1,48 +1,92 @@
-import { hoyISO, limpiarTexto, nuevoId } from './formato';
-import type { Cliente, Pago, Poliza, Prospecto, Siniestro, Tarea, Vehiculo } from './tipos';
-
-export * from './tipos';
-export { polizaVigente, prospectoAbierto, siniestroAbierto, tareaAbierta } from './reglas';
+import COLUMNAS from './columnas.json';
+import { PREFIJO_ID, type Modulo } from './esquema';
+import { limpiarTexto, nuevoId } from './formato';
 import { db } from './supabase';
 
 /*
- * Lectura y escritura sobre las MISMAS tablas que usa crm.jacsegurospa.com.
+ * Lectura y escritura sobre las MISMAS tablas que usa crm.jacsegurospa.com,
+ * con la misma conversion que su sincronizacion (aFila / aObjeto):
  *
- * Reglas para no pisar al CRM web:
- *  - Nunca se manda la fila entera: solo las columnas que se cambiaron.
- *    Asi el JSON 'extra' (adjuntos, historial, etc.) queda intacto.
- *  - Los registros nuevos usan el mismo formato de id que el web y 'extra'
- *    vacio, y el CRM web los recoge en su siguiente sincronizacion.
- *  - La app no borra registros.
+ *  - Cada registro es un objeto con claves camelCase, igual que en el web.
+ *  - Lo que tiene columna va a la columna (snake_case); lo demas va al JSON
+ *    'extra'. Asi se ven y se editan TODOS los campos, no solo las columnas.
+ *  - Al editar se relee la fila de la base y se le aplican solo los cambios:
+ *    nunca se pisa lo que el web guardo en otros campos.
  */
 
-const COLUMNAS = {
-  clientes: 'id,nombre,alias,cedula,tipo,cel,tel,email,dir,ciudad,provincia,f_nac,ocupacion,obs,estado_cli',
-  polizas:
-    'id,cliente_id,nombre_cliente,num,aseg,ramo,subramo,prima,total,comision,forma_pago,fecha_inicio,fecha_fin,estado,riesgo,cobertura,obs,cel_cliente,email_cliente,vendedor',
-  siniestros:
-    'id,cliente_id,num_sin,num_cia,nombre,fecha_sin,poliza,asegurado,monto_reclamo,val_ind,deducible,cliente,cel,aseg,estado,desc,seguimiento',
-  pagos: 'id,cliente_id,poliza_id,monto,fecha,metodo,referencia,estado',
-  tareas: 'id,titulo,desc,tipo_rel,rel_id,cliente_id,tipo,prioridad,etapa_tarea,fecha_limite,estado',
-  vehiculos: 'id,cliente_id,placa,cliente_nom',
-  prospectos:
-    'id,nombre,cedula,cel,tel,email,tipo,fuente,etapa_venta,prioridad,probabilidad,monto_estimado,aseg_preferida,f_contacto,f_seguimiento,estado_comercial',
-} as const;
+export type Reg = { id: string; [k: string]: unknown };
 
-type Tabla = keyof typeof COLUMNAS;
+type Tipo = 'text' | 'date' | 'numeric' | 'boolean';
+const COLS = COLUMNAS as unknown as Record<string, Array<[string, Tipo]>>;
+
+export const TABLA: Record<Modulo, string> = {
+  clientes: 'clientes', polizas: 'polizas', siniestros: 'siniestros', vehiculos: 'vehiculos', pagos: 'pagos',
+  prospectos: 'prospectos', comisiones: 'comisiones', tareas: 'tareas',
+};
 
 export class ErrorDatos extends Error {}
 
-/** Lee una tabla completa por paginas. Si una pagina falla, falla todo (nunca media tabla). */
-async function leerTodo<T>(tabla: Tabla): Promise<T[]> {
-  const filas: T[] = [];
-  for (let desde = 0; ; desde += 1000) {
-    const { data, error } = await db.from(tabla).select(COLUMNAS[tabla]).range(desde, desde + 999);
-    if (error) throw new ErrorDatos(mensajeError(error));
-    filas.push(...((data ?? []) as T[]));
-    if (!data || data.length < 1000) return filas;
-  }
+/* ---------------- conversion fila <-> objeto (copia del CRM web) ---------------- */
+
+const snake = (c: string) => c.replace(/[A-Z]/g, (m) => '_' + m.toLowerCase());
+
+function aFecha(v: unknown): string | null {
+  if (!v) return null;
+  const s = String(v).trim();
+  if (!s) return null;
+  let m = s.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+  if (m) return `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}`;
+  m = s.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})/);
+  if (m) return `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
+  const d = new Date(s);
+  return isNaN(d.getTime()) ? null : d.toISOString().slice(0, 10);
 }
+
+function aNum(v: unknown): number | null {
+  if (v === null || v === undefined || v === '') return null;
+  const n = parseFloat(String(v).replace(/[^0-9.-]/g, ''));
+  return isFinite(n) ? n : null;
+}
+
+export function aFila(obj: Record<string, unknown>, tabla: string): Record<string, unknown> {
+  const def = COLS[tabla] || [];
+  const fila: Record<string, unknown> = {};
+  const usados = new Set<string>();
+  const extra: Record<string, unknown> = {};
+  for (const [col, tipo] of def) {
+    const origen = Object.keys(obj).find((k) => snake(k) === col);
+    if (origen === undefined) continue;
+    usados.add(origen);
+    let v = obj[origen];
+    if (v === '') v = null;
+    if (v !== null && typeof v === 'object') {
+      extra[origen] = v;
+      v = null;
+    } else if (tipo === 'date') v = aFecha(v);
+    else if (tipo === 'numeric') v = aNum(v);
+    else if (tipo === 'boolean') v = v === true || v === 'true' || v === 1;
+    else if (v !== null && v !== undefined) v = String(v);
+    fila[col] = v ?? null;
+  }
+  for (const k of Object.keys(obj)) if (!usados.has(k)) extra[k] = obj[k];
+  fila.extra = extra;
+  fila.id = String(obj.id);
+  return fila;
+}
+
+export function aObjeto(fila: Record<string, unknown>): Reg {
+  const o: Record<string, unknown> = {};
+  for (const c of Object.keys(fila)) {
+    if (c === 'extra' || c === 'created_at' || c === 'updated_at' || fila[c] === null) continue;
+    o[c.replace(/_([a-z])/g, (_m, l: string) => l.toUpperCase())] = fila[c];
+  }
+  const ex = (fila.extra && typeof fila.extra === 'object' ? fila.extra : {}) as Record<string, unknown>;
+  for (const e of Object.keys(ex)) if (e !== 'id') o[e] = ex[e];
+  o.id = String(fila.id);
+  return o as Reg;
+}
+
+/* ---------------- lectura ---------------- */
 
 function mensajeError(e: { message?: string; code?: string }): string {
   if (e.code === 'PGRST301' || /jwt/i.test(e.message ?? '')) return 'Tu sesión venció. Vuelve a entrar.';
@@ -50,202 +94,209 @@ function mensajeError(e: { message?: string; code?: string }): string {
   return 'No se pudo conectar con el CRM. Revisa tu internet.';
 }
 
-export type Cartera = {
-  clientes: Cliente[]; polizas: Poliza[]; siniestros: Siniestro[]; pagos: Pago[]; tareas: Tarea[];
-  vehiculos: Vehiculo[]; prospectos: Prospecto[]; cargadoEn: number;
-};
-
-export async function cargarCartera(): Promise<Cartera> {
-  const [clientes, polizas, siniestros, pagos, tareas, vehiculos, prospectos] = await Promise.all([
-    leerTodo<Cliente>('clientes'),
-    leerTodo<Poliza>('polizas'),
-    leerTodo<Siniestro>('siniestros'),
-    leerTodo<Pago>('pagos'),
-    leerTodo<Tarea>('tareas'),
-    leerTodo<Vehiculo>('vehiculos'),
-    leerTodo<Prospecto>('prospectos'),
-  ]);
-  clientes.sort((a, b) => (a.nombre ?? '').localeCompare(b.nombre ?? '', 'es'));
-  return { clientes, polizas, siniestros, pagos, tareas, vehiculos, prospectos, cargadoEn: Date.now() };
+/** Tabla completa, por paginas de 1000. Si una pagina falla, falla todo (nunca media tabla). */
+async function leerTabla(tabla: string): Promise<Reg[]> {
+  const filas: Reg[] = [];
+  for (let desde = 0; ; desde += 1000) {
+    const { data, error } = await db.from(tabla).select('*').order('id').range(desde, desde + 999);
+    if (error) throw new ErrorDatos(mensajeError(error));
+    for (const f of data ?? []) filas.push(aObjeto(f as Record<string, unknown>));
+    if (!data || data.length < 1000) return filas;
+  }
 }
 
-/* ---------------- Estados (mismos textos que el CRM web) ---------------- */
+/* Claves de crm_meta que usa la app (agenda y catalogos) */
+export const CLAVES_META = ['calReuniones', 'calNotas', 'calMetas', 'calDiarios', 'aseguradoras', 'ramosCfg'] as const;
+export type Meta = {
+  calReuniones: Reg[];
+  calNotas: Reg[];
+  calMetas: Reg[];
+  calDiarios: Record<string, unknown>;
+  aseguradoras: Array<{ nombre?: string }>;
+  ramosCfg: unknown;
+};
 
-export const ETAPAS_TAREA = ['Por Hacer', 'En Proceso', 'En Seguimiento', 'Delegado', 'Hecho', 'Cancelada'] as const;
-export const PRIORIDADES = ['Alta', 'Media', 'Baja'] as const;
-export const TIPOS_TAREA = ['Llamada', 'Seguimiento', 'Renovación', 'Cobro', 'Reunión', 'Trámite', 'Otro'] as const;
-export const ESTADOS_SINIESTRO = ['En proceso', 'Pendiente docs', 'Pagado', 'Rechazado', 'Cerrado'] as const;
+async function leerMeta(): Promise<Meta> {
+  const { data, error } = await db.from('crm_meta').select('clave,valor').in('clave', CLAVES_META as unknown as string[]);
+  if (error) throw new ErrorDatos(mensajeError(error));
+  const m: Record<string, unknown> = {};
+  for (const f of data ?? []) m[f.clave as string] = f.valor;
+  const lista = (v: unknown) => (Array.isArray(v) ? (v as Reg[]) : []);
+  return {
+    calReuniones: lista(m.calReuniones),
+    calNotas: lista(m.calNotas),
+    calMetas: lista(m.calMetas),
+    calDiarios: m.calDiarios && typeof m.calDiarios === 'object' && !Array.isArray(m.calDiarios) ? (m.calDiarios as Record<string, unknown>) : {},
+    aseguradoras: Array.isArray(m.aseguradoras) ? (m.aseguradoras as Array<{ nombre?: string }>) : [],
+    ramosCfg: m.ramosCfg ?? null,
+  };
+}
 
-export const ETAPAS_VENTA = [
-  'Contacto inicial', 'Prospecto', 'Calificación', 'Cotización', 'Propuesta enviada', 'Negociación',
-  'Cierre', 'Cliente ganado', 'Perdido',
-] as const;
-export const FUENTES = [
-  'Referido', 'Facebook', 'Instagram', 'WhatsApp', 'Llamada entrante', 'Web', 'Evento', 'Venta Cruzada',
-  'Cold call', 'Otro',
-] as const;
-export const METODOS_PAGO = ['ACH', 'Transferencia', 'Yappy', 'Tarjeta', 'Efectivo', 'Cheque', 'Descuento directo'] as const;
-export const ESTADOS_PAGO = ['Pagado', 'Pendiente'] as const;
+export type Cartera = Record<Modulo, Reg[]> & { meta: Meta; cargadoEn: number };
 
+export async function cargarCartera(): Promise<Cartera> {
+  const mods = Object.keys(TABLA) as Modulo[];
+  const [tablas, meta] = await Promise.all([Promise.all(mods.map((m) => leerTabla(TABLA[m]))), leerMeta()]);
+  const c = { meta, cargadoEn: Date.now() } as Cartera;
+  mods.forEach((m, i) => (c[m] = tablas[i]));
+  c.clientes.sort((a, b) => txt(a, 'nombre').localeCompare(txt(b, 'nombre'), 'es'));
+  return c;
+}
 
-/* ---------------- Escrituras ---------------- */
+/* ---------------- acceso comodo a campos ---------------- */
 
-async function actualizar(tabla: Tabla, id: string, cambios: Record<string, unknown>): Promise<void> {
-  // updated_at avisa al CRM web que esta fila cambio y debe bajarla.
-  const fila = { ...cambios, updated_at: new Date().toISOString() };
+export const txt = (r: Reg | undefined | null, k: string): string => {
+  const v = r?.[k];
+  return v === null || v === undefined ? '' : typeof v === 'object' ? '' : String(v);
+};
+export const num = (r: Reg | undefined | null, k: string): number | null => aNum(r?.[k]);
+export const fec = (r: Reg | undefined | null, k: string): string => aFecha(r?.[k]) ?? '';
+
+/* ---------------- escritura ---------------- */
+
+/**
+ * Crea (id = null) o actualiza un registro con los campos dados.
+ * Devuelve el registro tal como quedo en la base.
+ */
+export async function guardarRegistro(modulo: Modulo, id: string | null, cambios: Record<string, unknown>): Promise<Reg> {
+  const tabla = TABLA[modulo];
+  const limpio: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(cambios)) {
+    limpio[k] = typeof v === 'string' ? limpiarTexto(v, 5000) : v;
+  }
+
+  if (id === null) {
+    const obj = { id: nuevoId(PREFIJO_ID[modulo]), ...limpio, creadoDesde: 'app-movil' };
+    const fila = aFila(obj, tabla);
+    const { error } = await db.from(tabla).insert(fila);
+    if (error) throw new ErrorDatos(mensajeError(error));
+    return aObjeto(fila);
+  }
+
+  return actualizarCon(modulo, id, () => limpio);
+}
+
+/**
+ * Actualiza un registro partiendo SIEMPRE de lo que hay en la base en este
+ * momento: `cambiar` recibe la version actual y devuelve solo los campos a cambiar.
+ */
+export async function actualizarCon(modulo: Modulo, id: string, cambiar: (actual: Reg) => Record<string, unknown>): Promise<Reg> {
+  const tabla = TABLA[modulo];
+  const { data, error: e1 } = await db.from(tabla).select('*').eq('id', id).maybeSingle();
+  if (e1) throw new ErrorDatos(mensajeError(e1));
+  if (!data) throw new ErrorDatos('Este registro ya no existe en el CRM.');
+  const actual = aObjeto(data as Record<string, unknown>);
+  const obj = { ...actual, ...cambiar(actual), id };
+  const fila = { ...aFila(obj, tabla), updated_at: new Date().toISOString() };
   const { error, count } = await db.from(tabla).update(fila, { count: 'exact' }).eq('id', id);
   if (error) throw new ErrorDatos(mensajeError(error));
   if (count === 0) throw new ErrorDatos('No tienes permiso para modificar este registro.');
+  return aObjeto(fila);
 }
 
-export type NuevaTarea = {
-  titulo: string; desc: string; tipo: string; prioridad: string; fecha_limite: string; cliente_id?: string;
-};
+/* ---------------- historial / acciones (igual que el CRM web) ---------------- */
 
-export async function crearTarea(t: NuevaTarea): Promise<Tarea> {
-  const titulo = limpiarTexto(t.titulo, 200);
-  if (!titulo) throw new ErrorDatos('El título es obligatorio.');
-  if (!(PRIORIDADES as readonly string[]).includes(t.prioridad)) throw new ErrorDatos('Prioridad inválida.');
-  if (t.fecha_limite && !/^\d{4}-\d{2}-\d{2}$/.test(t.fecha_limite)) throw new ErrorDatos('Fecha inválida.');
-  const fila: Tarea & { extra: Record<string, unknown> } = {
-    id: nuevoId('T'),
-    titulo,
-    desc: limpiarTexto(t.desc) || null,
-    tipo: limpiarTexto(t.tipo, 60) || null,
-    prioridad: t.prioridad,
-    etapa_tarea: 'Por Hacer',
-    estado: 'pendiente',
-    fecha_limite: t.fecha_limite || null,
-    tipo_rel: t.cliente_id ? 'cliente' : null,
-    rel_id: t.cliente_id || null,
-    cliente_id: t.cliente_id || null,
-    extra: { creadoDesde: 'app-movil' },
+export type EntradaHistorial = { id?: string; fecha?: string; accion?: string; nota?: string; resultado?: string; tipo?: string };
+
+export function historial(r: Reg): EntradaHistorial[] {
+  const h = r.historial;
+  return Array.isArray(h) ? (h as EntradaHistorial[]).filter((x) => x && typeof x === 'object') : [];
+}
+
+/** Registra una accion en el historial (se agrega; nunca se borra lo anterior). */
+export async function registrarAccion(modulo: Modulo, id: string, e: EntradaHistorial, otros: Record<string, unknown> = {}): Promise<Reg> {
+  const entrada = {
+    ...(modulo === 'clientes' ? { id: nuevoId('H') } : {}),
+    fecha: e.fecha || new Date().toISOString().slice(0, 10),
+    accion: limpiarTexto(e.accion ?? '', 500),
+    resultado: limpiarTexto(e.resultado ?? '', 2000),
+    tipo: 'manual',
   };
-  const { error } = await db.from('tareas').insert(fila);
+  return actualizarCon(modulo, id, (a) => {
+    const lista = historial(a);
+    // Clientes: lo nuevo arriba (unshift); prospectos: al final (push). Igual que el web.
+    return { historial: modulo === 'clientes' ? [entrada, ...lista] : [...lista, entrada], ...otros };
+  });
+}
+
+/** Solo para tareas (la agenda del CRM permite eliminarlas). */
+export async function eliminarTarea(id: string): Promise<void> {
+  const { error } = await db.from('tareas').delete().eq('id', id);
   if (error) throw new ErrorDatos(mensajeError(error));
-  const { extra: _omit, ...tarea } = fila;
-  void _omit;
-  return tarea;
 }
 
-export async function cambiarEtapaTarea(id: string, etapa: string): Promise<Partial<Tarea>> {
-  if (!(ETAPAS_TAREA as readonly string[]).includes(etapa)) throw new ErrorDatos('Etapa inválida.');
-  const cambios = { etapa_tarea: etapa, estado: etapa === 'Hecho' ? 'completada' : etapa === 'Cancelada' ? 'cancelada' : 'pendiente' };
-  await actualizar('tareas', id, cambios);
-  return cambios;
-}
-
-export async function actualizarSiniestro(
-  id: string, estado: string, seguimiento: string,
-): Promise<Partial<Siniestro>> {
-  if (!(ESTADOS_SINIESTRO as readonly string[]).includes(estado)) throw new ErrorDatos('Estado inválido.');
-  const cambios = { estado, seguimiento: limpiarTexto(seguimiento, 5000) || null };
-  await actualizar('siniestros', id, cambios);
-  return cambios;
-}
-
-export type ContactoCliente = Pick<Cliente, 'cel' | 'tel' | 'email' | 'dir'>;
-
-export async function actualizarContactoCliente(id: string, c: ContactoCliente): Promise<Partial<Cliente>> {
-  const cambios: ContactoCliente = {
-    cel: limpiarTexto(c.cel ?? '', 30) || null,
-    tel: limpiarTexto(c.tel ?? '', 30) || null,
-    email: limpiarTexto(c.email ?? '', 120).toLowerCase() || null,
-    dir: limpiarTexto(c.dir ?? '', 300) || null,
-  };
-  await actualizar('clientes', id, cambios);
-  return cambios;
-}
-
-/* ---------------- Pagos ---------------- */
-
-export type NuevoPago = {
-  poliza: Poliza; monto: string; fecha: string; metodo: string; referencia: string; estado: string; notas: string;
-};
-
-export async function registrarPago(n: NuevoPago, nombreCliente: string): Promise<Pago> {
-  const monto = Number(n.monto.replace(',', '.'));
-  if (!isFinite(monto) || monto <= 0 || monto > 1_000_000) throw new ErrorDatos('Monto inválido.');
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(n.fecha)) throw new ErrorDatos('Fecha inválida.');
-  if (!(METODOS_PAGO as readonly string[]).includes(n.metodo)) throw new ErrorDatos('Método inválido.');
-  if (!(ESTADOS_PAGO as readonly string[]).includes(n.estado)) throw new ErrorDatos('Estado inválido.');
-  const pago: Pago = {
-    id: nuevoId('PAG'),
-    cliente_id: n.poliza.cliente_id,
-    poliza_id: n.poliza.id,
-    monto: Math.round(monto * 100) / 100,
-    fecha: n.fecha,
-    metodo: n.metodo,
-    referencia: limpiarTexto(n.referencia, 80) || null,
-    estado: n.estado,
-  };
-  // Lo que el CRM web guarda fuera de columnas va en 'extra', igual que alla.
-  const extra = {
-    notas: limpiarTexto(n.notas, 500), cuota: '', aseg: n.poliza.aseg ?? '', ramo: n.poliza.ramo ?? '',
-    cliente: nombreCliente, periodo: n.poliza.forma_pago ?? '', creadoDesde: 'app-movil',
-  };
-  const { error } = await db.from('pagos').insert({ ...pago, extra });
+/**
+ * Modifica una lista de crm_meta (reuniones, notas, metas, diario).
+ * Lee el valor actual de la base justo antes de escribir, para no borrar
+ * lo que se haya agregado desde la computadora.
+ */
+export async function guardarMeta<T>(clave: (typeof CLAVES_META)[number], vacio: T, cambiar: (actual: T) => T): Promise<T> {
+  const { data, error } = await db.from('crm_meta').select('valor').eq('clave', clave).maybeSingle();
   if (error) throw new ErrorDatos(mensajeError(error));
-  return pago;
+  const actual = (data?.valor ?? vacio) as T;
+  const nuevo = cambiar(JSON.parse(JSON.stringify(actual)) as T);
+  const { error: e2 } = await db.from('crm_meta').upsert({ clave, valor: nuevo }, { onConflict: 'clave' });
+  if (e2) throw new ErrorDatos(mensajeError(e2));
+  return nuevo;
 }
 
-/* ---------------- Prospectos ---------------- */
+/* ---------------- documentos adjuntos ---------------- */
 
-export type NuevoProspecto = {
-  nombre: string; cel: string; email: string; fuente: string; prioridad: string; interes: string;
-  monto_estimado: string; f_seguimiento: string; notas: string;
-};
+export type Adjunto = { id?: string; name?: string; type?: string; path?: string; size?: number };
 
-export async function crearProspecto(n: NuevoProspecto): Promise<Prospecto> {
-  const nombre = limpiarTexto(n.nombre, 150);
-  if (!nombre) throw new ErrorDatos('El nombre es obligatorio.');
-  if (!(FUENTES as readonly string[]).includes(n.fuente)) throw new ErrorDatos('Fuente inválida.');
-  if (!(PRIORIDADES as readonly string[]).includes(n.prioridad)) throw new ErrorDatos('Prioridad inválida.');
-  if (n.f_seguimiento && !/^\d{4}-\d{2}-\d{2}$/.test(n.f_seguimiento)) throw new ErrorDatos('Fecha inválida.');
-  const monto = n.monto_estimado ? Number(n.monto_estimado.replace(',', '.')) : 0;
-  if (!isFinite(monto) || monto < 0) throw new ErrorDatos('Monto inválido.');
-  const hoy = hoyISO();
-  const prospecto: Prospecto = {
-    id: nuevoId('PR'),
-    nombre,
-    cedula: null,
-    cel: limpiarTexto(n.cel, 30) || null,
-    tel: null,
-    email: limpiarTexto(n.email, 120).toLowerCase() || null,
-    tipo: 'Personal',
-    fuente: n.fuente,
-    etapa_venta: 'Contacto inicial',
-    prioridad: n.prioridad,
-    probabilidad: 20,
-    monto_estimado: monto,
-    aseg_preferida: null,
-    f_contacto: hoy,
-    f_seguimiento: n.f_seguimiento || null,
-    estado_comercial: null,
+export function adjuntos(r: Reg): Adjunto[] {
+  const a = r.archivos;
+  const lista = Array.isArray(a) ? a : a && typeof a === 'object' ? [a] : [];
+  return (lista as Adjunto[]).filter((f) => f && typeof f === 'object');
+}
+
+/** Enlace para abrir un adjunto: temporal (5 min) si esta en el deposito privado. */
+export async function enlaceAdjunto(f: Adjunto & { b64?: string }): Promise<string> {
+  if (!f.path && f.b64 && /^data:/.test(f.b64)) {
+    // Archivo guardado dentro de la ficha (aun no subido al deposito).
+    const coma = f.b64.indexOf(',');
+    const tipo = f.b64.slice(5, f.b64.indexOf(';')) || 'application/octet-stream';
+    const bin = atob(f.b64.slice(coma + 1));
+    const u = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+    return URL.createObjectURL(new Blob([u], { type: tipo }));
+  }
+  if (!f.path) throw new ErrorDatos('Este archivo aún no se ha subido a la nube desde la computadora.');
+  const { data, error } = await db.storage.from('adjuntos').createSignedUrl(f.path, 300);
+  if (error || !data?.signedUrl) throw new ErrorDatos('No se pudo abrir el archivo.');
+  return data.signedUrl;
+}
+
+export const MAX_ADJUNTO = 2.5 * 1024 * 1024; // mismo limite que el CRM web
+
+/** Sube un archivo al deposito privado y lo agrega a la ficha (igual que el CRM web). */
+export async function agregarAdjunto(modulo: Modulo, id: string, archivo: File): Promise<Reg> {
+  if (archivo.size > MAX_ADJUNTO) throw new ErrorDatos(`"${archivo.name.slice(0, 30)}" supera 2.5 MB.`);
+  const { data: s } = await db.auth.getSession();
+  const uid = s.session?.user.id;
+  if (!uid) throw new ErrorDatos('Tu sesión venció. Vuelve a entrar.');
+  const fid = nuevoId('F');
+  const ruta = `${uid}/${modulo}/${id}/${fid}-${archivo.name.replace(/[^\w.-]/g, '_')}`;
+  const { error } = await db.storage.from('adjuntos').upload(ruta, archivo, {
+    contentType: archivo.type || 'application/octet-stream', upsert: false,
+  });
+  if (error) throw new ErrorDatos('No se pudo subir el archivo.');
+  const nuevo = {
+    id: fid, name: archivo.name, type: archivo.type, size: archivo.size, b64: '', path: ruta,
+    fecha: new Date().toISOString().slice(0, 10),
   };
-  // Mismas listas que crea el CRM web, para que la ficha abra completa alla.
-  const extra = {
-    notas: limpiarTexto(n.notas),
-    interes: n.interes ? [limpiarTexto(n.interes, 60)] : [],
-    historial: [{ fecha: hoy, accion: '✨ Prospecto creado (app móvil)', resultado: '', tipo: 'sistema' }],
-    tareas: [], archivos: [], etiquetas: [], asegPreferidas: [],
-    esVentaCruzada: false, clienteIdVinculado: '',
-  };
-  const { error } = await db.from('prospectos').insert({ ...prospecto, es_venta_cruzada: false, extra });
-  if (error) throw new ErrorDatos(mensajeError(error));
-  return prospecto;
+  try {
+    return await actualizarCon(modulo, id, (a) => ({ archivos: [...adjuntos(a), nuevo] }));
+  } catch (e) {
+    await db.storage.from('adjuntos').remove([ruta]);
+    throw e;
+  }
 }
 
-export async function cambiarEtapaProspecto(id: string, etapa: string): Promise<Partial<Prospecto>> {
-  if (!(ETAPAS_VENTA as readonly string[]).includes(etapa)) throw new ErrorDatos('Etapa inválida.');
-  const cambios = { etapa_venta: etapa };
-  await actualizar('prospectos', id, cambios);
-  return cambios;
-}
-
-export async function fijarSeguimientoProspecto(id: string, f: string): Promise<Partial<Prospecto>> {
-  if (f && !/^\d{4}-\d{2}-\d{2}$/.test(f)) throw new ErrorDatos('Fecha inválida.');
-  const cambios = { f_seguimiento: f || null };
-  await actualizar('prospectos', id, cambios);
-  return cambios;
+export async function eliminarAdjunto(modulo: Modulo, id: string, f: Adjunto): Promise<Reg> {
+  const r = await actualizarCon(modulo, id, (a) => ({
+    archivos: adjuntos(a).filter((x) => (f.id ? x.id !== f.id : x.path !== f.path || x.name !== f.name)),
+  }));
+  if (f.path) await db.storage.from('adjuntos').remove([f.path]);
+  return r;
 }

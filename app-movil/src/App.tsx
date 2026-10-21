@@ -3,25 +3,23 @@ import { App as CapApp } from '@capacitor/app';
 import { Icono, type NombreIcono } from './components/Icono';
 import { Cargando, Vacio } from './components/Piezas';
 import { cerrarSesion, nivelMfa, sesionCaducada } from './lib/auth';
+import { cancelarAvisos, programarAvisos } from './lib/avisos';
 import { activarPantallaPrivada, esAppNativa, vigilarBloqueo } from './lib/bloqueo';
-import { cargarCartera, ErrorDatos, type Cartera } from './lib/datos';
+import { cargarCartera, ErrorDatos, txt, type Cartera, type Reg } from './lib/datos';
+import type { Modulo } from './lib/esquema';
 import { db } from './lib/supabase';
 import { Bloqueo, Login, SegundoPaso } from './screens/Acceso';
+import { Agenda, EditarTarea } from './screens/Agenda';
 import { Ajustes } from './screens/Ajustes';
-import { ClienteDetalle, Clientes } from './screens/Clientes';
 import { Inicio } from './screens/Inicio';
-import { PolizaDetalle, Polizas } from './screens/Polizas';
-import { SiniestroDetalle, Siniestros } from './screens/Siniestros';
-import { Tareas } from './screens/Tareas';
 import { Mas } from './screens/Mas';
-import { ProspectoDetalle, Prospectos } from './screens/Prospectos';
-import { cancelarAvisos, programarAvisos } from './lib/avisos';
+import {
+  ClienteFicha, Clientes, ComisionFicha, Comisiones, PagoFicha, Pagos, PolizaFicha, Polizas, ProspectoFicha, Prospectos,
+  SiniestroFicha, Siniestros, VehiculoFicha, Vehiculos, type Ctx,
+} from './screens/Modulos';
 
-export type Pestana = 'inicio' | 'clientes' | 'polizas' | 'tareas' | 'mas';
-export type Vista =
-  | { tipo: 'cliente' | 'poliza' | 'siniestro' | 'prospecto'; id: string }
-  | { tipo: 'ajustes' | 'siniestros' | 'prospectos' };
-export type Abrir = (v: Vista) => void;
+export type Pestana = 'inicio' | 'clientes' | 'polizas' | 'agenda' | 'mas';
+export type Vista = { t: 'ficha'; m: Modulo; id: string } | { t: 'lista'; m: Modulo } | { t: 'ajustes' };
 export type Avisar = (texto: string) => void;
 
 type Fase =
@@ -35,9 +33,14 @@ const PESTANAS: Array<[Pestana, string, NombreIcono]> = [
   ['inicio', 'Inicio', 'inicio'],
   ['clientes', 'Clientes', 'clientes'],
   ['polizas', 'Pólizas', 'polizas'],
-  ['tareas', 'Tareas', 'tareas'],
+  ['agenda', 'Agenda', 'tareas'],
   ['mas', 'Más', 'menu'],
 ];
+
+const NOMBRE_LISTA: Record<Modulo, string> = {
+  clientes: 'Clientes', polizas: 'Pólizas', siniestros: 'Siniestros', vehiculos: 'Autos / motos', pagos: 'Pagos',
+  prospectos: 'Prospectos', comisiones: 'Comisiones', tareas: 'Tareas',
+};
 
 export default function App() {
   const [fase, setFase] = useState<Fase>({ f: 'arranque' });
@@ -168,16 +171,27 @@ export default function App() {
   if (fase.f === 'bloqueada') return <Bloqueo onDesbloquear={() => setFase({ f: 'dentro' })} onSalir={salir} />;
 
   /* ---------------- dentro ---------------- */
-  const abrir: Abrir = (v) => setPila((p) => [...p, v]);
+  const ir = (v: Vista) => setPila((p) => [...p, v]);
   const actual = pila[pila.length - 1];
 
-  const cambiar = <K extends 'clientes' | 'siniestros' | 'tareas' | 'prospectos'>(tabla: K, id: string, c: Partial<Cartera[K][number]>) =>
-    setCartera((ca) => ca && { ...ca, [tabla]: ca[tabla].map((x) => (x.id === id ? { ...x, ...c } : x)) });
+  const ctx: Ctx | null = cartera && {
+    cartera,
+    avisar,
+    abrir: (m, id) => ir({ t: 'ficha', m, id }),
+    poner: (m, r) => setCartera((c) => {
+      if (!c) return c;
+      const lista = c[m];
+      const i = lista.findIndex((x) => x.id === r.id);
+      return { ...c, [m]: i >= 0 ? lista.map((x) => (x.id === r.id ? r : x)) : [r, ...lista] };
+    }),
+    quitar: (m, id) => setCartera((c) => c && { ...c, [m]: c[m].filter((x) => x.id !== id) }),
+    ponerMeta: (k, v) => setCartera((c) => c && { ...c, meta: { ...c.meta, [k]: v } }),
+  };
 
   let titulo = PESTANAS.find((p) => p[0] === pestana)![1];
   let cuerpo: React.ReactNode;
 
-  if (!cartera) {
+  if (!ctx) {
     cuerpo = errorCarga ? (
       <Vacio>
         <p>{errorCarga}</p>
@@ -187,59 +201,58 @@ export default function App() {
     ) : (
       <Cargando texto="Cargando cartera…" />
     );
-  } else if (actual?.tipo === 'ajustes') {
+  } else if (actual?.t === 'ajustes') {
     titulo = 'Ajustes';
-    cuerpo = <Ajustes correo={correo} cartera={cartera} onSalir={salir} avisar={avisar} />;
-  } else if (actual?.tipo === 'siniestros') {
-    titulo = 'Siniestros';
-    cuerpo = <Siniestros cartera={cartera} abrir={abrir} />;
-  } else if (actual?.tipo === 'prospectos') {
-    titulo = 'Prospectos';
-    cuerpo = (
-      <Prospectos cartera={cartera} abrir={abrir} avisar={avisar}
-        alCrear={(p) => setCartera((ca) => ca && { ...ca, prospectos: [p, ...ca.prospectos] })} />
-    );
-  } else if (actual?.tipo === 'prospecto') {
-    const p = cartera.prospectos.find((x) => x.id === actual.id);
-    titulo = p?.nombre || 'Prospecto';
-    cuerpo = p ? (
-      <ProspectoDetalle prospecto={p} avisar={avisar} alCambiar={(cb) => cambiar('prospectos', p.id, cb)} />
-    ) : <Vacio>Este prospecto ya no existe.</Vacio>;
-  } else if (actual?.tipo === 'cliente') {
-    const c = cartera.clientes.find((x) => x.id === actual.id);
-    titulo = c?.nombre || 'Cliente';
-    cuerpo = c ? (
-      <ClienteDetalle cliente={c} cartera={cartera} abrir={abrir} avisar={avisar}
-        alCambiar={(cb) => cambiar('clientes', c.id, cb)} />
-    ) : <Vacio>Este cliente ya no existe.</Vacio>;
-  } else if (actual?.tipo === 'poliza') {
-    const p = cartera.polizas.find((x) => x.id === actual.id);
-    titulo = p ? `Póliza ${p.num ?? ''}` : 'Póliza';
-    cuerpo = p ? (
-      <PolizaDetalle poliza={p} cartera={cartera} abrir={abrir} avisar={avisar}
-        alPagar={(pg) => setCartera((ca) => ca && { ...ca, pagos: [pg, ...ca.pagos] })} />
-    ) : <Vacio>Esta póliza ya no existe.</Vacio>;
-  } else if (actual?.tipo === 'siniestro') {
-    const s = cartera.siniestros.find((x) => x.id === actual.id);
-    titulo = 'Siniestro';
-    cuerpo = s ? (
-      <SiniestroDetalle siniestro={s} cartera={cartera} abrir={abrir} avisar={avisar}
-        alCambiar={(cb) => cambiar('siniestros', s.id, cb)} />
-    ) : <Vacio>Este siniestro ya no existe.</Vacio>;
+    cuerpo = <Ajustes correo={correo} cartera={ctx.cartera} onSalir={salir} avisar={avisar} />;
+  } else if (actual?.t === 'lista') {
+    titulo = NOMBRE_LISTA[actual.m];
+    const L = { siniestros: Siniestros, prospectos: Prospectos, pagos: Pagos, vehiculos: Vehiculos, comisiones: Comisiones,
+      clientes: Clientes, polizas: Polizas, tareas: Agenda }[actual.m];
+    cuerpo = <L ctx={ctx} />;
+  } else if (actual?.t === 'ficha') {
+    const r: Reg | undefined = ctx.cartera[actual.m].find((x) => x.id === actual.id);
+    if (!r) {
+      cuerpo = <Vacio>Este registro ya no existe.</Vacio>;
+    } else if (actual.m === 'clientes') {
+      titulo = txt(r, 'nombre') || 'Cliente';
+      cuerpo = <ClienteFicha ctx={ctx} c={r} />;
+    } else if (actual.m === 'polizas') {
+      titulo = `Póliza ${txt(r, 'num')}`;
+      cuerpo = <PolizaFicha ctx={ctx} p={r} />;
+    } else if (actual.m === 'siniestros') {
+      titulo = txt(r, 'nombre') || 'Siniestro';
+      cuerpo = <SiniestroFicha ctx={ctx} s={r} />;
+    } else if (actual.m === 'vehiculos') {
+      titulo = txt(r, 'placa') || 'Vehículo';
+      cuerpo = <VehiculoFicha ctx={ctx} v={r} />;
+    } else if (actual.m === 'pagos') {
+      titulo = 'Pago';
+      cuerpo = <PagoFicha ctx={ctx} p={r} />;
+    } else if (actual.m === 'comisiones') {
+      titulo = 'Comisión';
+      cuerpo = <ComisionFicha ctx={ctx} c={r} />;
+    } else if (actual.m === 'prospectos') {
+      titulo = txt(r, 'nombre') || 'Prospecto';
+      cuerpo = <ProspectoFicha ctx={ctx} p={r} />;
+    } else {
+      titulo = 'Agenda';
+      cuerpo = (
+        <>
+          <Agenda ctx={ctx} />
+          <EditarTarea ctx={ctx} r={r} fecha={txt(r, 'fechaLimite')} onCerrar={() => setPila((p) => p.slice(0, -1))} />
+        </>
+      );
+    }
   } else if (pestana === 'inicio') {
-    cuerpo = <Inicio cartera={cartera} abrir={abrir} irA={setPestana} />;
+    cuerpo = <Inicio ctx={ctx} irA={setPestana} irLista={(m) => ir({ t: 'lista', m })} />;
   } else if (pestana === 'clientes') {
-    cuerpo = <Clientes cartera={cartera} abrir={abrir} />;
+    cuerpo = <Clientes ctx={ctx} />;
   } else if (pestana === 'polizas') {
-    cuerpo = <Polizas cartera={cartera} abrir={abrir} />;
-  } else if (pestana === 'mas') {
-    cuerpo = <Mas cartera={cartera} abrir={abrir} />;
+    cuerpo = <Polizas ctx={ctx} />;
+  } else if (pestana === 'agenda') {
+    cuerpo = <Agenda ctx={ctx} />;
   } else {
-    cuerpo = (
-      <Tareas cartera={cartera} avisar={avisar}
-        alCrear={(t) => setCartera((ca) => ca && { ...ca, tareas: [t, ...ca.tareas] })}
-        alCambiar={(id, c) => cambiar('tareas', id, c)} />
-    );
+    cuerpo = <Mas ctx={ctx} irLista={(m) => ir({ t: 'lista', m })} irAjustes={() => ir({ t: 'ajustes' })} />;
   }
 
   return (
@@ -251,13 +264,9 @@ export default function App() {
           </button>
         )}
         <h2>{titulo}</h2>
-        {!actual && (
-          <>
-            <button type="button" aria-label="Actualizar" onClick={recargar} disabled={cargando}>
-              <Icono nombre="recargar" />
-            </button>
-          </>
-        )}
+        <button type="button" aria-label="Actualizar" onClick={recargar} disabled={cargando} className={cargando ? 'girando' : ''}>
+          <Icono nombre="recargar" />
+        </button>
       </header>
       <div className="contenido" ref={contenido}>{cuerpo}</div>
       <nav className="pestanas">
