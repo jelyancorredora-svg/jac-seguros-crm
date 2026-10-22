@@ -2904,16 +2904,32 @@ document.addEventListener('click',function(ev){var t=ev.target.closest('[data-et
 function initFileInp(inputId,listId){
  const inp=document.getElementById(inputId);if(!inp||inp._bound)return;inp._bound=true;
  inp.addEventListener('change',e=>{
- for(const f of e.target.files){
+ for(const f0 of e.target.files){ jacComprimirFoto(f0).then(function(f){
  /* Archivos grandes: van DIRECTO a la nube (sin limite propio del CRM; el
     limite lo pone el plan de Supabase). No se guardan dentro del navegador. */
- if(f.size>2.5*1024*1024){jacSubirGrande(f).then(function(it){if(it){_pf.push(it);renderPF(listId);}});continue;}
+ if(f.size>2.5*1024*1024){jacSubirGrande(f).then(function(it){if(it){_pf.push(it);renderPF(listId);}});return;}
  const r=new FileReader();
  r.onload=ev=>{_pf.push({id:'F'+uid(),name:f.name,type:f.type,size:f.size,b64:ev.target.result,fecha:TODAY.toISOString().split('T')[0]});renderPF(listId);};
  r.readAsDataURL(f);
+ });
  }
  inp.value='';
  });
+}
+/* Fotos 5–10 veces mas livianas (igual que la app): JPEG de 2000 px, calidad 0.82.
+   PDF, Word, Excel y videos no se tocan. Si algo falla, se usa la original. */
+async function jacComprimirFoto(f){
+ try{
+  if(localStorage.getItem('jac_comprimir_fotos')==='no')return f;
+  if(!/^image\/(jpe?g|png|webp|heic|heif)$/i.test(f.type||'')||f.size<350*1024)return f;
+  var url=URL.createObjectURL(f),img=new Image();img.src=url;await img.decode();
+  var w=img.naturalWidth,h=img.naturalHeight,m=Math.max(w,h),k=m>2000?2000/m:1;
+  var c=document.createElement('canvas');c.width=Math.round(w*k);c.height=Math.round(h*k);
+  var g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);
+  var b=await new Promise(function(r){c.toBlob(r,'image/jpeg',0.82);});
+  if(!b||b.size>=f.size*0.9)return f;
+  return new File([b],f.name.replace(/\.(jpe?g|png|webp|heic|heif)$/i,'')+'.jpg',{type:'image/jpeg'});
+ }catch(e){return f;}
 }
 async function jacSubirGrande(f){
  try{
@@ -2934,6 +2950,7 @@ async function jacSubirGrande(f){
   return {id:fid,name:f.name,type:f.type,size:f.size,path:ruta,fecha:TODAY.toISOString().split('T')[0]};
  }catch(e){toast('No se pudo subir "'+f.name.slice(0,20)+'"','err');return null;}
 }
+function jacUrlDrive(f){var u=String(f.url||'');return /^https:\/\/(drive|docs)\.google\.com\//.test(u)?u:'https://drive.google.com/file/d/'+encodeURIComponent(f.drive)+'/view';}
 function uid_(){return (typeof uid==='function')?uid():(Date.now().toString(36)+Math.random().toString(36).slice(2,7));}
 /* Abrir un archivo que esta solo en la nube (grande o subido desde la app) */
 async function jacAbrirNube(ruta){
@@ -2949,6 +2966,7 @@ function renderFL(files,rid,rtype){
  const isImg=f.name&&/\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(f.name);
  const isPDF=f.name&&/\.pdf$/i.test(f.name);
  const canView=isImg||isPDF;
+ if(!f.b64&&f.drive){return`<div class="fitem"><span title="${esc(f.name)}">📁 ${esc(f.name.length>16?f.name.slice(0,13)+'...':f.name)}</span><a href="${esc(jacUrlDrive(f))}" target="_blank" rel="noopener noreferrer" class="btn bgh bic" style="padding:1px 5px" title="Abrir en Google Drive">👁️</a><button onclick="delFile('${rid}','${rtype}','${f.id}')" class="btn bgh bic" style="padding:1px 4px;color:var(--rd)" title="Eliminar">✕</button></div>`;}
  if(!f.b64&&f.path){return`<div class="fitem"><span title="${esc(f.name)}">☁️ ${esc(f.name.length>16?f.name.slice(0,13)+'...':f.name)}</span><button data-p="${esc(f.path)}" onclick="jacAbrirNube(this.dataset.p)" class="btn bgh bic" style="padding:1px 5px" title="Abrir">👁️</button><button onclick="delFile('${rid}','${rtype}','${f.id}')" class="btn bgh bic" style="padding:1px 4px;color:var(--rd)" title="Eliminar">✕</button></div>`;}
  const safe=f.b64?(f.b64.replace(/'/g,"\\'")):('');
  const viewBtn=canView?`<button onclick="viewFile('${safe.substring(0,30)}...','${esc(f.name)}','${esc(rid)}','${esc(rtype)}','${esc(f.id||'')}')" class="btn bgh bic" style="padding:1px 5px" title="Ver">👁️</button>`:'';
@@ -2960,6 +2978,7 @@ function renderFLFull(files,rid,rtype){
  return files.map(f=>{
  const isImg=f.name&&/\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(f.name);
  const isPDF=f.name&&/\.pdf$/i.test(f.name);
+ if(!f.b64&&f.drive){return`<div style="margin:2px 0"><a href="${esc(jacUrlDrive(f))}" target="_blank" rel="noopener noreferrer" class="btn bsm bin">📁 Abrir en Drive: ${esc(f.name.length>25?f.name.slice(0,22)+'...':f.name)}</a></div>`;}
  if(!f.b64&&f.path){return`<div style="margin:2px 0"><button data-p="${esc(f.path)}" onclick="jacAbrirNube(this.dataset.p)" class="btn bsm bin">☁️ Abrir: ${esc(f.name.length>25?f.name.slice(0,22)+'...':f.name)}</button></div>`;}
  if(isImg&&f.b64){return`<div style="margin:4px 0"><img src="${esc(f.b64)}" style="max-width:100%;max-height:200px;border-radius:6px;border:1px solid var(--bd);cursor:pointer" onclick="openFileViewer('${esc(f.b64).replace(/'/g,"\\'")}','${esc(f.name)}','img')" title="Click para ampliar"><div style="font-size:10px;color:var(--mu);margin-top:2px">${esc(f.name)}</div></div>`;}
  if(isPDF&&f.b64){return`<div style="margin:4px 0"><button class="btn bsm bin" onclick="openFileViewer('${esc(f.b64).replace(/'/g,"\\'")}','${esc(f.name)}','pdf')">📄 Ver PDF: ${esc(f.name.length>25?f.name.slice(0,22)+'...':f.name)}</button></div>`;}
@@ -2971,7 +2990,7 @@ function viewFile(b64Short,name,rid,rtype,fid){
  const arr=maps[rtype];if(!arr)return;
  const obj=arr.find(x=>x.id===rid);if(!obj||!obj.archivos)return;
  const f=obj.archivos.find(x=>x.id===fid||x.name===name);if(!f)return;
- if(!f.b64){if(f.path)jacAbrirNube(f.path);return;}
+ if(!f.b64){if(f.drive){var wd=window.open(jacUrlDrive(f),'_blank');if(wd)wd.opener=null;return;}if(f.path)jacAbrirNube(f.path);return;}
  const isImg=name&&/\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(name);
  openFileViewer(f.b64,name,isImg?'img':'pdf');
 }
