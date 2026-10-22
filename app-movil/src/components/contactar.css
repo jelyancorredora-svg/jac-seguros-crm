@@ -1,0 +1,15 @@
+/* 💬 / 📧 en filas y fichas */
+.icono-accion.verde { background: var(--ok-f); color: var(--ok); }
+.boton.verde-wa { background: #16a34a; }
+@media (max-width: 380px) {
+  .fila-acciones { gap: 4px; }
+  .fila-acciones .icono-accion { width: 30px; height: 30px; font-size: 13px; }
+}
+.com-fila { align-items: flex-start; }
+.com-texto { font-size: 13px; color: var(--suave); white-space: pre-wrap; word-break: break-word; max-height: 96px; overflow: hidden; margin-top: 4px; }
+.crm-orden { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--suave); margin-bottom: 8px; }
+.crm-orden select { flex: 1; }
+/* Si no caben nombre y botones, los botones bajan a una segunda linea (el nombre nunca se aplasta) */
+div.fila:has(> .fila-acciones) { flex-wrap: wrap; row-gap: 8px; }
+div.fila > .fila-boton { flex: 1 1 190px; }
+div.fila > .fila-acciones { margin-left: auto; }

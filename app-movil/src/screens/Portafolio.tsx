@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
+import { datosPoliza } from '../lib/contacto';
+import { BotonesContacto } from '../components/Contactar';
 import { Vacio } from '../components/Piezas';
 import { ListaLarga } from '../components/Registro';
 import { fec, num, txt } from '../lib/datos';
-import { diasHasta, dinero, enlaceWhatsApp, fecha } from '../lib/formato';
+import { diasHasta, dinero, fecha } from '../lib/formato';
 import { polizaCancelada } from '../lib/reglas';
 import type { Ctx } from './Modulos';
 
@@ -44,7 +46,6 @@ export function Portafolio({ ctx }: { ctx: Ctx }) {
           const cl = cartera.clientes.find((c) => c.id === txt(p, 'clienteId'));
           const nom = txt(cl, 'nombre') || txt(p, 'nombreCliente') || '—';
           const d = diasHasta(fec(p, 'fechaFin'));
-          const wa = enlaceWhatsApp(txt(cl, 'cel') || txt(p, 'celCliente'));
           return (
             <div key={p.id} className="fila">
               <button type="button" className="fila-boton" onClick={() => ctx.abrir('polizas', p.id)}>
@@ -58,7 +59,7 @@ export function Portafolio({ ctx }: { ctx: Ctx }) {
                 </span>
               </button>
               {cl && <button type="button" className="mini" onClick={() => ctx.abrir('clientes', cl.id)} aria-label={`Ver cliente ${nom}`}>👤</button>}
-              {wa && <a className="mini verde" href={wa} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">💬</a>}
+              <div className="fila-acciones"><BotonesContacto ctx={ctx} d={datosPoliza(p, cartera)} /></div>
             </div>
           );
         }} />

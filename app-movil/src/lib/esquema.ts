@@ -278,6 +278,6 @@ export const PREFIJO_ID: Record<Modulo, string> = {
 
 /** Claves internas que no se muestran como campo suelto */
 export const OCULTOS = new Set([
-  'id', 'archivos', 'historial', 'historialWA', 'tareas', 'cotizaciones', 'amparos', '_edicionManual', 'etiquetas',
+  'id', 'archivos', 'historial', 'historialWA', 'historialComms', 'historialEmail', 'tareas', 'cotizaciones', 'amparos', '_edicionManual', 'etiquetas',
   'asegPreferidas', 'interes', 'creadoDesde', 'reminderSent', '_autoTipo', 'contactoLibre',
 ]);

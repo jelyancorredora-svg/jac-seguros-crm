@@ -1,4 +1,6 @@
 import { useMemo, useState, type FormEvent } from 'react';
+import { datosPago, datosPoliza, datosProspecto, datosTarea, type Datos } from '../lib/contacto';
+import { BotonesContacto } from '../components/Contactar';
 import { Fila, Hoja, Vacio } from '../components/Piezas';
 import { FichaCampos } from '../components/Registro';
 import {
@@ -214,6 +216,7 @@ function EventosDia({ ctx, evs, onTarea, onHecha }: {
               {e.tipo === 'tar' && txt(e.r, 'hora') && <small> · {txt(e.r, 'hora')}</small>}
               {e.tipo === 'tar' && txt(e.r, 'reminder') && txt(e.r, 'reminder') !== 'ninguno' && ' 🔔'}</span>
           </button>
+          <ContactoDe ctx={ctx} d={e.tipo === 'tar' ? datosTarea(e.r, ctx.cartera) : e.tipo === 'pol' ? datosPoliza(e.r, ctx.cartera) : datosProspecto(e.r)} />
           {e.tipo === 'tar' && (
             <button type="button" className="ag-check" aria-label="Marcar realizada" onClick={() => onHecha(e.r)}>✓</button>
           )}
@@ -337,6 +340,7 @@ function TareasAgenda({ ctx, onTarea, onHecha }: { ctx: Ctx; onTarea: (r: Reg) =
                       txt(t, 'etapaTarea')].filter(Boolean).join(' · ')}
                   </small>
                 </button>
+                <ContactoDe ctx={ctx} d={datosTarea(t, ctx.cartera)} />
                 {tareaAbierta(t) && <button type="button" className="ag-check" aria-label="Marcar realizada" onClick={() => onHecha(t)}>✓</button>}
               </div>
             );
@@ -1018,8 +1022,7 @@ function Cobros({ ctx }: { ctx: Ctx }) {
               const pol = c.polizas.find((x) => x.id === txt(p, 'polizaId'));
               const cl = pol ? c.clientes.find((x) => x.id === txt(pol, 'clienteId')) : undefined;
               const nom = cl ? txt(cl, 'nombre') : txt(p, 'cliente') || 'Cliente';
-              const wa = enlaceWhatsApp(txt(cl, 'cel'));
-              const correo = enlaceCorreo(txt(cl, 'email'));
+              const dp = datosPago(p, c);
               const msg = `Hola ${nom.split(' ')[0]}, le contacto de JAC Seguros por pago pendiente.`;
               return (
                 <Fila key={p.id} titulo={nom}
@@ -1027,8 +1030,7 @@ function Cobros({ ctx }: { ctx: Ctx }) {
                   onClick={() => (cl ? ctx.abrir('clientes', cl.id) : ctx.abrir('pagos', p.id))}
                   acciones={(
                     <>
-                      {wa && <a className="icono-accion" style={{ display: 'grid', placeItems: 'center', background: 'var(--ok-f)' }} href={`${wa}?text=${encodeURIComponent(msg)}`} target="_blank" rel="noopener noreferrer" aria-label={`WhatsApp a ${nom}`}>💬</a>}
-                      {correo && <a className="icono-accion" style={{ display: 'grid', placeItems: 'center' }} href={correo} aria-label={`Correo a ${nom}`}>📧</a>}
+                      <BotonesContacto ctx={ctx} d={{ ...dp, wa: [{ motivo: 'Pago pendiente', msg }, ...(dp.wa ?? [])] }} />
                     </>
                   )} />
               );
@@ -1038,4 +1040,10 @@ function Cobros({ ctx }: { ctx: Ctx }) {
       )}
     </>
   );
+}
+
+/** 💬 / 📧 del cliente o prospecto relacionado con un evento de la agenda */
+function ContactoDe({ ctx, d }: { ctx: Ctx; d: Datos | null }) {
+  if (!d) return null;
+  return <div className="fila-acciones"><BotonesContacto ctx={ctx} d={d} /></div>;
 }

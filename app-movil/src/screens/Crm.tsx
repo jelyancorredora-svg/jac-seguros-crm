@@ -1,8 +1,11 @@
 import { useMemo, useState } from 'react';
+import { datosCliente, datosPoliza } from '../lib/contacto';
+import { BotonesContacto } from '../components/Contactar';
 import { Fila, Hoja, Vacio, inicial } from '../components/Piezas';
+import { ListaLarga } from '../components/Registro';
 import { avanzarEtapa, llevarAPipeline, PIPE_ETAPAS, ventaCruzada, type OportunidadVC } from '../lib/crm';
 import { ErrorDatos, fec, num, txt, type Reg } from '../lib/datos';
-import { diasHasta, dinero, enlaceWhatsApp, fecha } from '../lib/formato';
+import { diasHasta, dinero, fecha, normalizar } from '../lib/formato';
 import { polizaCancelada, prospectoAbierto, seguimientoProspecto } from '../lib/reglas';
 import { AccionesFila, Prospectos, type Ctx } from './Modulos';
 
@@ -63,9 +66,14 @@ export function MoverEtapa({ ctx, p, onCerrar }: { ctx: Ctx; p: Reg; onCerrar: (
 
 /* ---------------- pipeline (tablero) ---------------- */
 
+type VistaPipe = 'tablero' | 'lista';
+const leerVista = (): VistaPipe => { try { return localStorage.getItem('jac_crm_vista') === 'lista' ? 'lista' : 'tablero'; } catch { return 'tablero'; } };
+
 function Pipeline({ ctx }: { ctx: Ctx }) {
   const [mover, setMover] = useState<Reg | null>(null);
   const [soloVC, setSoloVC] = useState(false);
+  const [vista, setVistaE] = useState<VistaPipe>(leerVista);
+  const setVista = (v: VistaPipe) => { setVistaE(v); try { localStorage.setItem('jac_crm_vista', v); } catch { /* sin almacenamiento */ } };
   const pros = ctx.cartera.prospectos.filter((p) => !soloVC || p.esVentaCruzada === true);
   const total = pros.filter((p) => txt(p, 'etapaVenta') !== 'Perdido').reduce((s, p) => s + (num(p, 'montoEstimado') ?? 0), 0);
   const ganados = pros.filter((p) => txt(p, 'etapaVenta') === 'Cliente ganado').length;
@@ -78,6 +86,11 @@ function Pipeline({ ctx }: { ctx: Ctx }) {
         <div className="kpi"><b>{conv}%</b><span>Conversión</span></div>
         <button className="kpi" type="button" onClick={() => setSoloVC(!soloVC)}><b>{soloVC ? 'VC' : 'Todos'}</b><span>{soloVC ? 'Solo venta cruzada' : 'Tocar: solo venta cruzada'}</span></button>
       </div>
+      <div className="filtros">
+        <button type="button" className={vista === 'tablero' ? 'activa' : ''} onClick={() => setVista('tablero')}>🗂 Tablero</button>
+        <button type="button" className={vista === 'lista' ? 'activa' : ''} onClick={() => setVista('lista')}>☰ Lista</button>
+      </div>
+      {vista === 'lista' ? <ListaPipeline ctx={ctx} pros={pros} onMover={setMover} /> : (<>
       <div className="pipe-saltos">
         {PIPE_ETAPAS.map((et) => {
           const n = pros.filter((p) => (txt(p, 'etapaVenta') || 'Contacto inicial') === et.id).length;
@@ -115,7 +128,6 @@ function Pipeline({ ctx }: { ctx: Ctx }) {
                         <div className="barra"><div className="barra-relleno" style={{ width: `${prob}%`, background: pc }} /></div>
                       </button>
                       <div className="pipe-acciones">
-                        {enlaceWhatsApp(txt(p, 'cel')) && <a className="mini verde" href={enlaceWhatsApp(txt(p, 'cel'))!} target="_blank" rel="noopener noreferrer">💬</a>}
                         <button type="button" className="mini" onClick={() => setMover(p)}>Mover ➜</button>
                         <AccionesFila ctx={ctx} modulo="prospectos" r={p} />
                       </div>
@@ -128,7 +140,79 @@ function Pipeline({ ctx }: { ctx: Ctx }) {
         })}
       </div>
       <p className="sincro">Desliza a los lados para ver todas las etapas.</p>
+      </>)}
       {mover && <MoverEtapa ctx={ctx} p={mover} onCerrar={() => setMover(null)} />}
+    </>
+  );
+}
+
+/* ---------------- pipeline (lista, como "☰ Lista" del CRM web) ---------------- */
+
+type OrdenLista = 'seg' | 'monto' | 'nombre' | 'etapa' | 'prob';
+
+function ListaPipeline({ ctx, pros, onMover }: { ctx: Ctx; pros: Reg[]; onMover: (p: Reg) => void }) {
+  const [etapa, setEtapa] = useState('');
+  const [q, setQ] = useState('');
+  const [orden, setOrden] = useState<OrdenLista>('seg');
+  const idxEtapa = (p: Reg) => PIPE_ETAPAS.findIndex((e) => e.id === (txt(p, 'etapaVenta') || 'Contacto inicial'));
+  const lista = useMemo(() => {
+    const t = normalizar(q);
+    const l = pros.filter((p) => (!etapa || (txt(p, 'etapaVenta') || 'Contacto inicial') === etapa)
+      && (!t || ['nombre', 'cel', 'email', 'fuente', 'cedula'].some((k) => normalizar(txt(p, k)).includes(t))
+        || (Array.isArray(p.interes) && normalizar((p.interes as string[]).join(' ')).includes(t))));
+    const cmp: Record<OrdenLista, (a: Reg, b: Reg) => number> = {
+      seg: (a, b) => (seguimientoProspecto(a) || '9999').localeCompare(seguimientoProspecto(b) || '9999'),
+      monto: (a, b) => (num(b, 'montoEstimado') ?? 0) - (num(a, 'montoEstimado') ?? 0),
+      nombre: (a, b) => txt(a, 'nombre').localeCompare(txt(b, 'nombre'), 'es'),
+      etapa: (a, b) => idxEtapa(a) - idxEtapa(b),
+      prob: (a, b) => (num(b, 'probabilidad') ?? 0) - (num(a, 'probabilidad') ?? 0),
+    };
+    return l.sort(cmp[orden]);
+  }, [pros, etapa, q, orden]);
+  const total = lista.reduce((s, p) => s + (num(p, 'montoEstimado') ?? 0), 0);
+  return (
+    <>
+      <input className="buscador" type="search" placeholder="Buscar nombre, teléfono, interés…" value={q} onChange={(e) => setQ(e.target.value)} />
+      <div className="chips">
+        <button type="button" className={`chip${!etapa ? ' azul' : ''}`} onClick={() => setEtapa('')}>Todas {pros.length}</button>
+        {PIPE_ETAPAS.map((et) => {
+          const n = pros.filter((p) => (txt(p, 'etapaVenta') || 'Contacto inicial') === et.id).length;
+          return n > 0 && (
+            <button key={et.id} type="button" className="chip" onClick={() => setEtapa(etapa === et.id ? '' : et.id)}
+              style={etapa === et.id ? { background: et.color, borderColor: et.color, color: '#fff' } : { borderColor: et.color, color: et.color }}>
+              {et.label} {n}
+            </button>
+          );
+        })}
+      </div>
+      <label className="crm-orden">Ordenar por
+        <select value={orden} onChange={(e) => setOrden(e.target.value as OrdenLista)}>
+          <option value="seg">Próximo seguimiento</option>
+          <option value="monto">Monto estimado</option>
+          <option value="prob">Probabilidad</option>
+          <option value="etapa">Etapa</option>
+          <option value="nombre">Nombre</option>
+        </select>
+      </label>
+      <p className="contador">{lista.length} registros · {dinero(total)}</p>
+      <ListaLarga items={lista} vacio="No hay registros en esta vista." render={(p) => {
+        const et = PIPE_ETAPAS[idxEtapa(p)] ?? PIPE_ETAPAS[0];
+        const seg = seguimientoProspecto(p);
+        const d = diasHasta(seg);
+        const interes = Array.isArray(p.interes) ? (p.interes as string[]).slice(0, 2).join(', ') : '';
+        return (
+          <Fila key={p.id} inicial={inicial(txt(p, 'nombre'))}
+            titulo={<>{txt(p, 'nombre') || 'Sin nombre'}{p.esVentaCruzada === true && <span className="etiqueta e-aviso"> VC</span>}</>}
+            sub={[interes || txt(p, 'fuente'), txt(p, 'prioridad'), num(p, 'montoEstimado') ? dinero(num(p, 'montoEstimado')) : '',
+              num(p, 'probabilidad') ? `${num(p, 'probabilidad')}%` : '', seg ? `📅 ${fecha(seg)}${d !== null && d < 0 ? ' ⚠' : ''}` : ''].filter(Boolean).join(' · ')}
+            derecha={<span className="etiqueta" style={{ background: et.color + '22', color: et.color }}>{et.label}</span>}
+            onClick={() => ctx.abrir('prospectos', p.id)}
+            acciones={<>
+              <button className="icono-accion" type="button" aria-label={`Mover ${txt(p, 'nombre')}`} onClick={() => onMover(p)}>➜</button>
+              <AccionesFila ctx={ctx} modulo="prospectos" r={p} />
+            </>} />
+        );
+      }} />
     </>
   );
 }
@@ -205,7 +289,7 @@ function VentaCruzada({ ctx }: { ctx: Ctx }) {
         const cl = o.cliente;
         const nombre1 = txt(cl, 'nombre').split(' ')[0];
         const msg = `Hola ${nombre1} 👋🏼\n\nTe contacto de *JAC Seguros*.\n\nBasado en tu perfil te recomiendo agregar *${o.ramo}* para complementar tu protección.\n\n¿Podemos hablar?`;
-        const wa = enlaceWhatsApp(txt(cl, 'cel') || txt(cl, 'tel'));
+        const dVC = datosCliente(cl);
         const sc = Math.round(o.score);
         return (
           <div key={cl.id + o.ramo} className="tarjeta vc">
@@ -215,7 +299,7 @@ function VentaCruzada({ ctx }: { ctx: Ctx }) {
             </div>
             <p className="contador">Ofrecer <b>{o.ramo}</b> · {o.mensaje}</p>
             <div className="ag-anot-botones">
-              {wa && <a className="mini verde" href={`${wa}?text=${encodeURIComponent(msg)}`} target="_blank" rel="noopener noreferrer">💬 WhatsApp</a>}
+              <BotonesContacto ctx={ctx} d={{ ...dVC, wa: [{ motivo: 'Venta cruzada', msg }, ...(dVC.wa ?? [])] }} />
               <button type="button" className="mini" disabled={ocupado === cl.id + o.ramo} onClick={() => alPipeline(o)}>➜ Al pipeline</button>
             </div>
           </div>
@@ -254,7 +338,7 @@ function Renovaciones({ ctx }: { ctx: Ctx }) {
               const dd = diasHasta(fec(p, 'fechaFin')) as number;
               const nombre = txt(cl, 'nombre') || txt(p, 'nombreCliente') || '—';
               const msg = `Hola ${nombre.split(' ')[0]} 👋🏼\n\nTe escribo de *JAC Seguros*. Tu póliza *${txt(p, 'ramo')}* N.º ${txt(p, 'num')} con ${txt(p, 'aseg')} ${dd < 0 ? 'venció' : 'vence'} el ${fecha(fec(p, 'fechaFin'))}. ¿Te ayudo con la renovación?`;
-              const wa = enlaceWhatsApp(txt(cl, 'cel') || txt(p, 'celCliente'));
+              const dR = datosPoliza(p, ctx.cartera);
               return (
                 <div key={p.id} className="fila">
                   <button type="button" className="fila-boton" onClick={() => ctx.abrir('polizas', p.id)}>
@@ -264,7 +348,7 @@ function Renovaciones({ ctx }: { ctx: Ctx }) {
                     </div>
                     <span className={`etiqueta ${clase}`}>{dd < 0 ? `${-dd}d atrás` : `${dd}d`}</span>
                   </button>
-                  {wa && <a className="mini verde" href={`${wa}?text=${encodeURIComponent(msg)}`} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp de renovación">💬</a>}
+                  <div className="fila-acciones"><BotonesContacto ctx={ctx} d={{ ...dR, wa: [{ motivo: 'Renovación (corto)', msg }, ...(dR.wa ?? [])] }} /></div>
                 </div>
               );
             })}

@@ -1,13 +1,15 @@
 import { useMemo, useState, type ReactNode } from 'react';
 import { Icono } from '../components/Icono';
-import { Accion, EtiquetaEstado, Fila, Hoja, Vacio, inicial } from '../components/Piezas';
+import { EtiquetaEstado, Fila, Hoja, Vacio, inicial } from '../components/Piezas';
 import { Adjuntos, FichaCampos, FormRegistro, Historial, ListaLarga } from '../components/Registro';
 import { avanzarEtapa } from '../lib/crm';
+import { BotonesContacto, Comunicaciones, type DatosContacto } from '../components/Contactar';
+import { datosCliente, datosPago, datosPoliza, datosProspecto, datosSiniestro, datosTarea, datosVehiculo } from '../lib/contacto';
 import { HistorialActividad } from './web/Reportes';
 import { eliminarRegistro, ErrorDatos, fec, guardarRegistro, num, txt, type Cartera, type Reg } from '../lib/datos';
 import { ESTADOS_COMERCIALES, ETAPAS_VENTA, type Modulo } from '../lib/esquema';
 import {
-  diasHasta, dinero, enlaceCorreo, enlaceLlamada, enlaceWhatsApp, fecha, hoyISO, normalizar,
+  diasHasta, dinero, fecha, hoyISO, normalizar,
 } from '../lib/formato';
 import {
   esEmpresa, estadoComercial, polizaCancelada, polizaVigente, prospectoAbierto, seguimientoProspecto, siniestroAbierto,
@@ -60,23 +62,7 @@ function BotonNuevo({ texto, onClick }: { texto: string; onClick: () => void }) 
   );
 }
 
-const wa = (r: Reg | undefined, k = 'cel') => {
-  const tel = txt(r, k);
-  const cod = txt(r, 'codPais');
-  if (!tel) return null;
-  const d = tel.replace(/\D/g, '');
-  return cod && cod !== '507' && !d.startsWith(cod) ? enlaceWhatsApp('+' + cod + d) : enlaceWhatsApp(tel);
-};
 
-function Contacto({ r }: { r: Reg | undefined }) {
-  return (
-    <div className="acciones">
-      <Accion icono="llamar" texto="Llamar" href={enlaceLlamada(txt(r, 'cel') || txt(r, 'tel'))} />
-      <Accion icono="chat" texto="WhatsApp" href={wa(r)} />
-      <Accion icono="correo" texto="Correo" href={enlaceCorreo(txt(r, 'email'))} />
-    </div>
-  );
-}
 
 /* Seleccionar un cliente al crear una poliza, siniestro o vehiculo */
 function ElegirCliente({ cartera, valor, cambiar }: { cartera: Cartera; valor: string; cambiar: (id: string) => void }) {
@@ -209,11 +195,27 @@ function Editar({ ctx, modulo, r, titulo }: { ctx: Ctx; modulo: Modulo; r: Reg; 
 }
 
 /** ✏️ y 🗑️ al final de cada fila de las listas */
+/** Datos de 💬 / 📧 de un registro, con los textos del CRM web */
+export function datosContacto(modulo: Modulo, r: Reg, c: Cartera): DatosContacto | null {
+  switch (modulo) {
+    case 'clientes': return datosCliente(r);
+    case 'prospectos': return datosProspecto(r);
+    case 'polizas': return datosPoliza(r, c);
+    case 'pagos': return datosPago(r, c);
+    case 'siniestros': return datosSiniestro(r, c);
+    case 'vehiculos': return datosVehiculo(r, c);
+    case 'tareas': return datosTarea(r, c);
+    default: return null;
+  }
+}
+
 export function AccionesFila({ ctx, modulo, r }: { ctx: Ctx; modulo: Modulo; r: Reg }) {
   const [abierto, setAbierto] = useState<'editar' | 'eliminar' | null>(null);
   const titulo = `Editar ${NOMBRE_MODULO[modulo]}`;
+  const d = datosContacto(modulo, r, ctx.cartera);
   return (
     <>
+      {d && <BotonesContacto ctx={ctx} d={d} />}
       <button className="icono-accion" type="button" aria-label={`Editar ${nombreRegistro(modulo, r)}`} onClick={() => setAbierto('editar')}>✏️</button>
       <button className="icono-accion rojo" type="button" aria-label={`Eliminar ${nombreRegistro(modulo, r)}`} onClick={() => setAbierto('eliminar')}>🗑️</button>
       {abierto === 'editar' && (
@@ -418,7 +420,7 @@ export function ClienteFicha({ ctx, c }: { ctx: Ctx; c: Reg }) {
 
   return (
     <>
-      <Contacto r={c} />
+      <BotonesContacto ctx={ctx} d={datosCliente(c)} estilo="accion" />
       <div className="chips">
         <span className="chip">{esEmpresa(c) ? '🏢 Empresa' : '🧑 Personal'}</span>
         <span className="chip">{ESTADOS_COMERCIALES.find(([v]) => v === estadoComercial(c))?.[1]}</span>
@@ -486,6 +488,7 @@ export function ClienteFicha({ ctx, c }: { ctx: Ctx; c: Reg }) {
       )}
 
       <Historial modulo="clientes" r={c} avisar={ctx.avisar} alCambiar={(n) => ctx.poner('clientes', n)} />
+      <Comunicaciones r={c} />
       <Adjuntos modulo="clientes" r={c} avisar={ctx.avisar} alCambiar={(n) => ctx.poner('clientes', n)} />
       <FichaCampos modulo="clientes" r={c} />
       <Editar ctx={ctx} modulo="clientes" r={c} titulo="Editar cliente" />
@@ -656,11 +659,10 @@ export function PolizaFicha({ ctx, p }: { ctx: Ctx; p: Reg }) {
   const pagos = cartera.pagos.filter((x) => txt(x, 'polizaId') === p.id).sort((a, b) => fec(b, 'fecha').localeCompare(fec(a, 'fecha')));
   const pagado = pagos.filter((x) => /pagad|cobrad/i.test(txt(x, 'estado'))).reduce((s, x) => s + (num(x, 'monto') ?? 0), 0);
   const siniestros = cartera.siniestros.filter((s) => txt(p, 'num') && txt(s, 'poliza') === txt(p, 'num'));
-  const contacto = cliente ?? ({ id: '', cel: txt(p, 'celCliente'), email: txt(p, 'emailCliente') } as Reg);
 
   return (
     <>
-      <Contacto r={contacto} />
+      <BotonesContacto ctx={ctx} d={datosPoliza(p, ctx.cartera)} estilo="accion" />
       <div className="chips">
         <EtiquetaPol p={p} />
         <span className="chip">{txt(p, 'aseg')}</span>
@@ -796,9 +798,9 @@ function CuotasDelMes({ ctx, onCobro }: { ctx: Ctx; onCobro: (polizaId: string) 
       const lp = num(pol, 'letraPrima') ?? 0, pr = num(pol, 'prima') ?? 0;
       const cuota = lp > 0 ? dinero(lp) : pr > 0 ? dinero(pr) : '—';
       const pagado = c.pagos.some((pg) => txt(pg, 'polizaId') === pol.id && (txt(pg, 'periodo') || txt(pg, 'fecha')).slice(0, 7) === mes);
-      const wa = enlaceWhatsApp(txt(cli, 'cel') || txt(cli, 'tel') || txt(pol, 'telAsegurado'));
       const msg = `Estimado/a ${nombre}, le recordamos el cobro de su póliza ${txt(pol, 'num')} (${txt(pol, 'aseg')}), cuota ${cuota}, correspondiente a ${mesLabel}.`;
-      return { pol, nombre, cuota, pagado, wa: wa ? `${wa}?text=${encodeURIComponent(msg)}` : null };
+      const dp = datosPoliza(pol, c);
+      return { pol, nombre, cuota, pagado, d: { ...dp, wa: [{ motivo: 'Cobro del mes', msg }, ...(dp.wa ?? [])] } };
     }), [c, mes, mesLabel]);
   const pend = filas.filter((f) => !f.pagado).length;
   if (!filas.length) return <Vacio>Sin cuotas configuradas. Edite las pólizas y defina Num. de Pagos y Letra/Prima.</Vacio>;
@@ -812,7 +814,7 @@ function CuotasDelMes({ ctx, onCobro }: { ctx: Ctx; onCobro: (polizaId: string) 
           onClick={() => ctx.abrir('polizas', f.pol.id)}
           acciones={(
             <>
-              {f.wa && <a className="icono-accion" style={{ display: 'grid', placeItems: 'center', background: 'var(--ok-f)' }} href={f.wa} target="_blank" rel="noopener noreferrer" aria-label={`WhatsApp a ${f.nombre}`}>💬</a>}
+              <BotonesContacto ctx={ctx} d={f.d} />
               {!f.pagado && <button className="icono-accion" type="button" aria-label={`Registrar cobro de ${f.nombre}`} onClick={() => onCobro(f.pol.id)}>＋</button>}
             </>
           )} />
@@ -904,7 +906,7 @@ export function SiniestroFicha({ ctx, s }: { ctx: Ctx; s: Reg }) {
   const cliente = ctx.cartera.clientes.find((c) => c.id === txt(s, 'clienteId'));
   return (
     <>
-      <Contacto r={cliente ?? ({ id: '', cel: txt(s, 'cel') } as Reg)} />
+      <BotonesContacto ctx={ctx} d={datosSiniestro(s, ctx.cartera)} estilo="accion" />
       <div className="chips"><EtiquetaEstado estado={txt(s, 'estado') || null} /><span className="chip">{txt(s, 'aseg')}</span></div>
       {cliente && (
         <div className="lista">
@@ -1070,7 +1072,7 @@ export function ProspectoFicha({ ctx, p }: { ctx: Ctx; p: Reg }) {
   }
   return (
     <>
-      <Contacto r={p} />
+      <BotonesContacto ctx={ctx} d={datosProspecto(p)} estilo="accion" />
       <div className="tarjeta">
         <dl className="datos">
           <dt>Etapa</dt><dd>{txt(p, 'etapaVenta') || '—'}</dd>
