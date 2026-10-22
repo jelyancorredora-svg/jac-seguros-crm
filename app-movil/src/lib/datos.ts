@@ -148,6 +148,7 @@ export const CLAVES_META = [
   'calReuniones', 'calNotas', 'calMetas', 'calDiarios', 'aseguradoras', 'ramosCfg', 'vcReglas',
   'encomiendas', 'mensajero', 'mensajeroTel', 'mensajeroEmail',
   'notas', 'comRates', 'etiquetas', 'plantillas', 'comisCfg', 'metas',
+  'emailjs', 'integraciones', 'gcalRefs',
 ] as const;
 export type Meta = {
   calReuniones: Reg[];
@@ -175,6 +176,12 @@ export type Meta = {
   comisCfg: Record<string, unknown>;
   /** Metas de comisiones {mensual, anual, ramos?, asegs?} */
   metas: { mensual?: number; anual?: number; [k: string]: unknown };
+  /** EmailJS (mismas claves que el web: ejs-pub, ejs-svc, ejs-tpl-*) */
+  emailjs: Record<string, string>;
+  /** Integraciones del web (googleClientId…) */
+  integraciones: { googleClientId?: string; [k: string]: unknown };
+  /** Eventos ya enviados a Google Calendar: clave → id del evento */
+  gcalRefs: Record<string, string>;
 };
 
 export async function leerMeta(): Promise<Meta> {
@@ -183,6 +190,7 @@ export async function leerMeta(): Promise<Meta> {
   const m: Record<string, unknown> = {};
   for (const f of data ?? []) m[f.clave as string] = f.valor;
   const lista = (v: unknown) => (Array.isArray(v) ? (v as Reg[]) : []);
+  const obj = (v: unknown) => (v && typeof v === 'object' && !Array.isArray(v) ? (v as Record<string, unknown>) : {});
   return {
     calReuniones: lista(m.calReuniones),
     calNotas: lista(m.calNotas),
@@ -201,6 +209,9 @@ export async function leerMeta(): Promise<Meta> {
     plantillas: lista(m.plantillas),
     comisCfg: m.comisCfg && typeof m.comisCfg === 'object' && !Array.isArray(m.comisCfg) ? (m.comisCfg as Record<string, unknown>) : {},
     metas: m.metas && typeof m.metas === 'object' && !Array.isArray(m.metas) ? (m.metas as Meta['metas']) : {},
+    emailjs: obj(m.emailjs) as Record<string, string>,
+    integraciones: obj(m.integraciones) as Meta['integraciones'],
+    gcalRefs: obj(m.gcalRefs) as Record<string, string>,
   };
 }
 

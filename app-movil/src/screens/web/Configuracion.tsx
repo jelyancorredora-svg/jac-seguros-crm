@@ -4,11 +4,12 @@ import { Hoja, Vacio } from '../../components/Piezas';
 import { ErrorDatos, guardarMeta, txt, type Meta, type Reg } from '../../lib/datos';
 import { dinero, nuevoId } from '../../lib/formato';
 import type { Ctx } from '../Modulos';
+import { Integraciones } from './Integraciones';
 
 /*
  * ⚙️ Configuración del CRM web (pg-cfg): etiquetas, metas de comisiones y
- * copia de seguridad. La contraseña y la seguridad estan en Ajustes.
- * Las integraciones (EmailJS, Google Calendar) son solo del web.
+ * copia de seguridad, e integraciones (EmailJS y Google Calendar).
+ * La contraseña y la seguridad estan en Ajustes.
  */
 
 const COLORES = ['#1D4ED8', '#16A34A', '#DC2626', '#D97706', '#7C3AED', '#0EA5E9', '#DB2777', '#475569'];
@@ -18,6 +19,7 @@ export function Configuracion({ ctx }: { ctx: Ctx }) {
     <>
       <Etiquetas ctx={ctx} />
       <Metas ctx={ctx} />
+      <Integraciones ctx={ctx} />
       <Respaldo ctx={ctx} />
     </>
   );

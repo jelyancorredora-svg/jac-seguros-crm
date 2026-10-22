@@ -28,7 +28,7 @@ export function Mas({ ctx, irLista, irAjustes, irImportar, irInformes, irMensaje
     [() => irLista('pagos'), '💳', 'Pagos', cuantos(pend, 'pendiente', 'pendientes')],
     [() => irLista('vehiculos'), '🚗', 'Autos / motos', cuantos(c.vehiculos.length, 'vehículo', 'vehículos')],
     [() => irLista('comisiones'), '💰', 'Comisiones', cuantos(c.comisiones.length, 'registro', 'registros')],
-    [() => irWeb('config'), '⚙️', 'Configuración del CRM', 'Etiquetas, metas de comisiones y backup'],
+    [() => irWeb('config'), '⚙️', 'Configuración del CRM', 'Etiquetas, metas, EmailJS, Google Calendar y backup'],
     [irImportar, '📥', 'Importar documentos', 'Agregar clientes, pólizas y archivos desde un paquete'],
     [irAjustes, 'ajustes', 'Ajustes y seguridad', 'Dos pasos, contraseña, cerrar sesión'],
   ];

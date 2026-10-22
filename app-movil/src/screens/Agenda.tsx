@@ -1,6 +1,7 @@
 import { useMemo, useState, type FormEvent } from 'react';
 import { datosPago, datosPoliza, datosProspecto, datosTarea, type Datos } from '../lib/contacto';
 import { BotonesContacto } from '../components/Contactar';
+import { enlaceAgregarGcal } from '../lib/gcal';
 import { Fila, Hoja, Vacio } from '../components/Piezas';
 import { FichaCampos } from '../components/Registro';
 import {
@@ -496,6 +497,9 @@ export function EditarTarea({ ctx, r, fecha: f, tipoAgenda, onCerrar }: {
               <button className="boton secundario" type="button" disabled={ocupado} onClick={() => rapido({ fechaLimite: v.fechaLimite, etapaTarea: 'Reprogramada' }, '📅 Tarea reprogramada')}>📅 Reprogramar a la fecha elegida</button>
               <button className="boton secundario" type="button" disabled={ocupado} onClick={() => rapido({ etapaTarea: 'Cancelada', estado: 'cancelada' }, 'Tarea cancelada')}>Cancelar tarea</button>
             </>
+          )}
+          {enlaceAgregarGcal(v.titulo, v.fechaLimite, v.hora, v.desc) && (
+            <a className="boton secundario" href={enlaceAgregarGcal(v.titulo, v.fechaLimite, v.hora, v.desc)!} target="_blank" rel="noopener noreferrer">📅 Agregar a Google Calendar</a>
           )}
           {r && !borrar && <button className="boton peligro" type="button" disabled={ocupado} onClick={() => setBorrar(true)}>🗑️ Eliminar</button>}
           {borrar && <button className="boton peligro" type="button" disabled={ocupado} onClick={eliminar}>Confirmar: eliminar definitivamente</button>}

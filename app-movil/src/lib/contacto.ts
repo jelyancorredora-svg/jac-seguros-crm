@@ -92,7 +92,8 @@ export const waTarea = (t: Reg, nombre: string) =>
 
 /* ---------------- correo ---------------- */
 
-export type Correo = { asunto: string; cuerpo: string };
+/** tipo: plantilla de EmailJS a usar (general, renovaciones o cumpleaños) */
+export type Correo = { asunto: string; cuerpo: string; tipo?: 'general' | 'ren' | 'bday' };
 
 export const correoCliente = (c: Reg): Correo => ({
   asunto: `JAC Seguros — Hola ${primer(txt(c, 'nombre'))}`,
@@ -110,6 +111,7 @@ export function correoProspecto(p: Reg): Correo {
 export function correoPoliza(p: Reg, cl: Reg | undefined, hoy = new Date()): Correo {
   const d = diasHasta(txt(p, 'fechaFin'), hoy) ?? -1;
   return {
+    tipo: 'ren',
     asunto: d >= 0 ? `⚠️ Tu póliza ${txt(p, 'ramo')} vence en ${d} días — JAC Seguros` : `Renovación póliza ${txt(p, 'ramo')} — JAC Seguros`,
     cuerpo: `Hola ${primer(txt(cl, 'nombre') || txt(p, 'nombreCliente'))} 👋\n\nTe contacto respecto a tu póliza de *${txt(p, 'ramo')}* con ${txt(p, 'aseg')} (N° ${txt(p, 'num')}).\n\nFecha de vencimiento: ${fmt(txt(p, 'fechaFin'))}\n${d >= 0 ? `⚠️ Faltan solo ${d} días para vencer.` : '⚠️ Tu póliza ya venció.'}\n\nPara renovarla y mantener tu cobertura sin interrupciones, contáctame.\n\nSaludos,${FIRMA_CORREO}`,
   };

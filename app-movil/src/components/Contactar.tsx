@@ -2,6 +2,7 @@ import './contactar.css';
 import { useState } from 'react';
 import { actualizarCon, type Reg } from '../lib/datos';
 import { enlaceMail, enlaceWA, entradaComms, type Datos } from '../lib/contacto';
+import { emailJSListo, enviarEmailJS, parametrosCorreo, plantillaEJS, type ConfigEmailJS } from '../lib/emailjs';
 import { rellenar } from '../lib/wamasivo';
 import type { Ctx } from '../screens/Modulos';
 import { Icono } from './Icono';
@@ -117,6 +118,22 @@ function ComponerCorreo({ ctx, d, onCerrar }: { ctx: Ctx; d: DatosContacto; onCe
   const [para, setPara] = useState(d.email ?? '');
   const [asunto, setAsunto] = useState(d.correo?.asunto ?? '');
   const [cuerpo, setCuerpo] = useState(d.correo?.cuerpo ?? '');
+  const [ocupado, setOcupado] = useState(false);
+  const cfg = ctx.cartera.meta.emailjs as ConfigEmailJS;
+  const directo = emailJSListo(cfg);
+  async function enviarDirecto() {
+    if (!para.trim() || !asunto.trim() || !cuerpo.trim()) return ctx.avisar('Completa todos los campos');
+    setOcupado(true);
+    try {
+      await enviarEmailJS(cfg, plantillaEJS(cfg, d.correo?.tipo ?? 'general'), parametrosCorreo(para, asunto, cuerpo, { to_name: d.nombre }));
+      void registrar(ctx, d, entradaComms('email', 'Email', cuerpo, para, asunto));
+      ctx.avisar('✅ Correo enviado por EmailJS');
+      onCerrar();
+    } catch (e) {
+      ctx.avisar(e instanceof Error ? e.message : 'Error enviando. Usa "Abrir en Correo"');
+      setOcupado(false);
+    }
+  }
   function enviar() {
     if (!para.trim() || !asunto.trim()) return ctx.avisar('Para y Asunto son obligatorios');
     window.location.href = enlaceMail(para, { asunto, cuerpo });
@@ -130,7 +147,8 @@ function ComponerCorreo({ ctx, d, onCerrar }: { ctx: Ctx; d: DatosContacto; onCe
       <label>Asunto<input value={asunto} onChange={(e) => setAsunto(e.target.value)} maxLength={200} /></label>
       <label>Mensaje<textarea rows={10} value={cuerpo} onChange={(e) => setCuerpo(e.target.value)} maxLength={8000} /></label>
       <div className="botonera">
-        <button className="boton" type="button" onClick={enviar}>📧 Abrir en Correo</button>
+        {directo && <button className="boton" type="button" disabled={ocupado} onClick={enviarDirecto}>{ocupado ? 'Enviando…' : '📨 Enviar directo (EmailJS)'}</button>}
+        <button className={directo ? 'boton secundario' : 'boton'} type="button" disabled={ocupado} onClick={enviar}>📧 Abrir en Correo</button>
         <button className="boton secundario" type="button" onClick={onCerrar}>Cancelar</button>
       </div>
     </Hoja>

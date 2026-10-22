@@ -3,6 +3,7 @@ import { ComisionesWeb } from './screens/web/Comisiones';
 import { Configuracion } from './screens/web/Configuracion';
 import { Cotizador } from './screens/web/Cotizador';
 import { Cumpleanos } from './screens/web/Cumpleanos';
+import { retornoGcal, vueltaDeGoogleReciente } from './lib/gcal';
 import { Empresas } from './screens/web/Empresas';
 import { Notas } from './screens/web/Notas';
 import { Reportes } from './screens/web/Reportes';
@@ -133,6 +134,7 @@ export default function App() {
         await cerrarSesion();
         return setFase({ f: 'login' });
       }
+      if (!esAppNativa && vueltaDeGoogleReciente()) return setFase({ f: 'dentro' });
       if (!esAppNativa) {
         // Version web: no hay Face ID propio de la app, asi que al reabrirla
         // siempre se pide la contraseña (el Llavero de iCloud la rellena con Face ID).
@@ -170,6 +172,14 @@ export default function App() {
     if (fase.f === 'dentro' && !cartera && !cargando) void recargar();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fase.f]);
+
+  /* Vuelta desde Google: abrir Configuración, donde se sincroniza el calendario */
+  useEffect(() => {
+    if (fase.f !== 'dentro' || !cartera || !retornoGcal.v) return;
+    if (retornoGcal.v === 'rechazado') { avisar('No se pudo conectar con Google Calendar.'); retornoGcal.v = null; }
+    setPestana('mas');
+    setPila([{ t: 'web', p: 'config' }]);
+  }, [fase.f, cartera, avisar]);
 
   /* Sincronizacion en vivo con el CRM web y los demas dispositivos */
   useEffect(() => {
