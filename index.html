@@ -8842,7 +8842,7 @@ function cotpGeneratePDF(filterAsegId){
  var sumaFmt = sumaRaw ? '$'+parseFloat(sumaRaw).toLocaleString('es-PA') : '---';
  var fecha = new Date().toLocaleDateString('es-PA',{year:'numeric',month:'long',day:'numeric'});
  var rows = res.map(function(r,i){
- return '<tr style="background:'+(i%2===0?'#F8FAFC':'#FFFFFF')+'"><td style="padding:10px 14px;font-weight:700;color:#1E3A5F;border-bottom:1px solid #E2E8F0">'+(i+1)+'. '+r.aseg.nombre+'</td><td style="padding:10px 14px;text-align:center;border-bottom:1px solid #E2E8F0;color:#64748B">'+r.aseg.rating+'/5</td><td style="padding:10px 14px;text-align:right;font-weight:800;color:#1E3A5F;font-size:16px;border-bottom:1px solid #E2E8F0">$'+r.total.toFixed(2)+'/ano</td><td style="padding:10px 14px;text-align:right;color:#64748B;border-bottom:1px solid #E2E8F0">$'+r.neta.toFixed(2)+'</td><td style="padding:10px 14px;font-size:12px;color:#475569;border-bottom:1px solid #E2E8F0">'+(r.cobertura||'---')+'</td><td style="padding:10px 14px;text-align:center;font-size:12px;color:#64748B;border-bottom:1px solid #E2E8F0">'+(r.deducible||'---')+'</td></tr>';
+ return '<tr style="background:'+(i%2===0?'#F8FAFC':'#FFFFFF')+'"><td style="padding:10px 14px;font-weight:700;color:#1E3A5F;border-bottom:1px solid #E2E8F0">'+(i+1)+'. '+r.aseg.nombre+'</td><td style="padding:10px 14px;text-align:center;border-bottom:1px solid #E2E8F0;color:#64748B">'+r.aseg.rating+'/5</td><td style="padding:10px 14px;text-align:right;font-weight:800;color:#1E3A5F;font-size:16px;border-bottom:1px solid #E2E8F0">$'+r.primaTotal.toFixed(2)+'/ano</td><td style="padding:10px 14px;text-align:right;color:#64748B;border-bottom:1px solid #E2E8F0">$'+r.primaNeta.toFixed(2)+'</td><td style="padding:10px 14px;font-size:12px;color:#475569;border-bottom:1px solid #E2E8F0">'+(r.cobertura||'---')+'</td><td style="padding:10px 14px;text-align:center;font-size:12px;color:#64748B;border-bottom:1px solid #E2E8F0">'+(r.deducible||'---')+'</td></tr>';
  }).join('');
  var html = '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><title>Cotizacion '+ramoLabel+' - JAC Seguros<\/title>'
  +'<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:\'Segoe UI\',Helvetica,Arial,sans-serif;color:#1E293B;font-size:13px;background:#fff}.hdr{background:linear-gradient(135deg,#0F172A 0%,#1E3A5F 100%);color:#fff;padding:24px 32px;display:flex;justify-content:space-between;align-items:center}.hdr-logo{font-size:24px;font-weight:900;letter-spacing:2px;color:#FCD34D;font-family:Georgia,serif}.hdr-sub{font-size:11px;color:#93C5FD;margin-top:3px;letter-spacing:1px;text-transform:uppercase}.hdr-contact{text-align:right;font-size:11px;color:#CBD5E1;line-height:2}.body{padding:28px 32px}.qtitle{font-size:22px;font-weight:900;color:#0F172A;margin-bottom:4px}.qsub{font-size:12px;color:#64748B;margin-bottom:20px}.info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;background:#F1F5F9;border-radius:10px;padding:16px 20px;margin-bottom:22px}.info-lbl{font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:#64748B;font-weight:700}.info-val{font-size:15px;font-weight:800;color:#0F172A;margin-top:4px}table{width:100%;border-collapse:collapse;margin-bottom:20px;border-radius:8px;overflow:hidden}thead tr{background:linear-gradient(90deg,#1E3A5F,#1E40AF);color:#fff}thead th{padding:11px 14px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:1px;font-weight:700}.nota{background:#EFF6FF;border-left:4px solid #3B82F6;border-radius:0 8px 8px 0;padding:12px 16px;font-size:11px;color:#1E40AF;line-height:1.7;margin-bottom:20px}.ftr{border-top:2px solid #E2E8F0;padding:14px 32px;font-size:10px;color:#94A3B8;display:flex;justify-content:space-between;background:#F8FAFC}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}@page{margin:10mm;size:A4}}<\/style><\/head><body>'
@@ -8870,7 +8870,7 @@ function cotpSendWhatsApp(filterAsegId){
  msg += 'Hola *'+nombre+'*, te comparto las mejores opciones:\n\n';
  res.forEach(function(r,i){
  msg += '*'+(i+1)+'. '+r.aseg.nombre+'*\n';
- msg += 'Prima anual: *$'+r.total.toFixed(2)+'*\n';
+ msg += 'Prima anual: *$'+r.primaTotal.toFixed(2)+'*\n';
  if(r.cobertura) msg += r.cobertura+'\n';
  if(r.deducible) msg += 'Deducible: '+r.deducible+'\n';
  msg += '\n';
@@ -9309,8 +9309,10 @@ function cotpCalcAll(){
  }else if(rates.fijo){
  // Precio fijo (SOAT, terceros auto, etc.)
  primaNeta=rates.fijo;
- }else if(rates.base){
+ }else if(rates.base&&rates.edad_factor!==undefined){
  // SALUD: base mensual × 12 meses × factor edad × factor dependientes
+ // (solo tarifas de salud: las de autos tambien traen "base" = cargo de emision,
+ //  y antes caian aqui sin factor de edad y daban NaN en 13 aseguradoras)
  const edadS=parseInt(document.getElementById('cotp-val')?.value)||35;
  primaNeta=rates.base*12*_saludEdadFactor(edadS,rates.edad_factor)*(1+deps*0.58);
  }else if(rates.tasa){
@@ -9657,7 +9659,7 @@ function cotpLoadClient(id,tipo){
  const src=tipo==='cliente'?(S.clientes||[]):(S.prospectos||[]);
  const c=src.find(x=>x.id===id);if(!c)return;
  SVal('cotp-nombre',c.nombre||'');SVal('cotp-cedula',c.cedula||'');SVal('cotp-tel',c.cel||c.tel||'');SVal('cotp-email',c.email||'');
- if(c.fechaNac){const dobEl=document.getElementById('cotp-dob');if(dobEl)dobEl.value=c.fechaNac;cotpCalcEdad();}
+ if(c.fNac||c.fechaNac){const dobEl=document.getElementById('cotp-dob');if(dobEl)dobEl.value=c.fNac||c.fechaNac;cotpCalcEdad();}
  cotpLinkedId=id;
  // Auto-fill paso 4 save form with client name
  const _saveNom=document.getElementById('cotp-save-nom');if(_saveNom&&!_saveNom.value)_saveNom.value=c.nombre||'';
