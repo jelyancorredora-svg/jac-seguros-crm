@@ -88,6 +88,7 @@ export function Adjuntos({ modulo, r, avisar, alCambiar }: {
     setOcupado('abrir' + i);
     // La ventana se abre YA (dentro del toque) para que Safari no la bloquee.
     const w = window.open('', '_blank');
+    if (w) w.opener = null; // la pestaña del documento no puede tocar la app
     try {
       const url = await enlaceAdjunto(f);
       if (w) w.location.href = url;
@@ -268,14 +269,16 @@ export function FormRegistro({ modulo, titulo, r, cartera, fijos, onCerrar, onGu
   validar?: () => string | null;
 }) {
   const campos = CAMPOS[modulo];
-  const inicial = useMemo(() => {
+  // Se congela al abrir: si llega un cambio de otro dispositivo mientras editas,
+  // solo se envian los campos que TU tocaste y no se pisa lo demas.
+  const [inicial] = useState(() => {
     const o: Record<string, string> = {};
     for (const c of campos) {
       const v = r?.[c.k];
       o[c.k] = v === null || v === undefined || typeof v === 'object' ? '' : c.t === 'fecha' ? String(v).slice(0, 10) : String(v);
     }
     return o;
-  }, [campos, r]);
+  });
   const [v, setV] = useState(inicial);
   const [error, setError] = useState('');
   const [ocupado, setOcupado] = useState(false);

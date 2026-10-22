@@ -8,6 +8,7 @@ import { activarPantallaPrivada, esAppNativa, vigilarBloqueo } from './lib/bloqu
 import { cargarCartera, ErrorDatos, txt, type Cartera, type Reg } from './lib/datos';
 import type { Modulo } from './lib/esquema';
 import { db } from './lib/supabase';
+import { iniciarVivo, type EstadoVivo } from './lib/vivo';
 import { Bloqueo, Login, SegundoPaso } from './screens/Acceso';
 import { Agenda, EditarTarea } from './screens/Agenda';
 import { Ajustes } from './screens/Ajustes';
@@ -16,13 +17,15 @@ import { Importar } from './screens/Importar';
 import { Informes } from './screens/Informes';
 import { Inicio } from './screens/Inicio';
 import { Mas } from './screens/Mas';
+import { Mensajero } from './screens/Mensajero';
+import { Portafolio } from './screens/Portafolio';
 import {
   ClienteFicha, Clientes, ComisionFicha, Comisiones, PagoFicha, Pagos, PolizaFicha, Polizas, ProspectoFicha, Prospectos,
   SiniestroFicha, Siniestros, VehiculoFicha, Vehiculos, type Ctx,
 } from './screens/Modulos';
 
 export type Pestana = 'inicio' | 'clientes' | 'polizas' | 'crm' | 'agenda' | 'mas';
-export type Vista = { t: 'ficha'; m: Modulo; id: string } | { t: 'lista'; m: Modulo } | { t: 'ajustes' } | { t: 'importar' } | { t: 'informes' };
+export type Vista = { t: 'ficha'; m: Modulo; id: string } | { t: 'lista'; m: Modulo } | { t: 'ajustes' } | { t: 'importar' } | { t: 'informes' } | { t: 'mensajero' } | { t: 'portafolio' };
 export type Avisar = (texto: string) => void;
 
 type Fase =
@@ -55,6 +58,8 @@ export default function App() {
   const [pestana, setPestana] = useState<Pestana>('inicio');
   const [pila, setPila] = useState<Vista[]>([]);
   const [aviso, setAviso] = useState('');
+  const [vivo, setVivo] = useState<EstadoVivo>('conectando');
+  const hayCartera = cartera !== null;
   const contenido = useRef<HTMLDivElement>(null);
 
   const temporizadorAviso = useRef(0);
@@ -146,6 +151,25 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fase.f]);
 
+  /* Sincronizacion en vivo con el CRM web y los demas dispositivos */
+  useEffect(() => {
+    if (fase.f !== 'dentro' || !hayCartera) return;
+    return iniciarVivo((cb) => {
+      setCartera((c) => {
+        if (!c) return c;
+        const n = { ...c } as Cartera;
+        for (const { m, r } of cb.filas) {
+          const l = n[m];
+          const i = l.findIndex((x) => x.id === r.id);
+          n[m] = i >= 0 ? l.map((x) => (x.id === r.id ? r : x)) : [r, ...l];
+        }
+        for (const { m, id } of cb.borrados) n[m] = n[m].filter((x) => x.id !== id);
+        if (cb.meta) n.meta = cb.meta;
+        return n;
+      });
+    }, setVivo);
+  }, [fase.f, hayCartera]);
+
   /* Bloqueo por inactividad o por volver del segundo plano */
   useEffect(() => {
     if (fase.f !== 'dentro') return;
@@ -208,6 +232,12 @@ export default function App() {
   } else if (actual?.t === 'ajustes') {
     titulo = 'Ajustes';
     cuerpo = <Ajustes correo={correo} cartera={ctx.cartera} onSalir={salir} avisar={avisar} />;
+  } else if (actual?.t === 'mensajero') {
+    titulo = 'Mensajero';
+    cuerpo = <Mensajero ctx={ctx} />;
+  } else if (actual?.t === 'portafolio') {
+    titulo = 'Portafolio por ramo';
+    cuerpo = <Portafolio ctx={ctx} />;
   } else if (actual?.t === 'informes') {
     titulo = 'Informes';
     cuerpo = <Informes ctx={ctx} />;
@@ -265,7 +295,8 @@ export default function App() {
   } else if (pestana === 'agenda') {
     cuerpo = <Agenda ctx={ctx} />;
   } else {
-    cuerpo = <Mas ctx={ctx} irLista={(m) => ir({ t: 'lista', m })} irAjustes={() => ir({ t: 'ajustes' })} irImportar={() => ir({ t: 'importar' })} irInformes={() => ir({ t: 'informes' })} />;
+    cuerpo = <Mas ctx={ctx} irLista={(m) => ir({ t: 'lista', m })} irAjustes={() => ir({ t: 'ajustes' })} irImportar={() => ir({ t: 'importar' })} irInformes={() => ir({ t: 'informes' })}
+      irMensajero={() => ir({ t: 'mensajero' })} irPortafolio={() => ir({ t: 'portafolio' })} />;
   }
 
   return (
@@ -277,6 +308,11 @@ export default function App() {
           </button>
         )}
         <h2>{titulo}</h2>
+        {ctx && (
+          <span className={`vivo vivo-${vivo}`} role="status"
+            aria-label={vivo === 'en-vivo' ? 'Sincronizado en vivo' : vivo === 'sin-conexion' ? 'Sin conexión' : 'Sincronizando'}
+            title={vivo === 'en-vivo' ? 'Sincronizado en vivo' : vivo === 'sin-conexion' ? 'Sin conexión' : 'Sincronizando cada 45 s'} />
+        )}
         <button type="button" aria-label="Actualizar" onClick={recargar} disabled={cargando} className={cargando ? 'girando' : ''}>
           <Icono nombre="recargar" />
         </button>

@@ -14,7 +14,7 @@ function csp(supabaseUrl: string): Plugin {
     "style-src 'self'",
     "img-src 'self' data: blob:",
     "font-src 'self'",
-    `connect-src 'self' ${supabaseUrl}`,
+    `connect-src 'self' ${supabaseUrl} ${supabaseUrl.replace(/^https:/, 'wss:')}`,
     "object-src 'none'",
     "base-uri 'none'",
     "form-action 'none'",

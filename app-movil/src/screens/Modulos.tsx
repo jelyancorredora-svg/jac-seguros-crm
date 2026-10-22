@@ -21,7 +21,7 @@ export type Ctx = {
   /** Mete o reemplaza un registro en la cartera en memoria */
   poner: (m: Modulo, r: Reg) => void;
   quitar: (m: Modulo, id: string) => void;
-  ponerMeta: (clave: 'calReuniones' | 'calNotas' | 'calMetas' | 'calDiarios', v: unknown) => void;
+  ponerMeta: (clave: keyof Cartera['meta'], v: unknown) => void;
 };
 
 const busca = (r: Reg, t: string, claves: string[]) => claves.some((k) => normalizar(txt(r, k)).includes(t));

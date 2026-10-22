@@ -94,19 +94,58 @@ function mensajeError(e: { message?: string; code?: string }): string {
   return 'No se pudo conectar con el CRM. Revisa tu internet.';
 }
 
+/**
+ * Version de cada fila (updated_at) tal como la conoce este dispositivo.
+ * La sincronizacion la compara con la base para traer solo lo que cambio.
+ */
+export const versiones = new Map<string, Map<string, string>>();
+
 /** Tabla completa, por paginas de 1000. Si una pagina falla, falla todo (nunca media tabla). */
 async function leerTabla(tabla: string): Promise<Reg[]> {
   const filas: Reg[] = [];
+  const v = new Map<string, string>();
   for (let desde = 0; ; desde += 1000) {
     const { data, error } = await db.from(tabla).select('*').order('id').range(desde, desde + 999);
     if (error) throw new ErrorDatos(mensajeError(error));
-    for (const f of data ?? []) filas.push(aObjeto(f as Record<string, unknown>));
-    if (!data || data.length < 1000) return filas;
+    for (const f of data ?? []) {
+      const r = aObjeto(f as Record<string, unknown>);
+      filas.push(r);
+      v.set(r.id, String((f as Record<string, unknown>).updated_at ?? ''));
+    }
+    if (!data || data.length < 1000) {
+      versiones.set(tabla, v);
+      return filas;
+    }
   }
 }
 
+/** Lista liviana (id + updated_at) de una tabla; null si la lectura fallo. */
+export async function leerVersiones(tabla: string): Promise<Map<string, string> | null> {
+  const v = new Map<string, string>();
+  for (let desde = 0; ; desde += 1000) {
+    const { data, error } = await db.from(tabla).select('id,updated_at').order('id').range(desde, desde + 999);
+    if (error) return null;
+    for (const f of data ?? []) v.set(String(f.id), String(f.updated_at ?? ''));
+    if (!data || data.length < 1000) return v;
+  }
+}
+
+/** Trae filas concretas por id (en bloques de 100). */
+export async function leerFilas(tabla: string, ids: string[]): Promise<Array<{ r: Reg; v: string }>> {
+  const out: Array<{ r: Reg; v: string }> = [];
+  for (let i = 0; i < ids.length; i += 100) {
+    const { data, error } = await db.from(tabla).select('*').in('id', ids.slice(i, i + 100));
+    if (error) throw new ErrorDatos(mensajeError(error));
+    for (const f of data ?? []) out.push({ r: aObjeto(f as Record<string, unknown>), v: String((f as Record<string, unknown>).updated_at ?? '') });
+  }
+  return out;
+}
+
 /* Claves de crm_meta que usa la app (agenda y catalogos) */
-export const CLAVES_META = ['calReuniones', 'calNotas', 'calMetas', 'calDiarios', 'aseguradoras', 'ramosCfg', 'vcReglas'] as const;
+export const CLAVES_META = [
+  'calReuniones', 'calNotas', 'calMetas', 'calDiarios', 'aseguradoras', 'ramosCfg', 'vcReglas',
+  'encomiendas', 'mensajero', 'mensajeroTel', 'mensajeroEmail',
+] as const;
 export type Meta = {
   calReuniones: Reg[];
   calNotas: Reg[];
@@ -116,9 +155,14 @@ export type Meta = {
   ramosCfg: unknown;
   /** Reglas de venta cruzada del CRM web: {tiene, ofrecer, tipo, msg} */
   vcReglas: Array<{ tiene?: string; ofrecer?: string; tipo?: string; msg?: string }>;
+  /** Mensajero: asignaciones (encomiendas) y datos del mensajero */
+  encomiendas: Reg[];
+  mensajero: string;
+  mensajeroTel: string;
+  mensajeroEmail: string;
 };
 
-async function leerMeta(): Promise<Meta> {
+export async function leerMeta(): Promise<Meta> {
   const { data, error } = await db.from('crm_meta').select('clave,valor').in('clave', CLAVES_META as unknown as string[]);
   if (error) throw new ErrorDatos(mensajeError(error));
   const m: Record<string, unknown> = {};
@@ -132,6 +176,10 @@ async function leerMeta(): Promise<Meta> {
     aseguradoras: Array.isArray(m.aseguradoras) ? (m.aseguradoras as Array<{ nombre?: string }>) : [],
     ramosCfg: m.ramosCfg ?? null,
     vcReglas: Array.isArray(m.vcReglas) ? (m.vcReglas as Meta['vcReglas']) : [],
+    encomiendas: lista(m.encomiendas),
+    mensajero: typeof m.mensajero === 'string' ? m.mensajero : 'Francisco Flores',
+    mensajeroTel: typeof m.mensajeroTel === 'string' ? m.mensajeroTel : '66714215',
+    mensajeroEmail: typeof m.mensajeroEmail === 'string' ? m.mensajeroEmail : '',
   };
 }
 
@@ -194,7 +242,14 @@ export async function actualizarCon(modulo: Modulo, id: string, cambiar: (actual
   const { error, count } = await db.from(tabla).update(fila, { count: 'exact' }).eq('id', id);
   if (error) throw new ErrorDatos(mensajeError(error));
   if (count === 0) throw new ErrorDatos('No tienes permiso para modificar este registro.');
+  marcarVersion(tabla, id, String(fila.updated_at));
   return aObjeto(fila);
+}
+
+/** Lo que escribe este dispositivo no hace falta volver a bajarlo. */
+function marcarVersion(tabla: string, id: string, v: string) {
+  if (!versiones.has(tabla)) versiones.set(tabla, new Map());
+  versiones.get(tabla)!.set(id, v);
 }
 
 /* ---------------- historial / acciones (igual que el CRM web) ---------------- */

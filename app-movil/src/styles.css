@@ -369,3 +369,20 @@ a { color: inherit; text-decoration: none; }
 }
 .pipe-saltos { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 10px; }
 .pipe-saltos button { flex-shrink: 0; font-size: 12px; font-weight: 700; padding: 6px 10px; border-radius: 999px; background: var(--tarjeta); border: 1.5px solid; }
+
+.vivo { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; background: #fbbf24; box-shadow: 0 0 0 3px rgba(255,255,255,.15); }
+.vivo-en-vivo { background: #34d399; }
+.vivo-sin-conexion { background: #f87171; }
+
+.kpis-4 { grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.kpis-4 .kpi { padding: 10px 6px; text-align: center; }
+.kpis-4 .kpi b { font-size: 22px; }
+.kpis-4 .kpi span { font-size: 11px; }
+.kpi-sel { outline: 2px solid var(--azul); }
+.men-cab { display: flex; flex-direction: column; gap: 8px; }
+.men-card { background: var(--tarjeta); border: 1px solid var(--borde); border-top: 4px solid; border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 3px; }
+.men-card small { color: var(--suave); font-size: 12px; }
+.men-tipo { font-size: 11px; font-weight: 800; text-transform: uppercase; }
+.men-estados { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.men-estados button { color: #fff; font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 6px; }
+.men-lista { display: flex; flex-direction: column; gap: 8px; }

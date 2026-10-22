@@ -6,11 +6,16 @@ import type { Ctx } from './Modulos';
 
 const cuantos = (n: number, uno: string, varios: string) => `${n} ${n === 1 ? uno : varios}`;
 
-export function Mas({ ctx, irLista, irAjustes, irImportar, irInformes }: { ctx: Ctx; irLista: (m: Modulo) => void; irAjustes: () => void; irImportar: () => void; irInformes: () => void }) {
+export function Mas({ ctx, irLista, irAjustes, irImportar, irInformes, irMensajero, irPortafolio }: {
+  ctx: Ctx; irLista: (m: Modulo) => void; irAjustes: () => void; irImportar: () => void; irInformes: () => void;
+  irMensajero: () => void; irPortafolio: () => void;
+}) {
   const c = ctx.cartera;
   const pend = c.pagos.filter((p) => !/pagad|cobrad/i.test(txt(p, 'estado'))).length;
   const opciones: Array<[() => void, NombreIcono | string, string, string]> = [
     [irInformes, '📊', 'Informes', 'Producción, renovaciones, clientes y aseguradoras'],
+    [irPortafolio, '🗂', 'Portafolio por ramo', 'Pólizas, primas y comisiones de cada ramo'],
+    [irMensajero, '📦', 'Mensajero', `${c.meta.encomiendas.filter((e) => txt(e, 'estado') !== 'Completado').length} asignaciones activas`],
     [() => irLista('siniestros'), 'siniestros', 'Siniestros', cuantos(c.siniestros.filter(siniestroAbierto).length, 'abierto', 'abiertos')],
     [() => irLista('prospectos'), 'embudo', 'Prospectos', `${c.prospectos.filter(prospectoAbierto).length} en curso`],
     [() => irLista('pagos'), '💳', 'Pagos', cuantos(pend, 'pendiente', 'pendientes')],
