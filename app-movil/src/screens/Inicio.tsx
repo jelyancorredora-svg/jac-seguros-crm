@@ -6,7 +6,7 @@ import { polizaVigente, prospectoAbierto, seguimientoProspecto, siniestroAbierto
 import type { Ctx } from './Modulos';
 import type { Pestana } from '../App';
 
-export function Inicio({ ctx, irA, irLista }: { ctx: Ctx; irA: (p: Pestana) => void; irLista: (m: 'siniestros' | 'prospectos' | 'pagos') => void }) {
+export function Inicio({ ctx, irA, irLista, irInformes }: { ctx: Ctx; irA: (p: Pestana) => void; irLista: (m: 'siniestros' | 'prospectos' | 'pagos') => void; irInformes: () => void }) {
   const { cartera } = ctx;
   const r = useMemo(() => {
     const vigentes = cartera.polizas.filter(polizaVigente);
@@ -36,6 +36,10 @@ export function Inicio({ ctx, irA, irLista }: { ctx: Ctx; irA: (p: Pestana) => v
           <b>{r.tareas}</b><span>Tareas pendientes</span></button>
         <button className="kpi" type="button" onClick={() => irLista('siniestros')}><b>{r.siniestros}</b><span>Siniestros abiertos</span></button>
         <button className="kpi" type="button" onClick={() => irA('polizas')}><b className="kpi-dinero">{dinero(r.prima)}</b><span>Primas vigentes</span></button>
+      </div>
+      <div className="botonera fila-botones">
+        <button className="boton secundario" type="button" onClick={() => irA('crm')}>📈 Pipeline CRM</button>
+        <button className="boton secundario" type="button" onClick={irInformes}>📊 Informes</button>
       </div>
 
       <h3 className="seccion">Próximos vencimientos</h3>

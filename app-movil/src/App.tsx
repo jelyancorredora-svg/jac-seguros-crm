@@ -11,7 +11,9 @@ import { db } from './lib/supabase';
 import { Bloqueo, Login, SegundoPaso } from './screens/Acceso';
 import { Agenda, EditarTarea } from './screens/Agenda';
 import { Ajustes } from './screens/Ajustes';
+import { Crm } from './screens/Crm';
 import { Importar } from './screens/Importar';
+import { Informes } from './screens/Informes';
 import { Inicio } from './screens/Inicio';
 import { Mas } from './screens/Mas';
 import {
@@ -19,8 +21,8 @@ import {
   SiniestroFicha, Siniestros, VehiculoFicha, Vehiculos, type Ctx,
 } from './screens/Modulos';
 
-export type Pestana = 'inicio' | 'clientes' | 'polizas' | 'agenda' | 'mas';
-export type Vista = { t: 'ficha'; m: Modulo; id: string } | { t: 'lista'; m: Modulo } | { t: 'ajustes' } | { t: 'importar' };
+export type Pestana = 'inicio' | 'clientes' | 'polizas' | 'crm' | 'agenda' | 'mas';
+export type Vista = { t: 'ficha'; m: Modulo; id: string } | { t: 'lista'; m: Modulo } | { t: 'ajustes' } | { t: 'importar' } | { t: 'informes' };
 export type Avisar = (texto: string) => void;
 
 type Fase =
@@ -34,6 +36,7 @@ const PESTANAS: Array<[Pestana, string, NombreIcono]> = [
   ['inicio', 'Inicio', 'inicio'],
   ['clientes', 'Clientes', 'clientes'],
   ['polizas', 'Pólizas', 'polizas'],
+  ['crm', 'CRM', 'embudo'],
   ['agenda', 'Agenda', 'tareas'],
   ['mas', 'Más', 'menu'],
 ];
@@ -205,6 +208,9 @@ export default function App() {
   } else if (actual?.t === 'ajustes') {
     titulo = 'Ajustes';
     cuerpo = <Ajustes correo={correo} cartera={ctx.cartera} onSalir={salir} avisar={avisar} />;
+  } else if (actual?.t === 'informes') {
+    titulo = 'Informes';
+    cuerpo = <Informes ctx={ctx} />;
   } else if (actual?.t === 'importar') {
     titulo = 'Importar documentos';
     cuerpo = <Importar ctx={ctx} />;
@@ -248,15 +254,18 @@ export default function App() {
       );
     }
   } else if (pestana === 'inicio') {
-    cuerpo = <Inicio ctx={ctx} irA={setPestana} irLista={(m) => ir({ t: 'lista', m })} />;
+    cuerpo = <Inicio ctx={ctx} irA={setPestana} irLista={(m) => ir({ t: 'lista', m })} irInformes={() => ir({ t: 'informes' })} />;
   } else if (pestana === 'clientes') {
     cuerpo = <Clientes ctx={ctx} />;
   } else if (pestana === 'polizas') {
     cuerpo = <Polizas ctx={ctx} />;
+  } else if (pestana === 'crm') {
+    titulo = 'CRM';
+    cuerpo = <Crm ctx={ctx} />;
   } else if (pestana === 'agenda') {
     cuerpo = <Agenda ctx={ctx} />;
   } else {
-    cuerpo = <Mas ctx={ctx} irLista={(m) => ir({ t: 'lista', m })} irAjustes={() => ir({ t: 'ajustes' })} irImportar={() => ir({ t: 'importar' })} />;
+    cuerpo = <Mas ctx={ctx} irLista={(m) => ir({ t: 'lista', m })} irAjustes={() => ir({ t: 'ajustes' })} irImportar={() => ir({ t: 'importar' })} irInformes={() => ir({ t: 'informes' })} />;
   }
 
   return (

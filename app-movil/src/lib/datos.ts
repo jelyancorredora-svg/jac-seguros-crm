@@ -106,7 +106,7 @@ async function leerTabla(tabla: string): Promise<Reg[]> {
 }
 
 /* Claves de crm_meta que usa la app (agenda y catalogos) */
-export const CLAVES_META = ['calReuniones', 'calNotas', 'calMetas', 'calDiarios', 'aseguradoras', 'ramosCfg'] as const;
+export const CLAVES_META = ['calReuniones', 'calNotas', 'calMetas', 'calDiarios', 'aseguradoras', 'ramosCfg', 'vcReglas'] as const;
 export type Meta = {
   calReuniones: Reg[];
   calNotas: Reg[];
@@ -114,6 +114,8 @@ export type Meta = {
   calDiarios: Record<string, unknown>;
   aseguradoras: Array<{ nombre?: string }>;
   ramosCfg: unknown;
+  /** Reglas de venta cruzada del CRM web: {tiene, ofrecer, tipo, msg} */
+  vcReglas: Array<{ tiene?: string; ofrecer?: string; tipo?: string; msg?: string }>;
 };
 
 async function leerMeta(): Promise<Meta> {
@@ -129,6 +131,7 @@ async function leerMeta(): Promise<Meta> {
     calDiarios: m.calDiarios && typeof m.calDiarios === 'object' && !Array.isArray(m.calDiarios) ? (m.calDiarios as Record<string, unknown>) : {},
     aseguradoras: Array.isArray(m.aseguradoras) ? (m.aseguradoras as Array<{ nombre?: string }>) : [],
     ramosCfg: m.ramosCfg ?? null,
+    vcReglas: Array.isArray(m.vcReglas) ? (m.vcReglas as Meta['vcReglas']) : [],
   };
 }
 
@@ -210,7 +213,7 @@ export async function registrarAccion(modulo: Modulo, id: string, e: EntradaHist
     fecha: e.fecha || new Date().toISOString().slice(0, 10),
     accion: limpiarTexto(e.accion ?? '', 500),
     resultado: limpiarTexto(e.resultado ?? '', 2000),
-    tipo: 'manual',
+    tipo: e.tipo || 'manual',
   };
   return actualizarCon(modulo, id, (a) => {
     const lista = historial(a);

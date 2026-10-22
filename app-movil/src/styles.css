@@ -319,3 +319,53 @@ a { color: inherit; text-decoration: none; }
 .ag-colores button.sel { border-color: #2563eb; }
 .ag-meta-cab { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
 .ag-meta-cab span { display: flex; gap: 6px; }
+
+/* ---------- filtros, vinculos, CRM e informes ---------- */
+.pestanas { grid-template-columns: repeat(6, 1fr); }
+.pestanas button { font-size: 10.5px; }
+.busca-fila { display: flex; gap: 8px; align-items: flex-start; }
+.busca-fila .buscador { flex: 1; }
+.boton-filtro { flex-shrink: 0; height: 48px; min-width: 48px; padding: 0 12px; border-radius: 12px; border: 1.5px solid var(--borde); background: var(--tarjeta); font-weight: 800; }
+.boton-filtro.activo { background: var(--azul); color: #fff; border-color: var(--azul); }
+.casilla { display: flex !important; align-items: center; gap: 10px; }
+.casilla input { width: 22px; height: 22px; }
+.casilla span { margin: 0 !important; }
+.aviso-tarjeta { border: 1.5px dashed #d97706; background: var(--aviso-f); color: var(--texto); display: flex; flex-direction: column; gap: 8px; }
+.fila-suelta { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; }
+.aviso-linea { width: 100%; text-align: left; background: var(--aviso-f); color: var(--aviso); font-weight: 700; font-size: 13px; padding: 10px 12px; border-radius: 10px; margin-bottom: 10px; }
+.fila-botones { flex-direction: row; margin-bottom: 14px; }
+.fila-botones .boton { flex: 1; font-size: 14px; padding: 11px 8px; }
+.enlace { text-align: left; color: var(--info); }
+.verde-t { color: var(--ok) !important; }
+.rojo-t { color: var(--peligro) !important; }
+.pipe { display: flex; align-items: flex-start; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 8px; margin: 0 -14px; padding-left: 14px; padding-right: 14px; }
+.pipe-col { flex: 0 0 78%; max-width: 320px; scroll-snap-align: start; background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 14px; overflow: hidden; }
+.pipe-cab { padding: 10px 12px; font-weight: 800; font-size: 14px; }
+.pipe-n { border-radius: 10px; padding: 1px 8px; font-size: 12px; margin-left: 4px; }
+.pipe-monto { font-size: 12px; margin-top: 2px; }
+.pipe-cuerpo { padding: 8px; display: flex; flex-direction: column; gap: 8px; max-height: 60vh; overflow-y: auto; }
+.pipe-card { border: 1px solid var(--borde); border-left: 4px solid; border-radius: 10px; background: var(--fondo); }
+.pipe-card-cuerpo { width: 100%; text-align: left; padding: 9px 10px 4px; display: flex; flex-direction: column; gap: 3px; }
+.pipe-card-cuerpo small { color: var(--suave); font-size: 12px; }
+.pipe-card-cuerpo small.rojo { color: var(--peligro); font-weight: 700; }
+.pipe-dinero { color: var(--ok); font-weight: 800; font-size: 13px; }
+.pipe-acciones { display: flex; gap: 6px; justify-content: flex-end; padding: 0 8px 8px; }
+.vc { display: flex; flex-direction: column; gap: 4px; }
+.barras { display: flex; flex-direction: column; gap: 6px; }
+.barras-fila { display: grid; grid-template-columns: minmax(70px, 38%) 1fr auto; align-items: center; gap: 8px; font-size: 12px; }
+.barras-et { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--suave); }
+.barras-pista { height: 10px; background: var(--fondo); border-radius: 99px; overflow: hidden; }
+.barras-valor { height: 100%; background: linear-gradient(90deg, #1a3a6b, #2563eb); border-radius: 99px; }
+.tabla-scroll { overflow-x: auto; background: var(--tarjeta); border-radius: 14px; box-shadow: var(--sombra); }
+.tabla { width: 100%; border-collapse: collapse; font-size: 13px; }
+.tabla th { background: var(--azul); color: #fff; text-align: left; padding: 8px; white-space: nowrap; }
+.tabla td { padding: 8px; border-bottom: 1px solid var(--borde); white-space: nowrap; }
+.solo-imprimir { display: none; }
+@media print {
+  .cabecera, .pestanas, .no-imprimir, .aviso-flotante, .flotante { display: none !important; }
+  .solo-imprimir { display: block; font-size: 18px; margin-bottom: 10px; }
+  html, body, #root, .marco, .contenido { height: auto !important; overflow: visible !important; background: #fff !important; color: #000 !important; }
+  .tarjeta, .lista, .kpi { box-shadow: none !important; border: 1px solid #ccc; break-inside: avoid; }
+}
+.pipe-saltos { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 10px; }
+.pipe-saltos button { flex-shrink: 0; font-size: 12px; font-weight: 700; padding: 6px 10px; border-radius: 999px; background: var(--tarjeta); border: 1.5px solid; }

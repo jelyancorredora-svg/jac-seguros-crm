@@ -2,7 +2,8 @@ import { useMemo, useState, type ReactNode } from 'react';
 import { Icono } from '../components/Icono';
 import { Accion, EtiquetaEstado, Fila, Hoja, Vacio, inicial } from '../components/Piezas';
 import { Adjuntos, FichaCampos, FormRegistro, Historial, ListaLarga } from '../components/Registro';
-import { fec, num, registrarAccion, txt, type Cartera, type Reg } from '../lib/datos';
+import { avanzarEtapa } from '../lib/crm';
+import { fec, guardarRegistro, num, txt, type Cartera, type Reg } from '../lib/datos';
 import { ESTADOS_COMERCIALES, ETAPAS_VENTA, type Modulo } from '../lib/esquema';
 import {
   diasHasta, dinero, enlaceCorreo, enlaceLlamada, enlaceWhatsApp, fecha, hoyISO, normalizar,
@@ -166,12 +167,35 @@ function MasPeque({ onClick, texto }: { onClick: () => void; texto: string }) {
 /* ====================== CLIENTES ====================== */
 
 type TabCli = 'todos' | 'personal' | 'empresa' | 'vip' | 'ganado' | 'perdido' | 'inactivo';
+type FiltrosCli = { provincia: string; origen: string; polizas: '' | 'vigentes' | 'sin' | 'vencidas'; ramo: string; aseg: string; cumple: boolean; orden: 'nombre' | 'polizas' | 'prima' };
+const FC0: FiltrosCli = { provincia: '', origen: '', polizas: '', ramo: '', aseg: '', cumple: false, orden: 'nombre' };
+
+/** Pólizas de cada cliente (vinculadas por clienteId) */
+export function polizasPorCliente(c: Cartera): Map<string, Reg[]> {
+  const m = new Map<string, Reg[]>();
+  for (const p of c.polizas) {
+    const id = txt(p, 'clienteId');
+    if (!id) continue;
+    if (!m.has(id)) m.set(id, []);
+    m.get(id)!.push(p);
+  }
+  return m;
+}
+
+const valores = (lista: Reg[], k: string) => [...new Set(lista.map((r) => txt(r, k)).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es'));
+
+function cuantosFiltros(f: Record<string, unknown>, base: Record<string, unknown>) {
+  return Object.keys(base).filter((k) => k !== 'orden' && f[k] !== base[k]).length;
+}
 
 export function Clientes({ ctx }: { ctx: Ctx }) {
   const { cartera } = ctx;
   const [tab, setTab] = useState<TabCli>('todos');
   const [q, setQ] = useState('');
   const [nuevo, setNuevo] = useState(false);
+  const [f, setF] = useState<FiltrosCli>(FC0);
+  const [verFiltros, setVerFiltros] = useState(false);
+  const pols = useMemo(() => polizasPorCliente(cartera), [cartera]);
   const cuenta = useMemo(() => {
     const c = { todos: cartera.clientes.length, personal: 0, empresa: 0, vip: 0, ganado: 0, perdido: 0, inactivo: 0 };
     for (const x of cartera.clientes) {
@@ -181,27 +205,40 @@ export function Clientes({ ctx }: { ctx: Ctx }) {
     }
     return c;
   }, [cartera.clientes]);
+  const mesHoy = new Date().getMonth() + 1;
   const lista = useMemo(() => {
     const t = normalizar(q);
     const dig = q.replace(/\D/g, '');
-    return cartera.clientes.filter((c) => {
+    const prima = (c: Reg) => (pols.get(c.id) ?? []).filter(polizaVigente).reduce((s, p) => s + (num(p, 'total') ?? num(p, 'prima') ?? 0), 0);
+    const r = cartera.clientes.filter((c) => {
       if (tab === 'empresa' && !esEmpresa(c)) return false;
       if (tab === 'personal' && esEmpresa(c)) return false;
       if (['vip', 'ganado', 'perdido', 'inactivo'].includes(tab) && estadoComercial(c) !== tab) return false;
+      if (f.provincia && txt(c, 'provincia') !== f.provincia) return false;
+      if (f.origen && txt(c, 'origenCliente') !== f.origen) return false;
+      const ps = pols.get(c.id) ?? [];
+      if (f.polizas === 'vigentes' && !ps.some(polizaVigente)) return false;
+      if (f.polizas === 'sin' && ps.length) return false;
+      if (f.polizas === 'vencidas' && !ps.some((p) => /vencida/i.test(txt(p, 'estado')) || (diasHasta(fec(p, 'fechaFin')) ?? 1) < 0)) return false;
+      if (f.ramo && !ps.some((p) => txt(p, 'ramo') === f.ramo)) return false;
+      if (f.aseg && !ps.some((p) => txt(p, 'aseg') === f.aseg)) return false;
+      if (f.cumple) { const fn = fec(c, 'fNac'); if (!fn || +fn.slice(5, 7) !== mesHoy) return false; }
       if (!t) return true;
       return busca(c, t, ['nombre', 'alias', 'cedula', 'email', 'ciudad']) ||
-        (dig.length >= 4 && txt(c, 'cel').replace(/\D/g, '').includes(dig));
+        (dig.length >= 4 && (txt(c, 'cel') + txt(c, 'tel')).replace(/\D/g, '').includes(dig));
     });
-  }, [cartera.clientes, tab, q]);
-  const polizasDe = useMemo(() => {
-    const m = new Map<string, number>();
-    for (const p of cartera.polizas) if (polizaVigente(p)) m.set(txt(p, 'clienteId'), (m.get(txt(p, 'clienteId')) ?? 0) + 1);
-    return m;
-  }, [cartera.polizas]);
+    if (f.orden === 'polizas') r.sort((a, b) => (pols.get(b.id)?.length ?? 0) - (pols.get(a.id)?.length ?? 0));
+    else if (f.orden === 'prima') r.sort((a, b) => prima(b) - prima(a));
+    return r;
+  }, [cartera.clientes, tab, q, f, pols, mesHoy]);
+  const n = cuantosFiltros(f, FC0);
 
   return (
     <>
-      <Buscador q={q} setQ={setQ} ph="Nombre, cédula, correo, celular o ciudad" />
+      <div className="busca-fila">
+        <Buscador q={q} setQ={setQ} ph="Nombre, cédula, correo, celular o ciudad" />
+        <button type="button" className={`boton-filtro${n ? ' activo' : ''}`} onClick={() => setVerFiltros(true)}>⚙️{n ? ` ${n}` : ''}</button>
+      </div>
       <Filtros<TabCli> valor={tab} cambiar={setTab} opciones={[
         ['todos', `👥 Todos (${cuenta.todos})`], ['personal', `🧑 Personales (${cuenta.personal})`],
         ['empresa', `🏢 Empresas (${cuenta.empresa})`], ['vip', `⭐ VIP (${cuenta.vip})`],
@@ -209,18 +246,72 @@ export function Clientes({ ctx }: { ctx: Ctx }) {
         ['inactivo', `⚫ Inactivos (${cuenta.inactivo})`],
       ]} />
       <Contador n={lista.length} total={cartera.clientes.length} que="clientes" />
-      <ListaLarga items={lista} vacio="No se encontraron clientes." render={(c) => (
-        <Fila key={c.id} inicial={inicial(txt(c, 'nombre'))} titulo={txt(c, 'nombre') || 'Sin nombre'}
-          sub={[txt(c, 'cedula'), txt(c, 'cel'), polizasDe.get(c.id) ? `${polizasDe.get(c.id)} pól.` : ''].filter(Boolean).join(' · ')}
-          derecha={estadoComercial(c) !== 'activo' ? <EtiquetaEstado estado={ESTADOS_COMERCIALES.find(([v]) => v === estadoComercial(c))?.[1] ?? null} /> : undefined}
-          onClick={() => ctx.abrir('clientes', c.id)} />
-      )} />
+      <ListaLarga items={lista} vacio="No se encontraron clientes." render={(c) => {
+        const ps = pols.get(c.id) ?? [];
+        const vig = ps.filter(polizaVigente).length;
+        return (
+          <Fila key={c.id} inicial={inicial(txt(c, 'nombre'))} titulo={txt(c, 'nombre') || 'Sin nombre'}
+            sub={[txt(c, 'cedula'), txt(c, 'cel')].filter(Boolean).join(' · ')}
+            derecha={<span className={`etiqueta ${vig ? 'e-ok' : ps.length ? 'e-aviso' : 'e-neutra'}`}>{ps.length} pól.{ps.length && vig !== ps.length ? ` · ${vig} vig.` : ''}</span>}
+            onClick={() => ctx.abrir('clientes', c.id)} />
+        );
+      }} />
       <BotonNuevo texto="Nuevo cliente" onClick={() => setNuevo(true)} />
+      {verFiltros && (
+        <Hoja titulo="Filtrar y ordenar clientes" onCerrar={() => setVerFiltros(false)}>
+          <label className="campo"><span>Ordenar por</span>
+            <select value={f.orden} onChange={(e) => setF({ ...f, orden: e.target.value as FiltrosCli['orden'] })}>
+              <option value="nombre">Nombre (A–Z)</option><option value="polizas">Más pólizas</option><option value="prima">Mayor prima vigente</option>
+            </select></label>
+          <label className="campo"><span>Pólizas</span>
+            <select value={f.polizas} onChange={(e) => setF({ ...f, polizas: e.target.value as FiltrosCli['polizas'] })}>
+              <option value="">Todas</option><option value="vigentes">Con pólizas vigentes</option><option value="vencidas">Con pólizas vencidas</option><option value="sin">Sin pólizas</option>
+            </select></label>
+          <label className="campo"><span>Con póliza del ramo</span>
+            <select value={f.ramo} onChange={(e) => setF({ ...f, ramo: e.target.value })}><option value="">Cualquiera</option>{valores(cartera.polizas, 'ramo').map((x) => <option key={x}>{x}</option>)}</select></label>
+          <label className="campo"><span>Con póliza de la aseguradora</span>
+            <select value={f.aseg} onChange={(e) => setF({ ...f, aseg: e.target.value })}><option value="">Cualquiera</option>{valores(cartera.polizas, 'aseg').map((x) => <option key={x}>{x}</option>)}</select></label>
+          <label className="campo"><span>Provincia</span>
+            <select value={f.provincia} onChange={(e) => setF({ ...f, provincia: e.target.value })}><option value="">Todas</option>{valores(cartera.clientes, 'provincia').map((x) => <option key={x}>{x}</option>)}</select></label>
+          <label className="campo"><span>Origen del cliente</span>
+            <select value={f.origen} onChange={(e) => setF({ ...f, origen: e.target.value })}><option value="">Todos</option>{valores(cartera.clientes, 'origenCliente').map((x) => <option key={x}>{x}</option>)}</select></label>
+          <label className="campo casilla"><input type="checkbox" checked={f.cumple} onChange={(e) => setF({ ...f, cumple: e.target.checked })} /> <span>Cumplen años este mes</span></label>
+          <div className="botonera">
+            <button className="boton" type="button" onClick={() => setVerFiltros(false)}>Ver {lista.length} clientes</button>
+            <button className="boton secundario" type="button" onClick={() => setF(FC0)}>Limpiar filtros</button>
+          </div>
+        </Hoja>
+      )}
       {nuevo && <NuevoRegistro ctx={ctx} modulo="clientes" titulo="Nuevo cliente"
         base={{ tipo: 'Persona Natural', tipoDoc: 'Cédula', estadoComercial: 'activo', estadoCli: 'activo', codPais: '507', alias: '', historialWA: [], archivos: [] }}
         onCerrar={() => setNuevo(false)} onCreado={(r) => ctx.abrir('clientes', r.id)} />}
     </>
   );
+}
+
+/* ---------------- vincular cliente <-> póliza ---------------- */
+
+const normDoc = (s: string) => s.toUpperCase().replace(/[^0-9A-Z-]/g, '').split('-').map((x) => x.replace(/^0+(?=\d)/, '')).join('-');
+
+/** Pólizas sin cliente vinculado que parecen ser de este cliente (por cédula o nombre) */
+export function polizasSueltasDe(c: Cartera, cli: Reg): Reg[] {
+  const ced = txt(cli, 'cedula') ? normDoc(txt(cli, 'cedula')) : '';
+  const nom = normalizar(txt(cli, 'nombre'));
+  const ids = new Set(c.clientes.map((x) => x.id));
+  return c.polizas.filter((p) => {
+    if (ids.has(txt(p, 'clienteId'))) return false;
+    const docs = ['cedCliente', 'docAsegurado', 'docTomador'].map((k) => txt(p, k)).filter(Boolean).map(normDoc);
+    return (ced && docs.includes(ced)) || (nom && [txt(p, 'nombreCliente'), txt(p, 'nombreAsegurado'), txt(p, 'tomador')].some((x) => normalizar(x) === nom));
+  });
+}
+
+async function vincular(ctx: Ctx, p: Reg, cli: Reg) {
+  try {
+    ctx.poner('polizas', await guardarRegistro('polizas', p.id, copiaCliente('polizas', cli)));
+    ctx.avisar(`✓ Póliza vinculada a ${txt(cli, 'nombre')}`);
+  } catch {
+    ctx.avisar('No se pudo vincular.');
+  }
 }
 
 export function ClienteFicha({ ctx, c }: { ctx: Ctx; c: Reg }) {
@@ -235,6 +326,7 @@ export function ClienteFicha({ ctx, c }: { ctx: Ctx; c: Reg }) {
     .sort((a, b) => fec(b, 'fecha').localeCompare(fec(a, 'fecha')));
   const tareas = cartera.tareas.filter((t) => txt(t, 'clienteId') === c.id && tareaAbierta(t));
   const prima = polizas.filter(polizaVigente).reduce((s, p) => s + (num(p, 'total') ?? num(p, 'prima') ?? 0), 0);
+  const sueltas = polizasSueltasDe(cartera, c);
 
   return (
     <>
@@ -242,7 +334,7 @@ export function ClienteFicha({ ctx, c }: { ctx: Ctx; c: Reg }) {
       <div className="chips">
         <span className="chip">{esEmpresa(c) ? '🏢 Empresa' : '🧑 Personal'}</span>
         <span className="chip">{ESTADOS_COMERCIALES.find(([v]) => v === estadoComercial(c))?.[1]}</span>
-        <span className="chip">{polizas.filter(polizaVigente).length} pólizas vigentes</span>
+        <span className="chip">{polizas.length} póliza{polizas.length === 1 ? '' : 's'} · {polizas.filter(polizaVigente).length} vigente{polizas.filter(polizaVigente).length === 1 ? '' : 's'}</span>
         {prima > 0 && <span className="chip">{dinero(prima)} en primas</span>}
       </div>
 
@@ -252,6 +344,17 @@ export function ClienteFicha({ ctx, c }: { ctx: Ctx; c: Reg }) {
             {polizas.map((p) => <FilaPoliza key={p.id} p={p} ctx={ctx} />)}
           </div>
         ) : <Vacio>Sin pólizas.</Vacio>}
+        {sueltas.length > 0 && (
+          <div className="tarjeta aviso-tarjeta">
+            <b>🔗 {sueltas.length} póliza{sueltas.length > 1 ? 's' : ''} con su cédula o nombre sin vincular</b>
+            {sueltas.map((p) => (
+              <div key={p.id} className="fila-suelta">
+                <span>{txt(p, 'num')} · {txt(p, 'aseg')} · {txt(p, 'ramo')}</span>
+                <button type="button" className="mini" onClick={() => vincular(ctx, p, c)}>Vincular</button>
+              </div>
+            ))}
+          </div>
+        )}
       </Seccion>
 
       <Seccion titulo="Vehículos" n={vehiculos.length} accion={<MasPeque texto="Vehículo" onClick={() => setCrear('vehiculos')} />}>
@@ -331,39 +434,128 @@ export function FilaPoliza({ p, ctx, conCliente }: { p: Reg; ctx: Ctx; conClient
 }
 
 type FiltroPol = 'vencen' | 'vigentes' | 'vencidas' | 'canceladas' | 'todas';
+type FiltrosPol = { aseg: string; ramo: string; estado: string; forma: string; mes: string; sinCliente: boolean; orden: 'vence' | 'prima' | 'cliente' | 'recientes' };
+const FP0: FiltrosPol = { aseg: '', ramo: '', estado: '', forma: '', mes: '', sinCliente: false, orden: 'vence' };
 
 export function Polizas({ ctx }: { ctx: Ctx }) {
   const { cartera } = ctx;
-  const [f, setF] = useState<FiltroPol>('vencen');
+  const [tab, setTab] = useState<FiltroPol>('vencen');
   const [q, setQ] = useState('');
   const [nuevo, setNuevo] = useState(false);
+  const [f, setF] = useState<FiltrosPol>(FP0);
+  const [verFiltros, setVerFiltros] = useState(false);
+  const idsCli = useMemo(() => new Set(cartera.clientes.map((c) => c.id)), [cartera.clientes]);
+  const sinCliente = useMemo(() => cartera.polizas.filter((p) => !idsCli.has(txt(p, 'clienteId'))).length, [cartera.polizas, idsCli]);
   const lista = useMemo(() => {
     const t = normalizar(q);
-    return cartera.polizas.filter((p) => {
+    const r = cartera.polizas.filter((p) => {
       const d = diasHasta(fec(p, 'fechaFin'));
-      if (f === 'vencen' && !(polizaVigente(p) && d !== null && d >= 0 && d <= 30)) return false;
-      if (f === 'vigentes' && !polizaVigente(p)) return false;
-      if (f === 'vencidas' && !(/vencida/i.test(txt(p, 'estado')) || (polizaVigente(p) && d !== null && d < 0))) return false;
-      if (f === 'canceladas' && !polizaCancelada(p)) return false;
-      return !t || busca(p, t, ['nombreCliente', 'num', 'aseg', 'ramo', 'subramo', 'riesgo', 'nombreAsegurado', 'tomador']);
-    }).sort((a, b) => (f === 'vencen' || f === 'vigentes'
-      ? fec(a, 'fechaFin').localeCompare(fec(b, 'fechaFin'))
-      : fec(b, 'fechaFin').localeCompare(fec(a, 'fechaFin'))));
-  }, [cartera.polizas, f, q]);
+      if (tab === 'vencen' && !(polizaVigente(p) && d !== null && d >= 0 && d <= 30)) return false;
+      if (tab === 'vigentes' && !polizaVigente(p)) return false;
+      if (tab === 'vencidas' && !(/vencida/i.test(txt(p, 'estado')) || (polizaVigente(p) && d !== null && d < 0))) return false;
+      if (tab === 'canceladas' && !polizaCancelada(p)) return false;
+      if (f.aseg && txt(p, 'aseg') !== f.aseg) return false;
+      if (f.ramo && txt(p, 'ramo') !== f.ramo) return false;
+      if (f.estado && txt(p, 'estado') !== f.estado) return false;
+      if (f.forma && txt(p, 'formaPago') !== f.forma) return false;
+      if (f.mes && !fec(p, 'fechaFin').startsWith(f.mes)) return false;
+      if (f.sinCliente && idsCli.has(txt(p, 'clienteId'))) return false;
+      return !t || busca(p, t, ['nombreCliente', 'num', 'aseg', 'ramo', 'subramo', 'riesgo', 'nombreAsegurado', 'tomador', 'cedCliente', 'docAsegurado']);
+    });
+    const tot = (p: Reg) => num(p, 'total') ?? num(p, 'prima') ?? 0;
+    if (f.orden === 'prima') r.sort((a, b) => tot(b) - tot(a));
+    else if (f.orden === 'cliente') r.sort((a, b) => txt(a, 'nombreCliente').localeCompare(txt(b, 'nombreCliente'), 'es'));
+    else if (f.orden === 'recientes') r.sort((a, b) => fec(b, 'fechaInicio').localeCompare(fec(a, 'fechaInicio')));
+    else r.sort((a, b) => (tab === 'vencen' || tab === 'vigentes' ? 1 : -1) * fec(a, 'fechaFin').localeCompare(fec(b, 'fechaFin')));
+    return r;
+  }, [cartera.polizas, tab, q, f, idsCli]);
   const total = lista.reduce((s, p) => s + (num(p, 'total') ?? num(p, 'prima') ?? 0), 0);
+  const n = cuantosFiltros(f, FP0);
 
   return (
     <>
-      <Buscador q={q} setQ={setQ} ph="Cliente, número, aseguradora, ramo o riesgo" />
-      <Filtros<FiltroPol> valor={f} cambiar={setF} opciones={[
+      <div className="busca-fila">
+        <Buscador q={q} setQ={setQ} ph="Cliente, cédula, número, aseguradora, ramo…" />
+        <button type="button" className={`boton-filtro${n ? ' activo' : ''}`} onClick={() => setVerFiltros(true)}>⚙️{n ? ` ${n}` : ''}</button>
+      </div>
+      <Filtros<FiltroPol> valor={tab} cambiar={setTab} opciones={[
         ['vencen', '🔔 Vencen en 30 días'], ['vigentes', 'Vigentes'], ['vencidas', 'Vencidas'], ['canceladas', 'Canceladas'], ['todas', 'Todas'],
       ]} />
       <p className="contador">{lista.length} de {cartera.polizas.length} pólizas{total ? ` · ${dinero(total)}` : ''}</p>
+      {sinCliente > 0 && !f.sinCliente && (
+        <button type="button" className="aviso-linea" onClick={() => { setTab('todas'); setF({ ...f, sinCliente: true }); }}>
+          🔗 {sinCliente} pólizas sin cliente vinculado — ver
+        </button>
+      )}
       <ListaLarga items={lista} vacio="No hay pólizas en esta vista." render={(p) => <FilaPoliza key={p.id} p={p} ctx={ctx} conCliente />} />
       <BotonNuevo texto="Nueva póliza" onClick={() => setNuevo(true)} />
+      {verFiltros && (
+        <Hoja titulo="Filtrar y ordenar pólizas" onCerrar={() => setVerFiltros(false)}>
+          <label className="campo"><span>Ordenar por</span>
+            <select value={f.orden} onChange={(e) => setF({ ...f, orden: e.target.value as FiltrosPol['orden'] })}>
+              <option value="vence">Fecha de vencimiento</option><option value="prima">Mayor prima</option><option value="cliente">Cliente (A–Z)</option><option value="recientes">Más recientes (inicio)</option>
+            </select></label>
+          <label className="campo"><span>Aseguradora</span>
+            <select value={f.aseg} onChange={(e) => setF({ ...f, aseg: e.target.value })}><option value="">Todas</option>{valores(cartera.polizas, 'aseg').map((x) => <option key={x}>{x}</option>)}</select></label>
+          <label className="campo"><span>Ramo</span>
+            <select value={f.ramo} onChange={(e) => setF({ ...f, ramo: e.target.value })}><option value="">Todos</option>{valores(cartera.polizas, 'ramo').map((x) => <option key={x}>{x}</option>)}</select></label>
+          <label className="campo"><span>Estado</span>
+            <select value={f.estado} onChange={(e) => setF({ ...f, estado: e.target.value })}><option value="">Todos</option>{valores(cartera.polizas, 'estado').map((x) => <option key={x}>{x}</option>)}</select></label>
+          <label className="campo"><span>Forma de pago</span>
+            <select value={f.forma} onChange={(e) => setF({ ...f, forma: e.target.value })}><option value="">Todas</option>{valores(cartera.polizas, 'formaPago').map((x) => <option key={x}>{x}</option>)}</select></label>
+          <label className="campo"><span>Vence en el mes</span>
+            <input type="month" value={f.mes} onChange={(e) => setF({ ...f, mes: e.target.value })} /></label>
+          <label className="campo casilla"><input type="checkbox" checked={f.sinCliente} onChange={(e) => setF({ ...f, sinCliente: e.target.checked })} /> <span>Solo pólizas sin cliente vinculado</span></label>
+          <div className="botonera">
+            <button className="boton" type="button" onClick={() => setVerFiltros(false)}>Ver {lista.length} pólizas</button>
+            <button className="boton secundario" type="button" onClick={() => setF(FP0)}>Limpiar filtros</button>
+          </div>
+        </Hoja>
+      )}
       {nuevo && <NuevoRegistro ctx={ctx} modulo="polizas" titulo="Nueva póliza"
         base={{ tipo: 'Póliza', nueva: 'Nueva', estado: 'Vigente', etapa: 'Nueva', moneda: 'USD', participacion: 100, archivos: [] }}
         onCerrar={() => setNuevo(false)} onCreado={(r) => ctx.abrir('polizas', r.id)} />}
+    </>
+  );
+}
+
+function VincularCliente({ ctx, p, actual }: { ctx: Ctx; p: Reg; actual?: Reg }) {
+  const [abierto, setAbierto] = useState(false);
+  const [cid, setCid] = useState('');
+  const sugeridos = useMemo(() => {
+    if (actual) return [];
+    const docs = ['cedCliente', 'docAsegurado', 'docTomador'].map((k) => txt(p, k)).filter(Boolean).map(normDoc);
+    const noms = [txt(p, 'nombreCliente'), txt(p, 'nombreAsegurado'), txt(p, 'tomador')].filter(Boolean).map(normalizar);
+    return ctx.cartera.clientes.filter((c) => (txt(c, 'cedula') && docs.includes(normDoc(txt(c, 'cedula')))) || noms.includes(normalizar(txt(c, 'nombre')))).slice(0, 5);
+  }, [ctx.cartera.clientes, p, actual]);
+  return (
+    <>
+      {!actual && (
+        <div className="tarjeta aviso-tarjeta">
+          <b>🔗 Esta póliza no está vinculada a un cliente</b>
+          {txt(p, 'nombreCliente') && <p className="contador">Nombre en la póliza: {txt(p, 'nombreCliente')}</p>}
+          {sugeridos.map((c) => (
+            <div key={c.id} className="fila-suelta">
+              <span>{txt(c, 'nombre')} · {txt(c, 'cedula')}</span>
+              <button type="button" className="mini" onClick={() => vincular(ctx, p, c)}>Vincular</button>
+            </div>
+          ))}
+          <button type="button" className="mini" onClick={() => setAbierto(true)}>Buscar otro cliente…</button>
+        </div>
+      )}
+      {actual && <button type="button" className="mini mas-abajo" onClick={() => setAbierto(true)}>🔁 Cambiar cliente vinculado</button>}
+      {abierto && (
+        <Hoja titulo="Vincular a un cliente" onCerrar={() => setAbierto(false)}>
+          <ElegirCliente cartera={ctx.cartera} valor={cid} cambiar={setCid} />
+          <div className="botonera">
+            <button className="boton" type="button" disabled={!cid} onClick={async () => {
+              const c = ctx.cartera.clientes.find((x) => x.id === cid);
+              if (c) await vincular(ctx, p, c);
+              setAbierto(false);
+            }}>Vincular</button>
+          </div>
+        </Hoja>
+      )}
     </>
   );
 }
@@ -386,12 +578,17 @@ export function PolizaFicha({ ctx, p }: { ctx: Ctx; p: Reg }) {
         <span className="chip">{txt(p, 'ramo')}</span>
         {num(p, 'total') !== null && <span className="chip">{dinero(num(p, 'total'))}</span>}
       </div>
-      {cliente && (
-        <div className="lista">
-          <Fila inicial={inicial(txt(cliente, 'nombre'))} titulo={txt(cliente, 'nombre')} sub="Ver ficha del cliente"
-            onClick={() => ctx.abrir('clientes', cliente.id)} />
-        </div>
-      )}
+      {cliente && (() => {
+        const otras = ctx.cartera.polizas.filter((x) => txt(x, 'clienteId') === cliente.id);
+        return (
+          <div className="lista">
+            <Fila inicial={inicial(txt(cliente, 'nombre'))} titulo={txt(cliente, 'nombre')}
+              sub={`Ver ficha del cliente · ${otras.length} póliza${otras.length === 1 ? '' : 's'} en total`}
+              onClick={() => ctx.abrir('clientes', cliente.id)} />
+          </div>
+        );
+      })()}
+      <VincularCliente ctx={ctx} p={p} actual={cliente} />
       <Seccion titulo="Pagos" n={pagos.length} accion={<MasPeque texto="Pago" onClick={() => setPago(true)} />}>
         {pagado > 0 && <p className="contador">Pagado: {dinero(pagado)}</p>}
         {pagos.length > 0 && <ListaLarga items={pagos} paso={12} vacio="" render={(x) => <FilaPago key={x.id} p={x} ctx={ctx} />} />}
@@ -659,9 +856,10 @@ export function ProspectoFicha({ ctx, p }: { ctx: Ctx; p: Reg }) {
   const prob = Math.max(0, Math.min(100, num(p, 'probabilidad') ?? 0));
   async function avanzar(e: string) {
     try {
-      ctx.poner('prospectos', await registrarAccion('prospectos', p.id,
-        { accion: `Etapa → ${e}`, resultado: '' }, { etapaVenta: e }));
-      ctx.avisar('✓ Etapa actualizada');
+      const r = await avanzarEtapa(ctx.cartera, p, e);
+      ctx.poner('prospectos', r.prospecto);
+      if (r.cliente) ctx.poner('clientes', r.cliente);
+      ctx.avisar(r.mensaje);
     } catch {
       ctx.avisar('No se pudo guardar.');
     }
