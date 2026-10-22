@@ -10,6 +10,7 @@ import type { Cartera } from '../lib/datos';
 import { SEGURIDAD } from '../lib/config';
 import { fecha, hoyISO } from '../lib/formato';
 import type { Avisar } from '../App';
+import { activarPush, desactivarPush, estadoPush, probarPush, type EstadoPush } from '../lib/push';
 
 export function Ajustes({ correo, cartera, onSalir, avisar }: {
   correo: string; cartera: Cartera; onSalir: () => void; avisar: Avisar;
@@ -86,6 +87,8 @@ export function Ajustes({ correo, cartera, onSalir, avisar }: {
         </button>
       ))}
       <button className="boton secundario" type="button" onClick={() => setClave(true)}>Cambiar contraseña</button>
+
+      {!esAppNativa && <NotificacionesWeb avisar={avisar} />}
 
       {esAppNativa && (<>
       <h3 className="seccion">Avisos</h3>
@@ -197,5 +200,53 @@ function CambiarClave({ onCerrar, onListo }: { onCerrar: () => void; onListo: ()
         <button className="boton secundario" type="button" onClick={onCerrar}>Cancelar</button>
       </form>
     </Hoja>
+  );
+}
+
+const TEXTO_PUSH: Record<EstadoPush, string> = {
+  activo: 'Activadas en este dispositivo',
+  apagado: 'Desactivadas',
+  bloqueado: 'Bloqueadas en los ajustes del teléfono',
+  instalar: 'Primero agrega la app a la pantalla de inicio',
+  'no-soportado': 'Este navegador no las admite',
+};
+
+function NotificacionesWeb({ avisar }: { avisar: Avisar }) {
+  const [estado, setEstado] = useState<EstadoPush | null>(null);
+  const [ocupado, setOcupado] = useState(false);
+  useEffect(() => { void estadoPush().then(setEstado).catch(() => setEstado('no-soportado')); }, []);
+  async function hacer(f: () => Promise<unknown>) {
+    setOcupado(true);
+    try { await f(); } catch (e) { avisar(e instanceof Error ? e.message : 'No se pudo completar.'); }
+    setEstado(await estadoPush().catch(() => 'no-soportado' as EstadoPush));
+    setOcupado(false);
+  }
+  return (
+    <>
+      <h3 className="seccion">Notificaciones</h3>
+      <div className="tarjeta">
+        <dl className="datos">
+          <dt>Estado</dt>
+          <dd>{estado ? <span className={`etiqueta ${estado === 'activo' ? 'e-ok' : estado === 'apagado' ? 'e-neutra' : 'e-aviso'}`}>{TEXTO_PUSH[estado]}</span> : '…'}</dd>
+        </dl>
+        <p className="sincro">
+          Te avisa aunque la app esté cerrada: recordatorios de tareas y reuniones de la agenda (a su hora o con el aviso que
+          elijas), resumen diario a las 7:30 a. m. (vencimientos, tareas, reuniones, seguimientos y cumpleaños).
+        </p>
+      </div>
+      {estado === 'apagado' && (
+        <button className="boton" type="button" disabled={ocupado} onClick={() => hacer(async () => { const r = await activarPush(); if (r === 'activo') avisar('🔔 Notificaciones activadas'); })}>
+          🔔 Activar notificaciones
+        </button>
+      )}
+      {estado === 'activo' && (
+        <div className="botonera">
+          <button className="boton" type="button" disabled={ocupado} onClick={() => hacer(async () => avisar(await probarPush()))}>📨 Enviar notificación de prueba</button>
+          <button className="boton secundario" type="button" disabled={ocupado} onClick={() => hacer(async () => { await desactivarPush(); avisar('Notificaciones desactivadas'); })}>Desactivar en este dispositivo</button>
+        </div>
+      )}
+      {estado === 'instalar' && <div className="nota">En Safari toca Compartir → “Agregar a inicio”, abre la app desde el ícono y vuelve aquí.</div>}
+      {estado === 'bloqueado' && <div className="nota">Ve a Ajustes del iPhone → Notificaciones → JAC Seguros y actívalas.</div>}
+    </>
   );
 }

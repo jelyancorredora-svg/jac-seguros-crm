@@ -19,7 +19,7 @@ function csp(supabaseUrl: string): Plugin {
     "base-uri 'none'",
     "form-action 'none'",
     "frame-src 'none'",
-    "worker-src 'none'",
+    "worker-src 'self'",
     "manifest-src 'self'",
   ].join('; ');
   return {
