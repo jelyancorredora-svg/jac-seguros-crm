@@ -2905,13 +2905,42 @@ function initFileInp(inputId,listId){
  const inp=document.getElementById(inputId);if(!inp||inp._bound)return;inp._bound=true;
  inp.addEventListener('change',e=>{
  for(const f of e.target.files){
- if(f.size>2.5*1024*1024){toast(`"${f.name.slice(0,20)}" supera 2.5MB`,'err');continue;}
+ /* Archivos grandes: van DIRECTO a la nube (sin limite propio del CRM; el
+    limite lo pone el plan de Supabase). No se guardan dentro del navegador. */
+ if(f.size>2.5*1024*1024){jacSubirGrande(f).then(function(it){if(it){_pf.push(it);renderPF(listId);}});continue;}
  const r=new FileReader();
  r.onload=ev=>{_pf.push({id:'F'+uid(),name:f.name,type:f.type,size:f.size,b64:ev.target.result,fecha:TODAY.toISOString().split('T')[0]});renderPF(listId);};
  r.readAsDataURL(f);
  }
  inp.value='';
  });
+}
+async function jacSubirGrande(f){
+ try{
+  if(!window.db||!window.db.storage){toast('Sin conexión con la nube: no se puede subir "'+f.name.slice(0,20)+'"','err');return null;}
+  var ses=await window.db.auth.getSession();
+  var uid=ses&&ses.data&&ses.data.session&&ses.data.session.user.id;
+  if(!uid){toast('Tu sesión de nube venció. Vuelve a entrar.','err');return null;}
+  var fid='F'+uid_();
+  var ruta=uid+'/adjuntos/'+fid+'-'+String(f.name||'archivo').replace(/[^\w.\-]/g,'_');
+  toast('⏳ Subiendo "'+f.name.slice(0,24)+'" ('+(f.size/1048576).toFixed(1)+' MB)…');
+  var r=await window.db.storage.from('adjuntos').upload(ruta,f,{contentType:f.type||'application/octet-stream',upsert:false});
+  if(r.error){
+   var m=String(r.error.message||'').toLowerCase();
+   toast(/maximum allowed size|too large|413/.test(m)?'"'+f.name.slice(0,20)+'" supera el tamaño que permite tu plan de Supabase':'No se pudo subir "'+f.name.slice(0,20)+'"','err');
+   return null;
+  }
+  toast('✓ "'+f.name.slice(0,24)+'" en la nube');
+  return {id:fid,name:f.name,type:f.type,size:f.size,path:ruta,fecha:TODAY.toISOString().split('T')[0]};
+ }catch(e){toast('No se pudo subir "'+f.name.slice(0,20)+'"','err');return null;}
+}
+function uid_(){return (typeof uid==='function')?uid():(Date.now().toString(36)+Math.random().toString(36).slice(2,7));}
+/* Abrir un archivo que esta solo en la nube (grande o subido desde la app) */
+async function jacAbrirNube(ruta){
+ var w=window.open('','_blank');if(w)w.opener=null;
+ var url=(typeof window.jacEnlaceAdjunto==='function')?await window.jacEnlaceAdjunto(ruta,600):null;
+ if(!url){if(w)w.close();toast('No se pudo abrir el archivo','err');return;}
+ if(w)w.location.href=url;else location.href=url;
 }
 function renderPF(lid){const el=document.getElementById(lid);if(!el)return;el.innerHTML=_pf.map((f,i)=>`<div class="fitem"><span title="${esc(f.name)}">${esc(f.name.length>22?f.name.slice(0,19)+'...':f.name)}</span><span style="color:var(--mu);font-size:9px">${(f.size/1024).toFixed(0)}K</span><button onclick="_pf.splice(${i},1);renderPF('${lid}')" class="btn bgh bic" style="padding:1px 4px">✕</button></div>`).join('');}
 function renderFL(files,rid,rtype){
@@ -2920,6 +2949,7 @@ function renderFL(files,rid,rtype){
  const isImg=f.name&&/\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(f.name);
  const isPDF=f.name&&/\.pdf$/i.test(f.name);
  const canView=isImg||isPDF;
+ if(!f.b64&&f.path){return`<div class="fitem"><span title="${esc(f.name)}">☁️ ${esc(f.name.length>16?f.name.slice(0,13)+'...':f.name)}</span><button data-p="${esc(f.path)}" onclick="jacAbrirNube(this.dataset.p)" class="btn bgh bic" style="padding:1px 5px" title="Abrir">👁️</button><button onclick="delFile('${rid}','${rtype}','${f.id}')" class="btn bgh bic" style="padding:1px 4px;color:var(--rd)" title="Eliminar">✕</button></div>`;}
  const safe=f.b64?(f.b64.replace(/'/g,"\\'")):('');
  const viewBtn=canView?`<button onclick="viewFile('${safe.substring(0,30)}...','${esc(f.name)}','${esc(rid)}','${esc(rtype)}','${esc(f.id||'')}')" class="btn bgh bic" style="padding:1px 5px" title="Ver">👁️</button>`:'';
  return`<div class="fitem"><span title="${esc(f.name)}">${esc(f.name.length>18?f.name.slice(0,15)+'...':f.name)}</span>${viewBtn}<a href="${esc(f.b64)}" download="${esc(f.name)}" class="btn bgh bic" style="padding:1px 5px" title="Descargar">⬇️</a><button onclick="delFile('${rid}','${rtype}','${f.id}')" class="btn bgh bic" style="padding:1px 4px;color:var(--rd)" title="Eliminar">✕</button></div>`;
@@ -2930,6 +2960,7 @@ function renderFLFull(files,rid,rtype){
  return files.map(f=>{
  const isImg=f.name&&/\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(f.name);
  const isPDF=f.name&&/\.pdf$/i.test(f.name);
+ if(!f.b64&&f.path){return`<div style="margin:2px 0"><button data-p="${esc(f.path)}" onclick="jacAbrirNube(this.dataset.p)" class="btn bsm bin">☁️ Abrir: ${esc(f.name.length>25?f.name.slice(0,22)+'...':f.name)}</button></div>`;}
  if(isImg&&f.b64){return`<div style="margin:4px 0"><img src="${esc(f.b64)}" style="max-width:100%;max-height:200px;border-radius:6px;border:1px solid var(--bd);cursor:pointer" onclick="openFileViewer('${esc(f.b64).replace(/'/g,"\\'")}','${esc(f.name)}','img')" title="Click para ampliar"><div style="font-size:10px;color:var(--mu);margin-top:2px">${esc(f.name)}</div></div>`;}
  if(isPDF&&f.b64){return`<div style="margin:4px 0"><button class="btn bsm bin" onclick="openFileViewer('${esc(f.b64).replace(/'/g,"\\'")}','${esc(f.name)}','pdf')">📄 Ver PDF: ${esc(f.name.length>25?f.name.slice(0,22)+'...':f.name)}</button></div>`;}
  return`<div style="margin:2px 0"><a href="${esc(f.b64)}" download="${esc(f.name)}" class="btn bsm bgr">📎 ${esc(f.name.length>25?f.name.slice(0,22)+'...':f.name)}</a></div>`;
@@ -2939,7 +2970,8 @@ function viewFile(b64Short,name,rid,rtype,fid){
  const maps={cliente:S.clientes,poliza:S.polizas,siniestro:S.siniestros,prospecto:S.prospectos};
  const arr=maps[rtype];if(!arr)return;
  const obj=arr.find(x=>x.id===rid);if(!obj||!obj.archivos)return;
- const f=obj.archivos.find(x=>x.id===fid||x.name===name);if(!f||!f.b64)return;
+ const f=obj.archivos.find(x=>x.id===fid||x.name===name);if(!f)return;
+ if(!f.b64){if(f.path)jacAbrirNube(f.path);return;}
  const isImg=name&&/\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(name);
  openFileViewer(f.b64,name,isImg?'img':'pdf');
 }
@@ -12109,7 +12141,24 @@ document.addEventListener('click', function(e){
                   /* Mensajero: las asignaciones y los datos del mensajero
                      vivian solo en el navegador de cada computadora. Aqui
                      viajan a la nube y llegan al telefono y a la app. */
-                  'encomiendas', 'mensajero', 'mensajeroTel', 'mensajeroEmail'];
+                  'encomiendas', 'mensajero', 'mensajeroTel', 'mensajeroEmail',
+                  /* Notas & Recordatorios y tasas de comision: tambien vivian
+                     solo en el navegador. Ahora viajan a la nube y a la app. */
+                  'notas', 'comRates'];
+  /* Listas que la PRIMERA vez se juntan con la nube en vez de pisarla
+     (lo que solo estaba en esta computadora + lo que ya habia arriba). */
+  var _JAC_UNIR = {
+    encomiendas: function (x) { return x && x.id ? String(x.id) : null; },
+    notas: function (x) { return x && x.id ? String(x.id) : null; },
+    comRates: function (x) { return x ? String(x.aseg || '') + '|' + String(x.ramo || '') : null; }
+  };
+  function _jacUnir(local, nube, llave) {
+    var out = Array.isArray(nube) ? nube.slice() : [], ya = {};
+    out.forEach(function (x) { var k = llave(x); if (k) ya[k] = 1; });
+    (Array.isArray(local) ? local : []).forEach(function (x) { var k = llave(x); if (k && !ya[k]) { ya[k] = 1; out.push(x); } });
+    return out;
+  }
+  window._jacUnir = _jacUnir; window._JAC_UNIR = _JAC_UNIR;
   var COLS = window.__JAC_COLS || {};
 
   function snake(c) {
@@ -13071,27 +13120,25 @@ document.addEventListener('click', function(e){
             }
           }
         }
-        if (cat === 'encomiendas') {
-          /* Primera subida del Mensajero desde esta computadora: antes de
+        if (_JAC_UNIR[cat]) {
+          /* Primera subida de esta lista desde esta computadora: antes de
              escribir se lee lo que ya hay en la nube (de la app o de otra
-             computadora) y se junta por id. Nunca se pisa lo ajeno. */
+             computadora) y se junta. Nunca se pisa lo ajeno. */
           var _yaUnidas = false;
-          try { _yaUnidas = localStorage.getItem('jac_encomiendas_unidas') === '1'; } catch (e) {}
+          try { _yaUnidas = localStorage.getItem('jac_' + cat + '_unidas') === '1'; } catch (e) {}
           if (!_yaUnidas) {
-            var _act = await d.from('crm_meta').select('valor').eq('clave', 'encomiendas').maybeSingle();
+            var _act = await d.from('crm_meta').select('valor').eq('clave', cat).maybeSingle();
             if (_act.error) continue;
             var _nubeE = (_act.data && Array.isArray(_act.data.valor)) ? _act.data.valor : [];
-            var _idsE = {};
-            (S.encomiendas || []).forEach(function (x) { if (x && x.id) _idsE[x.id] = 1; });
-            _nubeE.forEach(function (x) { if (x && x.id && !_idsE[x.id]) S.encomiendas.push(x); });
-            val = JSON.stringify(S.encomiendas);
+            S[cat] = _jacUnir(S[cat], _nubeE, _JAC_UNIR[cat]);
+            val = JSON.stringify(S[cat]);
           }
         }
         var rm = await d.from('crm_meta').upsert(
           { clave: cat, valor: JSON.parse(val) }, { onConflict: 'clave' });
         if (!rm.error) _base['_meta_' + cat] = hash(val);
-        if (!rm.error && cat === 'encomiendas') {
-          try { localStorage.setItem('jac_encomiendas_unidas', '1'); } catch (e) {}
+        if (!rm.error && _JAC_UNIR[cat]) {
+          try { localStorage.setItem('jac_' + cat + '_unidas', '1'); } catch (e) {}
         }
       }
       var badge = document.getElementById('syncBadge');
@@ -13170,26 +13217,23 @@ document.addEventListener('click', function(e){
       if (f.clave === 'iseguros_polizas')          window._ISPols = f.valor || [];
       else if (f.clave === 'iseguros_comisiones')  window._IS = f.valor || { cortes: [] };
       else if (f.clave === 'bluecross_asegurados') window._BCBSDataDefault = f.valor || { asegurados: [] };
-      else if (f.clave === 'encomiendas' && typeof S !== 'undefined') {
-        /* La PRIMERA vez que esta computadora baja el Mensajero de la nube,
-           se juntan las asignaciones que solo existian aqui (por id) para no
-           perder ninguna. Despues manda la nube, como el resto. */
+      else if (window._JAC_UNIR && window._JAC_UNIR[f.clave] && typeof S !== 'undefined') {
+        /* La PRIMERA vez que esta computadora baja esta lista de la nube
+           (Mensajero, Notas, tasas de comision), se junta lo que solo
+           existia aqui para no perder nada. Despues manda la nube. */
         var _nube = Array.isArray(f.valor) ? f.valor.slice() : [];
         var _unidas = false;
-        try { _unidas = localStorage.getItem('jac_encomiendas_unidas') === '1'; } catch (e) {}
+        try { _unidas = localStorage.getItem('jac_' + f.clave + '_unidas') === '1'; } catch (e) {}
         /* La marca se pone recien cuando la lista unida SUBIO bien (ver la
            subida de catalogos). Hasta entonces cada bajada vuelve a juntar,
            asi una bajada intermedia no borra lo que solo estaba aqui. */
-        if (!_unidas) {
-          var _ids = {};
-          _nube.forEach(function (x) { if (x && x.id) _ids[x.id] = 1; });
-          (Array.isArray(S.encomiendas) ? S.encomiendas : []).forEach(function (x) {
-            if (x && x.id && !_ids[x.id]) _nube.push(x);
-          });
-        }
-        S.encomiendas = _nube;
-        try { if (typeof RMen === 'function' && document.getElementById('pg-men')
-                  && document.getElementById('pg-men').classList.contains('on')) { RMen(); renderMenStats(); } } catch (e) {}
+        if (!_unidas) _nube = window._jacUnir(S[f.clave], _nube, window._JAC_UNIR[f.clave]);
+        S[f.clave] = _nube;
+        try {
+          var _pgOn = function (id) { var e = document.getElementById(id); return e && e.classList.contains('on'); };
+          if (f.clave === 'encomiendas' && typeof RMen === 'function' && _pgOn('pg-men')) { RMen(); renderMenStats(); }
+          if (f.clave === 'notas' && typeof RNot === 'function' && _pgOn('pg-not')) RNot();
+        } catch (e) {}
       }
       else if (typeof S !== 'undefined')           S[f.clave] = f.valor;
     });
