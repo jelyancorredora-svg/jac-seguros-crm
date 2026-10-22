@@ -894,7 +894,8 @@ body.dark ::-webkit-scrollbar-thumb{background:#334155}
  </div>
  <p style="font-size:11px;color:var(--mu);margin-top:8px">Exporta periódicamente como respaldo de seguridad.</p>
  </div>
-<div class="card" style="margin-top:16px;padding:14px"><h3 style="font-size:13px;margin-bottom:8px">🔗 Integraciones · Google Calendar</h3><p style="font-size:11px;color:#78716C;margin-bottom:10px">Sincroniza tus tareas y acciones de la Agenda con tu Google Calendar. Pega aquí tu "Client ID" de Google Cloud Console.</p><label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:4px">Google Client ID</label><input id="cfg-gcal-cid" type="text" placeholder="xxxxxxxx.apps.googleusercontent.com" class="fc" style="width:100%;max-width:420px;margin-bottom:10px;box-sizing:border-box" oninput="cfgSaveGcalCid()"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn bp" onclick="gcalConectar()">🔌 Conectar Google Calendar</button><button class="btn" onclick="gcalSyncAll()">🔄 Sincronizar ahora</button><button class="btn" onclick="gcalDesconectar()">Desconectar</button></div><div id="cfg-gcal-status" style="font-size:11px;color:#78716C;margin-top:8px"></div></div><div class="card"><div class="ch"><h3>🏛 Aseguradoras</h3></div><div style="padding:12px 16px;"><p style="color:#6b7280;font-size:13px;margin:0 0 12px;">Gestiona las companias aseguradoras registradas en el sistema.</p><button onclick="SH(&apos;aseg&apos;)" style="padding:8px 16px;border-radius:8px;border:none;background:#1E3A8A;color:#fff;cursor:pointer;font-size:13px;">Abrir Aseguradoras</button></div></div><div class="card"><div class="ch"><h3>🔐 Seguridad de la sesión</h3></div><div style="padding:12px 16px;"><p style="color:#6b7280;font-size:13px;margin:0 0 12px;">Tu sesión se cierra automáticamente después de 24 horas de inactividad. Si usas una computadora compartida, cierra sesión manualmente al terminar.</p><button onclick="window.doLogout&&window.doLogout()" style="padding:8px 16px;border-radius:8px;border:none;background:#DC2626;color:#fff;cursor:pointer;font-size:13px;">🔓 Cerrar sesión</button></div></div>
+<div class="card" style="margin-top:16px;padding:14px"><h3 style="font-size:13px;margin-bottom:8px">🔗 Integraciones · Google Calendar</h3><p style="font-size:11px;color:#78716C;margin-bottom:10px">Sincroniza tus tareas y acciones de la Agenda con tu Google Calendar. Pega aquí tu "Client ID" de Google Cloud Console.</p><label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:4px">Google Client ID</label><input id="cfg-gcal-cid" type="text" placeholder="xxxxxxxx.apps.googleusercontent.com" class="fc" style="width:100%;max-width:420px;margin-bottom:10px;box-sizing:border-box" oninput="cfgSaveGcalCid()"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn bp" onclick="gcalConectar()">🔌 Conectar Google (Calendar + Drive)</button><button class="btn" onclick="gcalSyncAll()">🔄 Sincronizar ahora</button><button class="btn" onclick="gcalDesconectar()">Desconectar</button></div><label style="display:flex;gap:8px;align-items:center;font-size:12px;margin-top:10px;cursor:pointer"><input type="checkbox" id="cfg-drive-on" onchange="jacDriveDestino(this.checked)" style="width:16px;height:16px"> 📁 Guardar los archivos nuevos en mi <b>Google Drive</b> (carpeta “JAC Seguros CRM — Archivos”). Si Google no está conectado, van a la nube del CRM.</label>
+<div id="cfg-gcal-status" style="font-size:11px;color:#78716C;margin-top:8px"></div></div><div class="card"><div class="ch"><h3>🏛 Aseguradoras</h3></div><div style="padding:12px 16px;"><p style="color:#6b7280;font-size:13px;margin:0 0 12px;">Gestiona las companias aseguradoras registradas en el sistema.</p><button onclick="SH(&apos;aseg&apos;)" style="padding:8px 16px;border-radius:8px;border:none;background:#1E3A8A;color:#fff;cursor:pointer;font-size:13px;">Abrir Aseguradoras</button></div></div><div class="card"><div class="ch"><h3>🔐 Seguridad de la sesión</h3></div><div style="padding:12px 16px;"><p style="color:#6b7280;font-size:13px;margin:0 0 12px;">Tu sesión se cierra automáticamente después de 24 horas de inactividad. Si usas una computadora compartida, cierra sesión manualmente al terminar.</p><button onclick="window.doLogout&&window.doLogout()" style="padding:8px 16px;border-radius:8px;border:none;background:#DC2626;color:#fff;cursor:pointer;font-size:13px;">🔓 Cerrar sesión</button></div></div>
 </div>
 
 <!-- MENSAJERO -->
@@ -2904,7 +2905,9 @@ document.addEventListener('click',function(ev){var t=ev.target.closest('[data-et
 function initFileInp(inputId,listId){
  const inp=document.getElementById(inputId);if(!inp||inp._bound)return;inp._bound=true;
  inp.addEventListener('change',e=>{
- for(const f0 of e.target.files){ jacComprimirFoto(f0).then(function(f){
+ for(const f0 of e.target.files){ jacComprimirFoto(f0).then(async function(f){
+ /* Google Drive (destino principal): si Google esta conectado, todo va a tu Drive */
+ if(jacDriveActivo()){var itD=await jacSubirDrive(f);if(itD){_pf.push(itD);renderPF(listId);return;}}
  /* Archivos grandes: van DIRECTO a la nube (sin limite propio del CRM; el
     limite lo pone el plan de Supabase). No se guardan dentro del navegador. */
  if(f.size>2.5*1024*1024){jacSubirGrande(f).then(function(it){if(it){_pf.push(it);renderPF(listId);}});return;}
@@ -2949,6 +2952,36 @@ async function jacSubirGrande(f){
   toast('✓ "'+f.name.slice(0,24)+'" en la nube');
   return {id:fid,name:f.name,type:f.type,size:f.size,path:ruta,fecha:TODAY.toISOString().split('T')[0]};
  }catch(e){toast('No se pudo subir "'+f.name.slice(0,20)+'"','err');return null;}
+}
+/* ── 📁 Google Drive: destino principal de los archivos (igual que la app) ── */
+function jacDriveActivo(){var i=(typeof S!=='undefined'&&S.integraciones)||{};return !!window.__gcalToken&&i.archivosEn!=='supabase';}
+function jacDriveDestino(si){S.integraciones=S.integraciones||{};S.integraciones.archivosEn=si?'drive':'supabase';save();toast(si?'📁 Los archivos nuevos irán a tu Google Drive':'☁️ Los archivos nuevos irán a la nube del CRM');}
+setInterval(function(){try{var c=document.getElementById('cfg-drive-on');if(c&&document.activeElement!==c)c.checked=((S.integraciones||{}).archivosEn!=='supabase');}catch(e){}},1500);
+async function jacCarpetaDrive(tok){
+ var i=S.integraciones=S.integraciones||{},h={Authorization:'Bearer '+tok};
+ if(i.driveCarpeta){var r0=await fetch('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(i.driveCarpeta)+'?fields=id,trashed',{headers:h});if(r0.ok){var j0=await r0.json();if(j0.id&&!j0.trashed)return j0.id;}}
+ var q=encodeURIComponent("name = 'JAC Seguros CRM — Archivos' and mimeType = 'application/vnd.google-apps.folder' and trashed = false");
+ var r1=await fetch('https://www.googleapis.com/drive/v3/files?q='+q+'&fields=files(id)&pageSize=1',{headers:h});
+ var j1=r1.ok?await r1.json():{};var id=j1.files&&j1.files[0]&&j1.files[0].id;
+ if(!id){var r2=await fetch('https://www.googleapis.com/drive/v3/files?fields=id',{method:'POST',headers:Object.assign({'Content-Type':'application/json'},h),body:JSON.stringify({name:'JAC Seguros CRM — Archivos',mimeType:'application/vnd.google-apps.folder'})});if(!r2.ok)throw new Error('carpeta '+r2.status);id=(await r2.json()).id;}
+ i.driveCarpeta=id;save();return id;
+}
+async function jacSubirDrive(f){
+ var tok=window.__gcalToken;if(!tok)return null;
+ try{
+  toast('⏳ Subiendo "'+f.name.slice(0,24)+'" a Google Drive…');
+  var carpeta=await jacCarpetaDrive(tok);
+  var ini=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&fields=id,webViewLink',{method:'POST',
+   headers:{Authorization:'Bearer '+tok,'Content-Type':'application/json; charset=UTF-8','X-Upload-Content-Type':f.type||'application/octet-stream','X-Upload-Content-Length':String(f.size)},
+   body:JSON.stringify({name:f.name,parents:[carpeta]})});
+  if(!ini.ok){var t=await ini.text();toast(/insufficient|scope/i.test(t)?'Vuelve a tocar "Conectar Google" y acepta Drive':/accessNotConfigured|disabled/i.test(t)?'Activa la API de Google Drive en tu proyecto de Google':'Google Drive no aceptó el archivo ('+ini.status+')','err');return null;}
+  var ses=ini.headers.get('location');if(!ses)return null;
+  var r=await fetch(ses,{method:'PUT',body:f});
+  if(!r.ok){toast('No se pudo subir a Drive ('+r.status+')','err');return null;}
+  var j=await r.json();
+  toast('✓ "'+f.name.slice(0,24)+'" en tu Google Drive');
+  return {id:'F'+uid_(),name:f.name,type:f.type,size:f.size,drive:j.id,url:j.webViewLink||('https://drive.google.com/file/d/'+j.id+'/view'),fecha:TODAY.toISOString().split('T')[0]};
+ }catch(e){toast('No se pudo subir a Google Drive; se guarda en la nube del CRM','warn');return null;}
 }
 function jacUrlDrive(f){var u=String(f.url||'');return /^https:\/\/(drive|docs)\.google\.com\//.test(u)?u:'https://drive.google.com/file/d/'+encodeURIComponent(f.drive)+'/view';}
 function uid_(){return (typeof uid==='function')?uid():(Date.now().toString(36)+Math.random().toString(36).slice(2,7));}
@@ -11401,7 +11434,7 @@ function gcalConectar(){
  try{
   var tc=google.accounts.oauth2.initTokenClient({
    client_id:cid,
-   scope:'https://www.googleapis.com/auth/calendar.events',
+   scope:'https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/drive.file',
    callback:function(resp){
     if(resp&&resp.access_token){
      window.__gcalToken=resp.access_token;
