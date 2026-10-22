@@ -11,6 +11,7 @@ import { db } from './lib/supabase';
 import { Bloqueo, Login, SegundoPaso } from './screens/Acceso';
 import { Agenda, EditarTarea } from './screens/Agenda';
 import { Ajustes } from './screens/Ajustes';
+import { Importar } from './screens/Importar';
 import { Inicio } from './screens/Inicio';
 import { Mas } from './screens/Mas';
 import {
@@ -19,7 +20,7 @@ import {
 } from './screens/Modulos';
 
 export type Pestana = 'inicio' | 'clientes' | 'polizas' | 'agenda' | 'mas';
-export type Vista = { t: 'ficha'; m: Modulo; id: string } | { t: 'lista'; m: Modulo } | { t: 'ajustes' };
+export type Vista = { t: 'ficha'; m: Modulo; id: string } | { t: 'lista'; m: Modulo } | { t: 'ajustes' } | { t: 'importar' };
 export type Avisar = (texto: string) => void;
 
 type Fase =
@@ -204,6 +205,9 @@ export default function App() {
   } else if (actual?.t === 'ajustes') {
     titulo = 'Ajustes';
     cuerpo = <Ajustes correo={correo} cartera={ctx.cartera} onSalir={salir} avisar={avisar} />;
+  } else if (actual?.t === 'importar') {
+    titulo = 'Importar documentos';
+    cuerpo = <Importar ctx={ctx} />;
   } else if (actual?.t === 'lista') {
     titulo = NOMBRE_LISTA[actual.m];
     const L = { siniestros: Siniestros, prospectos: Prospectos, pagos: Pagos, vehiculos: Vehiculos, comisiones: Comisiones,
@@ -252,7 +256,7 @@ export default function App() {
   } else if (pestana === 'agenda') {
     cuerpo = <Agenda ctx={ctx} />;
   } else {
-    cuerpo = <Mas ctx={ctx} irLista={(m) => ir({ t: 'lista', m })} irAjustes={() => ir({ t: 'ajustes' })} />;
+    cuerpo = <Mas ctx={ctx} irLista={(m) => ir({ t: 'lista', m })} irAjustes={() => ir({ t: 'ajustes' })} irImportar={() => ir({ t: 'importar' })} />;
   }
 
   return (

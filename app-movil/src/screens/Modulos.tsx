@@ -561,6 +561,7 @@ export function VehiculoFicha({ ctx, v }: { ctx: Ctx; v: Reg }) {
             onClick={() => ctx.abrir('clientes', cliente.id)} />
         </div>
       )}
+      <Adjuntos modulo="vehiculos" r={v} avisar={ctx.avisar} alCambiar={(n) => ctx.poner('vehiculos', n)} />
       <FichaCampos modulo="vehiculos" r={v} />
       <Editar ctx={ctx} modulo="vehiculos" r={v} titulo="Editar vehículo" />
     </>
