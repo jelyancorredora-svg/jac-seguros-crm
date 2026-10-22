@@ -12105,7 +12105,11 @@ document.addEventListener('click', function(e){
                   /* Las alertas ya atendidas. Estaban solo en el navegador, asi
                      que marcar una en la computadora no la callaba en el
                      telefono. Aqui viajan con el resto de los datos. */
-                  'alertasAtendidas'];
+                  'alertasAtendidas',
+                  /* Mensajero: las asignaciones y los datos del mensajero
+                     vivian solo en el navegador de cada computadora. Aqui
+                     viajan a la nube y llegan al telefono y a la app. */
+                  'encomiendas', 'mensajero', 'mensajeroTel', 'mensajeroEmail'];
   var COLS = window.__JAC_COLS || {};
 
   function snake(c) {
@@ -13051,9 +13055,44 @@ document.addEventListener('click', function(e){
         if (vacioCat) continue;   /* nunca vaciar un catalogo */
         var val = JSON.stringify(S[cat] || []);
         if (_base['_meta_' + cat] === hash(val)) continue;
+        if (cat === 'mensajero' || cat === 'mensajeroTel' || cat === 'mensajeroEmail') {
+          /* Si la nube ya tiene este dato (puesto desde la app u otra
+             computadora), se adopta en vez de pisarlo la primera vez. */
+          var _mk = 'jac_' + cat + '_ok', _mOk = false;
+          try { _mOk = localStorage.getItem(_mk) === '1'; } catch (e) {}
+          if (!_mOk) {
+            var _mAct = await d.from('crm_meta').select('valor').eq('clave', cat).maybeSingle();
+            if (_mAct.error) continue;
+            try { localStorage.setItem(_mk, '1'); } catch (e) {}
+            if (_mAct.data && typeof _mAct.data.valor === 'string' && _mAct.data.valor) {
+              S[cat] = _mAct.data.valor;
+              _base['_meta_' + cat] = hash(JSON.stringify(S[cat]));
+              continue;
+            }
+          }
+        }
+        if (cat === 'encomiendas') {
+          /* Primera subida del Mensajero desde esta computadora: antes de
+             escribir se lee lo que ya hay en la nube (de la app o de otra
+             computadora) y se junta por id. Nunca se pisa lo ajeno. */
+          var _yaUnidas = false;
+          try { _yaUnidas = localStorage.getItem('jac_encomiendas_unidas') === '1'; } catch (e) {}
+          if (!_yaUnidas) {
+            var _act = await d.from('crm_meta').select('valor').eq('clave', 'encomiendas').maybeSingle();
+            if (_act.error) continue;
+            var _nubeE = (_act.data && Array.isArray(_act.data.valor)) ? _act.data.valor : [];
+            var _idsE = {};
+            (S.encomiendas || []).forEach(function (x) { if (x && x.id) _idsE[x.id] = 1; });
+            _nubeE.forEach(function (x) { if (x && x.id && !_idsE[x.id]) S.encomiendas.push(x); });
+            val = JSON.stringify(S.encomiendas);
+          }
+        }
         var rm = await d.from('crm_meta').upsert(
           { clave: cat, valor: JSON.parse(val) }, { onConflict: 'clave' });
         if (!rm.error) _base['_meta_' + cat] = hash(val);
+        if (!rm.error && cat === 'encomiendas') {
+          try { localStorage.setItem('jac_encomiendas_unidas', '1'); } catch (e) {}
+        }
       }
       var badge = document.getElementById('syncBadge');
       if (badge) {
@@ -13131,6 +13170,27 @@ document.addEventListener('click', function(e){
       if (f.clave === 'iseguros_polizas')          window._ISPols = f.valor || [];
       else if (f.clave === 'iseguros_comisiones')  window._IS = f.valor || { cortes: [] };
       else if (f.clave === 'bluecross_asegurados') window._BCBSDataDefault = f.valor || { asegurados: [] };
+      else if (f.clave === 'encomiendas' && typeof S !== 'undefined') {
+        /* La PRIMERA vez que esta computadora baja el Mensajero de la nube,
+           se juntan las asignaciones que solo existian aqui (por id) para no
+           perder ninguna. Despues manda la nube, como el resto. */
+        var _nube = Array.isArray(f.valor) ? f.valor.slice() : [];
+        var _unidas = false;
+        try { _unidas = localStorage.getItem('jac_encomiendas_unidas') === '1'; } catch (e) {}
+        /* La marca se pone recien cuando la lista unida SUBIO bien (ver la
+           subida de catalogos). Hasta entonces cada bajada vuelve a juntar,
+           asi una bajada intermedia no borra lo que solo estaba aqui. */
+        if (!_unidas) {
+          var _ids = {};
+          _nube.forEach(function (x) { if (x && x.id) _ids[x.id] = 1; });
+          (Array.isArray(S.encomiendas) ? S.encomiendas : []).forEach(function (x) {
+            if (x && x.id && !_ids[x.id]) _nube.push(x);
+          });
+        }
+        S.encomiendas = _nube;
+        try { if (typeof RMen === 'function' && document.getElementById('pg-men')
+                  && document.getElementById('pg-men').classList.contains('on')) { RMen(); renderMenStats(); } } catch (e) {}
+      }
       else if (typeof S !== 'undefined')           S[f.clave] = f.valor;
     });
     try {
