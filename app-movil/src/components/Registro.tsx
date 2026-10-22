@@ -5,6 +5,7 @@ import {
 } from '../lib/datos';
 import { CAMPOS, OCULTOS, type Campo, type Modulo } from '../lib/esquema';
 import { dinero, esCorreo, fecha, hoyISO } from '../lib/formato';
+import { prefDrive } from '../lib/drive';
 import { Hoja } from './Piezas';
 
 /* ---------------- valor legible de un campo ---------------- */
@@ -151,7 +152,7 @@ export function Adjuntos({ modulo, r, avisar, alCambiar }: {
                 <div className="fila-cuerpo">
                   <div className="fila-titulo">{f.name || 'Archivo'}</div>
                   <div className="fila-sub">
-                    {ocupado === 'abrir' + i ? 'Abriendo…' : [f.size ? `${Math.max(1, Math.round(f.size / 1024))} KB` : '', (f as { fecha?: string }).fecha ? fecha((f as { fecha?: string }).fecha) : ''].filter(Boolean).join(' · ') || 'Tocar para ver'}
+                    {ocupado === 'abrir' + i ? 'Abriendo…' : [f.drive ? '📁 Drive' : '', f.size ? `${Math.max(1, Math.round(f.size / 1024))} KB` : '', (f as { fecha?: string }).fecha ? fecha((f as { fecha?: string }).fecha) : ''].filter(Boolean).join(' · ') || 'Tocar para ver'}
                   </div>
                 </div>
               </button>
@@ -162,7 +163,7 @@ export function Adjuntos({ modulo, r, avisar, alCambiar }: {
       )}
       <input ref={entrada} type="file" multiple hidden onChange={(e) => subir(e.target.files)} />
       <button className="boton secundario mas-abajo" type="button" disabled={ocupado !== null} onClick={() => entrada.current?.click()}>
-        {ocupado === 'subir' ? avance || 'Subiendo…' : '📎 Agregar archivos o fotos (sin límite)'}
+        {ocupado === 'subir' ? avance || 'Subiendo…' : `📎 Agregar archivos o fotos${prefDrive.archivosEn === 'drive' ? ' · a Google Drive' : ''}`}
       </button>
       {borrar && (
         <Hoja titulo="¿Eliminar archivo?" onCerrar={() => setBorrar(null)}>

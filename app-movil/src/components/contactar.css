@@ -13,3 +13,6 @@
 div.fila:has(> .fila-acciones) { flex-wrap: wrap; row-gap: 8px; }
 div.fila > .fila-boton { flex: 1 1 190px; }
 div.fila > .fila-acciones { margin-left: auto; }
+.cfg-form .fila-sub { white-space: normal; overflow: visible; }
+.cfg-form .campo { margin-bottom: 0; }
+.hoja .chips { margin-bottom: 10px; }

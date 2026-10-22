@@ -3,6 +3,9 @@ import { PREFIJO_ID, type Modulo } from './esquema';
 import { limpiarTexto, nuevoId } from './formato';
 import { SUPABASE_KEY, SUPABASE_URL } from './config';
 import { ErrorSubida, explicarError, subirPorPartes, TROZO, type Progreso } from './subida';
+import { borrarDeDrive, carpetaCRM, ErrorDrive, prefDrive, subirADrive } from './drive';
+import { tokenGcal } from './gcal';
+import { comprimirFoto } from './imagen';
 import { db } from './supabase';
 
 /*
@@ -342,7 +345,7 @@ export async function guardarMeta<T>(clave: (typeof CLAVES_META)[number], vacio:
 
 /* ---------------- documentos adjuntos ---------------- */
 
-export type Adjunto = { id?: string; name?: string; type?: string; path?: string; size?: number };
+export type Adjunto = { id?: string; name?: string; type?: string; path?: string; size?: number; drive?: string; url?: string };
 
 export function adjuntos(r: Reg): Adjunto[] {
   const a = r.archivos;
@@ -352,6 +355,8 @@ export function adjuntos(r: Reg): Adjunto[] {
 
 /** Enlace para abrir un adjunto: temporal (5 min) si esta en el deposito privado. */
 export async function enlaceAdjunto(f: Adjunto & { b64?: string }): Promise<string> {
+  // Guardado en Google Drive: se abre con tu cuenta de Google (sigue privado)
+  if (f.drive) return f.url && /^https:\/\/(drive|docs)\.google\.com\//.test(f.url) ? f.url : `https://drive.google.com/file/d/${encodeURIComponent(f.drive)}/view`;
   if (!f.path && f.b64 && /^data:/.test(f.b64)) {
     // Archivo guardado dentro de la ficha (aun no subido al deposito).
     const coma = f.b64.indexOf(',');
@@ -370,8 +375,10 @@ export async function enlaceAdjunto(f: Adjunto & { b64?: string }): Promise<stri
 /** Tope de seguridad: el maximo que acepta Supabase Storage (el limite real lo pone el plan). */
 export const MAX_ADJUNTO = 50 * 1024 * 1024 * 1024;
 
-export async function agregarAdjunto(modulo: Modulo, id: string, archivo: File, progreso?: Progreso): Promise<Reg> {
-  if (!archivo.size) throw new ErrorDatos(`"${archivo.name.slice(0, 30)}" está vacío.`);
+export async function agregarAdjunto(modulo: Modulo, id: string, original: File, progreso?: Progreso): Promise<Reg> {
+  if (!original.size) throw new ErrorDatos(`"${original.name.slice(0, 30)}" está vacío.`);
+  const archivo = await comprimirFoto(original);   // fotos 5–10 veces mas livianas
+  if (prefDrive.archivosEn === 'drive') return agregarADrive(modulo, id, archivo, progreso);
   if (archivo.size > MAX_ADJUNTO) throw new ErrorDatos(`"${archivo.name.slice(0, 30)}" es demasiado grande.`);
   const { data: s } = await db.auth.getSession();
   const uid = s.session?.user.id;
@@ -419,5 +426,37 @@ export async function eliminarAdjunto(modulo: Modulo, id: string, f: Adjunto): P
     archivos: adjuntos(a).filter((x) => (f.id ? x.id !== f.id : x.path !== f.path || x.name !== f.name)),
   }));
   if (f.path) await db.storage.from('adjuntos').remove([f.path]);
+  if (f.drive) {
+    // Si hay conexion con Google se borra tambien de Drive; si no, queda en la carpeta del CRM
+    const t = tokenGcal();
+    if (t) { try { await borrarDeDrive(t, f.drive); } catch { /* queda en Drive */ } }
+  }
   return r;
+}
+
+/** Sube a Google Drive (15 GB gratis) y anota el archivo en la ficha */
+async function agregarADrive(modulo: Modulo, id: string, archivo: File, progreso?: Progreso): Promise<Reg> {
+  const t = tokenGcal();
+  if (!t) throw new ErrorDatos('Para guardar en Google Drive toca primero "Conectar con Google" (Más → Configuración del CRM).');
+  try {
+    if (!prefDrive.carpeta) {
+      prefDrive.carpeta = await carpetaCRM(t, '');
+      void guardarMeta<Record<string, unknown>>('integraciones', {}, (a) => ({ ...a, driveCarpeta: prefDrive.carpeta })).catch(() => {});
+    }
+    const fid = nuevoId('F');
+    const subido = await subirADrive(t, prefDrive.carpeta, archivo, `${modulo}-${id}-${archivo.name}`, archivo.type, progreso);
+    const nuevo = {
+      id: fid, name: archivo.name, type: archivo.type, size: archivo.size, b64: '', drive: subido.id, url: subido.url,
+      fecha: new Date().toISOString().slice(0, 10),
+    };
+    try {
+      return await actualizarCon(modulo, id, (a) => ({ archivos: [...adjuntos(a), nuevo] }));
+    } catch (e) {
+      await borrarDeDrive(t, subido.id).catch(() => {});
+      throw e;
+    }
+  } catch (e) {
+    if (e instanceof ErrorDatos) throw e;
+    throw new ErrorDatos(e instanceof ErrorDrive ? e.message : 'No se pudo subir a Google Drive.');
+  }
 }

@@ -4,6 +4,7 @@ import { Hoja, Vacio } from '../../components/Piezas';
 import { ErrorDatos, guardarMeta, txt, type Meta, type Reg } from '../../lib/datos';
 import { dinero, nuevoId } from '../../lib/formato';
 import type { Ctx } from '../Modulos';
+import { Archivos } from './Archivos';
 import { Integraciones } from './Integraciones';
 
 /*
@@ -19,6 +20,7 @@ export function Configuracion({ ctx }: { ctx: Ctx }) {
     <>
       <Etiquetas ctx={ctx} />
       <Metas ctx={ctx} />
+      <Archivos ctx={ctx} />
       <Integraciones ctx={ctx} />
       <Respaldo ctx={ctx} />
     </>
@@ -72,7 +74,7 @@ function Etiquetas({ ctx }: { ctx: Ctx }) {
         if (!n) return ctx.avisar('Escribe un nombre');
         if (await escribir((l) => [...l, { id: nuevoId('ET'), nombre: n, color }], '✓ Etiqueta agregada')) setNombre('');
       }}>
-        <label>Nueva etiqueta<input value={nombre} onChange={(e) => setNombre(e.target.value)} maxLength={40} placeholder="Ej.: VIP, Referido…" /></label>
+        <label className="campo"><span>Nueva etiqueta</span><input value={nombre} onChange={(e) => setNombre(e.target.value)} maxLength={40} placeholder="Ej.: VIP, Referido…" /></label>
         <div className="cfg-colores" role="radiogroup" aria-label="Color">
           {COLORES.map((k) => (
             <button key={k} type="button" role="radio" aria-checked={k === color} aria-label={k} className={`cfg-color grande${k === color ? ' activa' : ''}`}
@@ -118,8 +120,8 @@ function Metas({ ctx }: { ctx: Ctx }) {
           setOcupado(false);
         }
       }}>
-        <label>Meta mensual ($)<input type="number" inputMode="decimal" step="0.01" min="0" value={men} onChange={(e) => setMen(e.target.value)} /></label>
-        <label>Meta anual ($)<input type="number" inputMode="decimal" step="0.01" min="0" value={anu} onChange={(e) => setAnu(e.target.value)} /></label>
+        <label className="campo"><span>Meta mensual ($)</span><input type="number" inputMode="decimal" step="0.01" min="0" value={men} onChange={(e) => setMen(e.target.value)} /></label>
+        <label className="campo"><span>Meta anual ($)</span><input type="number" inputMode="decimal" step="0.01" min="0" value={anu} onChange={(e) => setAnu(e.target.value)} /></label>
         <p className="fila-sub">Actual: {dinero(m.mensual ?? 0)} al mes · {dinero(m.anual ?? 0)} al año</p>
         <button className="boton" type="submit" disabled={ocupado}>💾 Guardar metas</button>
       </form>

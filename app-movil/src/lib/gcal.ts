@@ -14,7 +14,8 @@
  */
 import type { Reg } from './datos';
 
-const ALCANCE = 'https://www.googleapis.com/auth/calendar.events';
+/* Calendario + Drive (solo los archivos que sube la app) */
+const ALCANCE = 'https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/drive.file';
 const API = 'https://www.googleapis.com/calendar/v3/calendars/primary/events';
 const K_TOKEN = 'jac_gcal_token';
 const K_ESTADO = 'jac_gcal_estado';

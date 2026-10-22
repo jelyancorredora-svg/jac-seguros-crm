@@ -95,7 +95,7 @@ function ComponerWA({ ctx, d, onCerrar }: { ctx: Ctx; d: DatosContacto; onCerrar
         </div>
       )}
       {plantillas.length > 0 && (
-        <label>Usar plantilla
+        <label className="campo"><span>Usar plantilla</span>
           <select value="" onChange={(e) => {
             const p = plantillas.find((x) => x.id === e.target.value);
             if (p) setMsg(rellenar(String(p.texto ?? ''), { cli: d.plantilla?.cli as never, pol: d.plantilla?.pol ?? null }));
@@ -105,7 +105,7 @@ function ComponerWA({ ctx, d, onCerrar }: { ctx: Ctx; d: DatosContacto; onCerrar
           </select>
         </label>
       )}
-      <label>Mensaje<textarea rows={9} value={msg} onChange={(e) => setMsg(e.target.value)} maxLength={4000} /></label>
+      <label className="campo"><span>Mensaje</span><textarea rows={9} value={msg} onChange={(e) => setMsg(e.target.value)} maxLength={4000} /></label>
       <div className="botonera">
         <button className="boton verde-wa" type="button" disabled={!msg.trim()} onClick={enviar}>💬 Abrir en WhatsApp</button>
         <button className="boton secundario" type="button" onClick={onCerrar}>Cancelar</button>
@@ -143,9 +143,9 @@ function ComponerCorreo({ ctx, d, onCerrar }: { ctx: Ctx; d: DatosContacto; onCe
   }
   return (
     <Hoja titulo={`📧 Correo a ${d.nombre}`} onCerrar={onCerrar}>
-      <label>Para<input type="email" value={para} onChange={(e) => setPara(e.target.value)} /></label>
-      <label>Asunto<input value={asunto} onChange={(e) => setAsunto(e.target.value)} maxLength={200} /></label>
-      <label>Mensaje<textarea rows={10} value={cuerpo} onChange={(e) => setCuerpo(e.target.value)} maxLength={8000} /></label>
+      <label className="campo"><span>Para</span><input type="email" value={para} onChange={(e) => setPara(e.target.value)} /></label>
+      <label className="campo"><span>Asunto</span><input value={asunto} onChange={(e) => setAsunto(e.target.value)} maxLength={200} /></label>
+      <label className="campo"><span>Mensaje</span><textarea rows={10} value={cuerpo} onChange={(e) => setCuerpo(e.target.value)} maxLength={8000} /></label>
       <div className="botonera">
         {directo && <button className="boton" type="button" disabled={ocupado} onClick={enviarDirecto}>{ocupado ? 'Enviando…' : '📨 Enviar directo (EmailJS)'}</button>}
         <button className={directo ? 'boton secundario' : 'boton'} type="button" disabled={ocupado} onClick={enviar}>📧 Abrir en Correo</button>

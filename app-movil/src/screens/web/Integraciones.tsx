@@ -62,7 +62,7 @@ function EmailJS({ ctx }: { ctx: Ctx }) {
       <div className="tarjeta cfg-form">
         <p className="fila-sub">Envía correos directo desde la app (sin abrir tu app de correo). Es la misma cuenta de emailjs.com del CRM web; si ya la configuraste allá, aquí aparece sola.</p>
         {CAMPOS_EJS.map(([k, etiqueta, req]) => (
-          <label key={k}>{etiqueta}{req ? ' *' : ''}
+          <label key={k} className="campo"><span>{etiqueta}{req ? ' *' : ''}</span>
             <input value={v[k] ?? ''} onChange={(e) => setV({ ...v, [k]: e.target.value })} autoCapitalize="off" autoCorrect="off" spellCheck={false} />
           </label>
         ))}
@@ -161,7 +161,7 @@ function GoogleCalendar({ ctx }: { ctx: Ctx }) {
       <h3 className="seccion">📅 Google Calendar {token && <span className="etiqueta e-ok">Conectado</span>}</h3>
       <div className="tarjeta cfg-form">
         <p className="fila-sub">Manda a tu Google Calendar las tareas de la agenda, las renovaciones (30 días), los cumpleaños (7 días) y los cobros. Si algo ya estaba, lo actualiza; nunca lo duplica, ni con el web.</p>
-        <label>Client ID de Google
+        <label className="campo"><span>Client ID de Google</span>
           <input value={cid} onChange={(e) => setCid(e.target.value)} placeholder="xxxxxxxx.apps.googleusercontent.com" autoCapitalize="off" autoCorrect="off" spellCheck={false} />
         </label>
         {!token ? (

@@ -4,6 +4,7 @@ import { Configuracion } from './screens/web/Configuracion';
 import { Cotizador } from './screens/web/Cotizador';
 import { Cumpleanos } from './screens/web/Cumpleanos';
 import { retornoGcal, vueltaDeGoogleReciente } from './lib/gcal';
+import { prefDrive } from './lib/drive';
 import { Empresas } from './screens/web/Empresas';
 import { Notas } from './screens/web/Notas';
 import { Reportes } from './screens/web/Reportes';
@@ -172,6 +173,13 @@ export default function App() {
     if (fase.f === 'dentro' && !cartera && !cargando) void recargar();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fase.f]);
+
+  /* Donde se guardan los archivos (Google Drive o la nube del CRM), igual en todos tus equipos */
+  useEffect(() => {
+    const i = cartera?.meta.integraciones;
+    prefDrive.archivosEn = i?.archivosEn === 'drive' ? 'drive' : 'supabase';
+    prefDrive.carpeta = typeof i?.driveCarpeta === 'string' ? i.driveCarpeta : '';
+  }, [cartera?.meta.integraciones]);
 
   /* Vuelta desde Google: abrir Configuración, donde se sincroniza el calendario */
   useEffect(() => {

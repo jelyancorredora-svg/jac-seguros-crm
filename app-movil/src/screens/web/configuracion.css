@@ -9,3 +9,5 @@
 .cfg-ayuda summary { font-weight: 700; color: var(--info); cursor: pointer; margin-bottom: 6px; }
 .cfg-ayuda p { margin: 4px 0; }
 .cfg-ayuda code { font-size: 12px; background: var(--fondo); padding: 1px 4px; border-radius: 4px; word-break: break-all; user-select: all; -webkit-user-select: all; }
+.cfg-check { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; }
+.cfg-check input { width: 22px; height: 22px; flex-shrink: 0; margin-top: 1px; }
