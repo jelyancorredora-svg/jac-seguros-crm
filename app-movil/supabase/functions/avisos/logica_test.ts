@@ -1,5 +1,5 @@
 import { assertEquals } from 'jsr:@std/assert@1';
-import { avisoResumen, avisosReuniones, avisosTareas, local } from './logica.ts';
+import { avisoResumen, avisosCumple, avisosReuniones, avisosTareas, local } from './logica.ts';
 
 // 2026-10-22 15:00 UTC = 10:00 en Panama
 const ahora = new Date('2026-10-22T15:00:00Z');
@@ -34,4 +34,16 @@ Deno.test('resumen solo en la manana y si hay algo', () => {
   assertEquals(avisoResumen(r, ahora), null);
   assertEquals(avisoResumen(r, new Date('2026-10-22T12:35:00Z'))!.body, '1 póliza vence hoy · 3 vencen en 7 días · 2 tareas · 🎂 1 cumpleaños');
   assertEquals(avisoResumen({ vencenHoy: 0, vencenSemana: 0, tareasHoy: 0, reunionesHoy: 0, seguimientosHoy: 0, cumpleHoy: 0 }, new Date('2026-10-22T12:35:00Z')), null);
+});
+
+Deno.test('cumpleanos: uno por cliente a las 8:00, agrupado si son muchos', () => {
+  const a8 = new Date('2026-10-22T13:05:00Z'); // 8:05 Panama
+  const cls = [{ id: 'C1', nombre: 'Ana Ruiz', f_nac: '1990-10-22' }, { id: 'C2', nombre: 'Otro', f_nac: '1990-10-23' }];
+  const r = avisosCumple(cls, a8);
+  assertEquals(r.length, 1);
+  assertEquals(r[0].clave, 'c:C1:2026-10-22');
+  assertEquals(r[0].title, '🎂 Hoy cumple Ana Ruiz');
+  assertEquals(avisosCumple(cls, new Date('2026-10-22T12:30:00Z')).length, 0); // 7:30
+  const muchos = Array.from({ length: 7 }, (_, i) => ({ id: 'X' + i, nombre: 'N' + i, f_nac: '1980-10-22' }));
+  assertEquals(avisosCumple(muchos, a8).length, 1);
 });

@@ -93,6 +93,36 @@ export function avisoResumen(r: Resumen, ahora: Date): Aviso | null {
   return { clave: `resumen:${fecha}`, title: '☀️ Tu día en JAC Seguros', body: partes.join(' · '), tag: `resumen-${fecha}` };
 }
 
+export type Cumpleanero = { id: string; nombre?: string | null; f_nac?: string | null };
+
+/**
+ * Cumpleaños de hoy, uno por cliente, a partir de las 8:00 a. m. (con la misma
+ * ventana que las tareas por si el cron se atrasa). Si son mas de 5, un solo
+ * aviso con la lista para no llenar el telefono.
+ */
+export function avisosCumple(clientes: Cumpleanero[], ahora: Date): Aviso[] {
+  const { fecha, min } = local(ahora);
+  if (min < 8 * 60 || min >= 8 * 60 + VENTANA_MIN) return [];
+  const hoy = clientes.filter((c) => typeof c.f_nac === 'string' && c.f_nac.slice(5, 10) === fecha.slice(5, 10));
+  const edad = (c: Cumpleanero) => Number(fecha.slice(0, 4)) - Number(String(c.f_nac).slice(0, 4));
+  const nom = (c: Cumpleanero) => (c.nombre || 'Cliente').trim();
+  if (hoy.length > 5) {
+    return [{
+      clave: `cumple:${fecha}`, title: `🎂 ${hoy.length} clientes cumplen años hoy`,
+      body: corto(hoy.map(nom).join(', '), 160), tag: `cumple-${fecha}`,
+    }];
+  }
+  return hoy.map((c) => {
+    const e = edad(c);
+    return {
+      clave: `c:${c.id}:${fecha}`,
+      title: `🎂 Hoy cumple ${corto(nom(c), 40)}`,
+      body: `${e > 0 && e < 120 ? `Cumple ${e} años · ` : ''}Envíale tu felicitación y su tarjeta desde Más → Cumpleaños.`,
+      tag: `cumple-${c.id}`,
+    };
+  });
+}
+
 /** Suma dias a una fecha AAAA-MM-DD */
 export function masDias(fecha: string, n: number): string {
   return new Date(Date.parse(fecha + 'T00:00:00Z') + n * 86_400_000).toISOString().slice(0, 10);

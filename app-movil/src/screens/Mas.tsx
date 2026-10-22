@@ -15,6 +15,7 @@ export function Mas({ ctx, irLista, irAjustes, irImportar, irInformes, irMensaje
   const pend = c.pagos.filter((p) => !/pagad|cobrad/i.test(txt(p, 'estado'))).length;
   const opciones: Array<[() => void, NombreIcono | string, string, string]> = [
     [irInformes, '📊', 'Informes', 'Producción, renovaciones, clientes y aseguradoras'],
+    [() => irWeb('cumpleanos'), '🎂', 'Cumpleaños', 'Felicita a tus clientes con mensaje y tarjeta'],
     [() => irWeb('reportes'), '📑', 'Reportes', 'Pólizas, pagos, clientes y comisiones · Excel / PDF'],
     [() => irWeb('cotizador'), '🧮', 'Cotizador', 'Compara aseguradoras y arma el informe'],
     [() => irWeb('notas'), '📝', 'Notas y recordatorios', `${c.meta.notas.filter((n) => n.done !== true).length} pendientes`],
@@ -27,6 +28,7 @@ export function Mas({ ctx, irLista, irAjustes, irImportar, irInformes, irMensaje
     [() => irLista('pagos'), '💳', 'Pagos', cuantos(pend, 'pendiente', 'pendientes')],
     [() => irLista('vehiculos'), '🚗', 'Autos / motos', cuantos(c.vehiculos.length, 'vehículo', 'vehículos')],
     [() => irLista('comisiones'), '💰', 'Comisiones', cuantos(c.comisiones.length, 'registro', 'registros')],
+    [() => irWeb('config'), '⚙️', 'Configuración del CRM', 'Etiquetas, metas de comisiones y backup'],
     [irImportar, '📥', 'Importar documentos', 'Agregar clientes, pólizas y archivos desde un paquete'],
     [irAjustes, 'ajustes', 'Ajustes y seguridad', 'Dos pasos, contraseña, cerrar sesión'],
   ];

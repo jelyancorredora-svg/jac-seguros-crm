@@ -10,7 +10,7 @@
  */
 import webpush from 'npm:web-push@3.6.7';
 import { createClient } from 'npm:@supabase/supabase-js@2.118.0';
-import { avisoResumen, avisosReuniones, avisosTareas, local, masDias, tareaAbierta, type Aviso, type Reunion, type Tarea } from './logica.ts';
+import { avisoResumen, avisosCumple, avisosReuniones, avisosTareas, local, masDias, tareaAbierta, type Aviso, type Cumpleanero, type Reunion, type Tarea } from './logica.ts';
 
 const ORIGENES = ['https://crm.jacsegurospa.com', 'https://jacsegurospa.com', 'https://www.jacsegurospa.com', 'http://localhost:5173', 'http://localhost:4173'];
 const env = (k: string) => Deno.env.get(k) ?? '';
@@ -80,7 +80,7 @@ Deno.serve(async (req) => {
       db.from('crm_meta').select('valor').eq('clave', 'calReuniones').maybeSingle(),
       db.from('polizas').select('id,estado,fecha_fin').gte('fecha_fin', fecha).lte('fecha_fin', en7),
       db.from('prospectos').select('id,etapa_venta,f_seguimiento').eq('f_seguimiento', fecha),
-      db.from('clientes').select('id,f_nac').like('f_nac', `%-${fecha.slice(5)}`),
+      db.from('clientes').select('id,nombre,f_nac').like('f_nac', `%-${fecha.slice(5)}`),
     ]);
     const tareas = (rt.data ?? []) as Tarea[];
     const reuniones = (Array.isArray(rm.data?.valor) ? rm.data!.valor : []) as Reunion[];
@@ -95,6 +95,7 @@ Deno.serve(async (req) => {
       cumpleHoy: (rc.data ?? []).length,
     }, ahora);
     if (resumen) avisos.push(resumen);
+    avisos.push(...avisosCumple((rc.data ?? []) as Cumpleanero[], ahora));
 
     // Cada aviso sale UNA sola vez: se reserva su clave antes de enviarlo.
     if (avisos.length) {

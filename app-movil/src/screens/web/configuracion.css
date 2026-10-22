@@ -1,0 +1,7 @@
+/* Configuración (etiquetas, metas, backup) */
+.cfg-form { display: flex; flex-direction: column; gap: 10px; padding: 14px; margin-bottom: 14px; }
+.cfg-color { width: 16px; height: 16px; border-radius: 4px; flex-shrink: 0; display: inline-block; }
+.cfg-color.grande { width: 32px; height: 32px; border-radius: 50%; border: 3px solid transparent; }
+.cfg-color.grande.activa { border-color: var(--tarjeta); box-shadow: 0 0 0 2px var(--azul); }
+.cfg-colores { display: flex; flex-wrap: wrap; gap: 10px; }
+.boton-nota { width: 100%; text-align: left; margin-bottom: 12px; font-weight: 700; }

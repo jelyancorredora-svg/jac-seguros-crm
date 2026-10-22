@@ -3,6 +3,7 @@ import { Icono } from '../components/Icono';
 import { Accion, EtiquetaEstado, Fila, Hoja, Vacio, inicial } from '../components/Piezas';
 import { Adjuntos, FichaCampos, FormRegistro, Historial, ListaLarga } from '../components/Registro';
 import { avanzarEtapa } from '../lib/crm';
+import { HistorialActividad } from './web/Reportes';
 import { eliminarRegistro, ErrorDatos, fec, guardarRegistro, num, txt, type Cartera, type Reg } from '../lib/datos';
 import { ESTADOS_COMERCIALES, ETAPAS_VENTA, type Modulo } from '../lib/esquema';
 import {
@@ -220,6 +221,17 @@ export function AccionesFila({ ctx, modulo, r }: { ctx: Ctx; modulo: Modulo; r: 
           onGuardado={(n) => { ctx.poner(modulo, n); setAbierto(null); ctx.avisar('✓ Cambios guardados'); }} />
       )}
       {abierto === 'eliminar' && <ConfirmarEliminar ctx={ctx} modulo={modulo} r={r} onCerrar={() => setAbierto(null)} />}
+    </>
+  );
+}
+
+/** 📜 Historial de actividad (pólizas, pagos y tareas), como el visor del CRM web */
+function VerActividad({ ctx, tipo, id }: { ctx: Ctx; tipo: 'cli' | 'pol'; id: string }) {
+  const [ver, setVer] = useState(false);
+  return (
+    <>
+      <button className="boton secundario mas-abajo" type="button" onClick={() => setVer(!ver)}>{ver ? 'Ocultar actividad' : '📜 Ver historial de actividad'}</button>
+      {ver && <HistorialActividad ctx={ctx} tipo={tipo} id={id} />}
     </>
   );
 }
@@ -477,6 +489,7 @@ export function ClienteFicha({ ctx, c }: { ctx: Ctx; c: Reg }) {
       <Adjuntos modulo="clientes" r={c} avisar={ctx.avisar} alCambiar={(n) => ctx.poner('clientes', n)} />
       <FichaCampos modulo="clientes" r={c} />
       <Editar ctx={ctx} modulo="clientes" r={c} titulo="Editar cliente" />
+      <VerActividad ctx={ctx} tipo="cli" id={c.id} />
 
       {crear === 'polizas' && <NuevoRegistro ctx={ctx} modulo="polizas" titulo="Nueva póliza" clienteId={c.id}
         base={{ tipo: 'Póliza', nueva: 'Nueva', estado: 'Vigente', etapa: 'Nueva', moneda: 'USD', participacion: 100, archivos: [] }}
@@ -682,6 +695,7 @@ export function PolizaFicha({ ctx, p }: { ctx: Ctx; p: Reg }) {
       <Adjuntos modulo="polizas" r={p} avisar={ctx.avisar} alCambiar={(n) => ctx.poner('polizas', n)} />
       <FichaCampos modulo="polizas" r={p} />
       <Editar ctx={ctx} modulo="polizas" r={p} titulo="Editar póliza" />
+      <VerActividad ctx={ctx} tipo="pol" id={p.id} />
       {pago && <NuevoRegistro ctx={ctx} modulo="pagos" titulo={`Pago · ${txt(p, 'num')}`}
         base={{
           polizaId: p.id, clienteId: txt(p, 'clienteId'), aseg: txt(p, 'aseg'), ramo: txt(p, 'ramo'),
@@ -705,25 +719,138 @@ function FilaPago({ p, ctx }: { p: Reg; ctx: Ctx }) {
 
 type FiltroPago = 'pendientes' | 'pagados' | 'todos';
 
-export function Pagos({ ctx }: { ctx: Ctx }) {
-  const [f, setF] = useState<FiltroPago>('pendientes');
+const NUM_PAGOS: Record<string, number> = { Mensual: 12, Trimestral: 4, Semestral: 2, Anual: 1 };
+
+/** Datos que el CRM web copia de la poliza al registrar un pago (onPC / SPag) */
+function datosPagoDePoliza(c: Cartera, pol: Reg | undefined): Record<string, unknown> {
+  if (!pol) return {};
+  const cl = c.clientes.find((x) => x.id === txt(pol, 'clienteId'));
+  const per = txt(pol, 'periodo');
+  const n = NUM_PAGOS[per || 'Anual'] ?? 1;
+  return {
+    polizaId: pol.id, aseg: txt(pol, 'aseg'), ramo: txt(pol, 'ramo'), cliente: txt(cl, 'nombre') || txt(pol, 'nombreCliente'),
+    ...(per ? { periodo: per } : {}),
+    cuota: n > 1 ? `Cuota ${per}` : 'Prima Anual',
+  };
+}
+
+function ElegirPoliza({ cartera, valor, cambiar }: { cartera: Cartera; valor: string; cambiar: (id: string) => void }) {
   const [q, setQ] = useState('');
+  const elegida = cartera.polizas.find((p) => p.id === valor);
+  const t = normalizar(q);
+  const lista = t.length >= 2 ? cartera.polizas.filter((p) => busca(p, t, ['num', 'nombreCliente', 'tomador', 'aseg'])).slice(0, 8) : [];
+  return (
+    <fieldset className="grupo">
+      <legend>Póliza</legend>
+      {elegida ? (
+        <button className="boton secundario" type="button" onClick={() => cambiar('')}>
+          {txt(elegida, 'num') || elegida.id} · {txt(elegida, 'nombreCliente') || txt(elegida, 'aseg')} ✕
+        </button>
+      ) : (
+        <>
+          <input className="buscador" placeholder="Número de póliza o cliente" value={q} onChange={(e) => setQ(e.target.value)} />
+          {lista.length > 0 && (
+            <div className="lista">
+              {lista.map((p) => (
+                <Fila key={p.id} titulo={txt(p, 'num') || p.id} sub={[txt(p, 'nombreCliente'), txt(p, 'aseg')].filter(Boolean).join(' · ')}
+                  onClick={() => { cambiar(p.id); setQ(''); }} />
+              ))}
+            </div>
+          )}
+        </>
+      )}
+    </fieldset>
+  );
+}
+
+/** + Registrar pago (formulario del CRM web: poliza, monto, fecha, cuota, estado, frecuencia, notas) */
+export function NuevoPago({ ctx, polizaId, onCerrar }: { ctx: Ctx; polizaId?: string; onCerrar: () => void }) {
+  const [pid, setPid] = useState(polizaId ?? '');
+  const pol = ctx.cartera.polizas.find((p) => p.id === pid);
+  const sugerida = pol ? (num(pol, 'letraPrima') || num(pol, 'prima')) : null;
+  return (
+    <FormRegistro modulo="pagos" titulo="💳 Registrar pago" r={null} cartera={ctx.cartera}
+      fijos={{ estado: 'Pendiente', fecha: hoyISO(), ...datosPagoDePoliza(ctx.cartera, pol) }}
+      extra={(
+        <>
+          <ElegirPoliza cartera={ctx.cartera} valor={pid} cambiar={setPid} />
+          {sugerida ? <div className="nota">Cuota de la póliza: <b>{dinero(sugerida)}</b></div> : null}
+        </>
+      )}
+      onCerrar={onCerrar}
+      onGuardado={(r) => { ctx.poner('pagos', r); ctx.avisar('✓ Pago registrado'); onCerrar(); }} />
+  );
+}
+
+/** 📋 Cuotas Pendientes del mes (RTpp del CRM web) */
+function CuotasDelMes({ ctx, onCobro }: { ctx: Ctx; onCobro: (polizaId: string) => void }) {
+  const c = ctx.cartera;
+  const mes = hoyISO().slice(0, 7);
+  const mesLabel = new Date().toLocaleString('es-PA', { month: 'long', year: 'numeric' });
+  const filas = useMemo(() => c.polizas
+    .filter((p) => !['Cancelada', 'Anulada'].includes(txt(p, 'estado')) && ((num(p, 'letraPrima') ?? 0) > 0 || (num(p, 'numPagos') ?? 0) > 0))
+    .sort((a, b) => txt(a, 'nombreCliente').localeCompare(txt(b, 'nombreCliente'), 'es'))
+    .map((pol) => {
+      const cli = c.clientes.find((x) => x.id === txt(pol, 'clienteId'));
+      const nombre = txt(pol, 'nombreCliente') || txt(cli, 'nombre');
+      const lp = num(pol, 'letraPrima') ?? 0, pr = num(pol, 'prima') ?? 0;
+      const cuota = lp > 0 ? dinero(lp) : pr > 0 ? dinero(pr) : '—';
+      const pagado = c.pagos.some((pg) => txt(pg, 'polizaId') === pol.id && (txt(pg, 'periodo') || txt(pg, 'fecha')).slice(0, 7) === mes);
+      const wa = enlaceWhatsApp(txt(cli, 'cel') || txt(cli, 'tel') || txt(pol, 'telAsegurado'));
+      const msg = `Estimado/a ${nombre}, le recordamos el cobro de su póliza ${txt(pol, 'num')} (${txt(pol, 'aseg')}), cuota ${cuota}, correspondiente a ${mesLabel}.`;
+      return { pol, nombre, cuota, pagado, wa: wa ? `${wa}?text=${encodeURIComponent(msg)}` : null };
+    }), [c, mes, mesLabel]);
+  const pend = filas.filter((f) => !f.pagado).length;
+  if (!filas.length) return <Vacio>Sin cuotas configuradas. Edite las pólizas y defina Num. de Pagos y Letra/Prima.</Vacio>;
+  return (
+    <>
+      <p className="contador">{mes} · {pend} pendiente{pend === 1 ? '' : 's'} · {filas.length - pend} cobrada{filas.length - pend === 1 ? '' : 's'}</p>
+      <ListaLarga items={filas} vacio="" render={(f) => (
+        <Fila key={f.pol.id} titulo={f.nombre || 'Sin nombre'}
+          sub={[txt(f.pol, 'num'), txt(f.pol, 'aseg'), txt(f.pol, 'ramo'), f.cuota, `vence ${fecha(fec(f.pol, 'fechaFin'))}`].filter(Boolean).join(' · ')}
+          derecha={<span className={`etiqueta ${f.pagado ? 'e-ok' : 'e-aviso'}`}>{f.pagado ? 'Cobrado' : 'Pendiente'}</span>}
+          onClick={() => ctx.abrir('polizas', f.pol.id)}
+          acciones={(
+            <>
+              {f.wa && <a className="icono-accion" style={{ display: 'grid', placeItems: 'center', background: 'var(--ok-f)' }} href={f.wa} target="_blank" rel="noopener noreferrer" aria-label={`WhatsApp a ${f.nombre}`}>💬</a>}
+              {!f.pagado && <button className="icono-accion" type="button" aria-label={`Registrar cobro de ${f.nombre}`} onClick={() => onCobro(f.pol.id)}>＋</button>}
+            </>
+          )} />
+      )} />
+    </>
+  );
+}
+
+export function Pagos({ ctx }: { ctx: Ctx }) {
+  const [vista, setVista] = useState<'cuotas' | 'registrados'>('cuotas');
+  const [f, setF] = useState<FiltroPago>('todos');
+  const [q, setQ] = useState('');
+  const [nuevo, setNuevo] = useState<{ polizaId?: string } | null>(null);
   const lista = useMemo(() => {
     const t = normalizar(q);
     return ctx.cartera.pagos.filter((p) => {
       const pag = /pagad|cobrad/i.test(txt(p, 'estado'));
       if (f === 'pendientes' && pag) return false;
       if (f === 'pagados' && !pag) return false;
-      return !t || busca(p, t, ['cliente', 'aseg', 'ramo', 'referencia', 'notas']);
+      return !t || busca(p, t, ['cliente', 'aseg', 'ramo', 'referencia', 'notas', 'cuota']);
     }).sort((a, b) => fec(b, 'fecha').localeCompare(fec(a, 'fecha')));
   }, [ctx.cartera.pagos, f, q]);
   const total = lista.reduce((s, p) => s + (num(p, 'monto') ?? 0), 0);
   return (
     <>
-      <Buscador q={q} setQ={setQ} ph="Cliente, aseguradora o referencia" />
-      <Filtros<FiltroPago> valor={f} cambiar={setF} opciones={[['pendientes', 'Pendientes'], ['pagados', 'Pagados'], ['todos', 'Todos']]} />
-      <p className="contador">{lista.length} pagos · {dinero(total)}</p>
-      <ListaLarga items={lista} vacio="No hay pagos en esta vista." render={(p) => <FilaPago key={p.id} p={p} ctx={ctx} />} />
+      <Filtros valor={vista} cambiar={setVista} opciones={[['cuotas', '📋 Cuotas del mes'], ['registrados', '💰 Pagos registrados']]} />
+      {vista === 'cuotas' ? (
+        <CuotasDelMes ctx={ctx} onCobro={(polizaId) => setNuevo({ polizaId })} />
+      ) : (
+        <>
+          <Buscador q={q} setQ={setQ} ph="Cliente, aseguradora o referencia" />
+          <Filtros<FiltroPago> valor={f} cambiar={setF} opciones={[['todos', 'Todos'], ['pendientes', 'Pendientes'], ['pagados', 'Pagados']]} />
+          <p className="contador">{lista.length} pagos · {dinero(total)}</p>
+          <ListaLarga items={lista} vacio="No hay pagos registrados." render={(p) => <FilaPago key={p.id} p={p} ctx={ctx} />} />
+        </>
+      )}
+      <BotonNuevo texto="Registrar pago" onClick={() => setNuevo({})} />
+      {nuevo && <NuevoPago ctx={ctx} polizaId={nuevo.polizaId} onCerrar={() => setNuevo(null)} />}
     </>
   );
 }

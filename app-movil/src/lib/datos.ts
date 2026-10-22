@@ -145,7 +145,7 @@ export async function leerFilas(tabla: string, ids: string[]): Promise<Array<{ r
 export const CLAVES_META = [
   'calReuniones', 'calNotas', 'calMetas', 'calDiarios', 'aseguradoras', 'ramosCfg', 'vcReglas',
   'encomiendas', 'mensajero', 'mensajeroTel', 'mensajeroEmail',
-  'notas', 'comRates', 'etiquetas', 'plantillas', 'comisCfg',
+  'notas', 'comRates', 'etiquetas', 'plantillas', 'comisCfg', 'metas',
 ] as const;
 export type Meta = {
   calReuniones: Reg[];
@@ -171,6 +171,8 @@ export type Meta = {
   plantillas: Reg[];
   /** Configuracion de comisiones por aseguradora/ramo (forma libre del CRM web) */
   comisCfg: Record<string, unknown>;
+  /** Metas de comisiones {mensual, anual, ramos?, asegs?} */
+  metas: { mensual?: number; anual?: number; [k: string]: unknown };
 };
 
 export async function leerMeta(): Promise<Meta> {
@@ -196,6 +198,7 @@ export async function leerMeta(): Promise<Meta> {
     etiquetas: lista(m.etiquetas),
     plantillas: lista(m.plantillas),
     comisCfg: m.comisCfg && typeof m.comisCfg === 'object' && !Array.isArray(m.comisCfg) ? (m.comisCfg as Record<string, unknown>) : {},
+    metas: m.metas && typeof m.metas === 'object' && !Array.isArray(m.metas) ? (m.metas as Meta['metas']) : {},
   };
 }
 

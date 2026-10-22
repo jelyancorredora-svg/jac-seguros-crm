@@ -24,10 +24,10 @@ const FRASES = ['La disciplina es el puente entre metas y logros.', 'El éxito e
 const iso = (y: number, m: number, d: number) => `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
 const claveDiario = (y: number, m: number, d: number) => `d_${y}_${m + 1}_${d}`;
 
-type Pestana = 'agenda' | 'semana' | 'tareas' | 'metas' | 'diario' | 'reun' | 'notas' | 'alertas' | 'historial';
+type Pestana = 'agenda' | 'semana' | 'tareas' | 'metas' | 'diario' | 'reun' | 'notas' | 'alertas' | 'historial' | 'cobros';
 const PESTANAS: Array<[Pestana, string]> = [
   ['agenda', '📅 Agenda'], ['semana', '📆 Semana'], ['tareas', '✅ Tareas'], ['metas', '🎯 Metas'], ['diario', '📝 Diario'],
-  ['reun', '👥 Reuniones'], ['notas', '📋 Notas'], ['alertas', '🔔 Alertas'], ['historial', '🕓 Historial'],
+  ['reun', '👥 Reuniones'], ['notas', '📋 Notas'], ['alertas', '🔔 Alertas'], ['historial', '🕓 Historial'], ['cobros', '💰 Cobros'],
 ];
 
 const CREAR: Array<[string, string, string]> = [
@@ -170,6 +170,7 @@ export function Agenda({ ctx }: { ctx: Ctx }) {
       {tab === 'notas' && <Notas ctx={ctx} fecha={fechaSel} onEditar={(r) => setHoja({ t: 'nota', r })} />}
       {tab === 'alertas' && <Alertas ctx={ctx} />}
       {tab === 'historial' && <HistorialAgenda ctx={ctx} />}
+      {tab === 'cobros' && <Cobros ctx={ctx} />}
 
       {hoja?.t === 'dia' && <DiaCompleto ctx={ctx} fecha={fechaSel} onCerrar={() => setHoja(null)} />}
       {hoja?.t === 'tarea' && (
@@ -988,6 +989,53 @@ function HistorialAgenda({ ctx }: { ctx: Ctx }) {
           <div className="texto-largo">{it.texto}</div>
         </div>
       )) : <Vacio>Sin resultados</Vacio>}
+    </>
+  );
+}
+
+/* ---------------- 💰 Cobros (calRenderCobros del CRM web) ---------------- */
+
+function Cobros({ ctx }: { ctx: Ctx }) {
+  const c = ctx.cartera;
+  const coms = c.tareas.filter((t) => t._autoTipo === 'comision' && txt(t, 'estado') !== 'completada');
+  const pags = c.pagos.filter((p) => !txt(p, 'estado') || txt(p, 'estado') === 'Pendiente');
+  if (!coms.length && !pags.length) return <Vacio>Sin cobros pendientes 🎉</Vacio>;
+  return (
+    <>
+      {coms.length > 0 && (
+        <>
+          <h3 className="seccion">Comisiones por cobrar ({coms.length})</h3>
+          <div className="lista">
+            {coms.map((t) => <Fila key={t.id} titulo={txt(t, 'titulo') || txt(t, 'desc')} sub={txt(t, 'desc')} onClick={() => ctx.abrir('tareas', t.id)} />)}
+          </div>
+        </>
+      )}
+      {pags.length > 0 && (
+        <>
+          <h3 className="seccion">Pagos pendientes de clientes ({pags.length})</h3>
+          <div className="lista">
+            {pags.map((p) => {
+              const pol = c.polizas.find((x) => x.id === txt(p, 'polizaId'));
+              const cl = pol ? c.clientes.find((x) => x.id === txt(pol, 'clienteId')) : undefined;
+              const nom = cl ? txt(cl, 'nombre') : txt(p, 'cliente') || 'Cliente';
+              const wa = enlaceWhatsApp(txt(cl, 'cel'));
+              const correo = enlaceCorreo(txt(cl, 'email'));
+              const msg = `Hola ${nom.split(' ')[0]}, le contacto de JAC Seguros por pago pendiente.`;
+              return (
+                <Fila key={p.id} titulo={nom}
+                  sub={[cl ? txt(cl, 'cedula') : txt(pol, 'cedCliente'), txt(pol, 'aseg'), num(p, 'monto') ? dinero(num(p, 'monto')) : ''].filter(Boolean).join(' · ')}
+                  onClick={() => (cl ? ctx.abrir('clientes', cl.id) : ctx.abrir('pagos', p.id))}
+                  acciones={(
+                    <>
+                      {wa && <a className="icono-accion" style={{ display: 'grid', placeItems: 'center', background: 'var(--ok-f)' }} href={`${wa}?text=${encodeURIComponent(msg)}`} target="_blank" rel="noopener noreferrer" aria-label={`WhatsApp a ${nom}`}>💬</a>}
+                      {correo && <a className="icono-accion" style={{ display: 'grid', placeItems: 'center' }} href={correo} aria-label={`Correo a ${nom}`}>📧</a>}
+                    </>
+                  )} />
+              );
+            })}
+          </div>
+        </>
+      )}
     </>
   );
 }

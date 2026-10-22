@@ -394,3 +394,120 @@ a { color: inherit; text-decoration: none; }
 .acciones-ficha { flex-direction: row; margin: 4px 0 14px; }
 .acciones-ficha .boton { flex: 1; margin-top: 0; }
 .pipe-acciones .icono-accion { width: 28px; height: 28px; font-size: 12px; }
+
+/* Notas y Reportes */
+.not-cab { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+.not-cab > div { display: flex; flex-direction: column; min-width: 0; }
+.not-cab small { color: var(--suave); font-size: 12px; }
+.not-cab .boton { width: auto; flex-shrink: 0; padding: 10px 14px; font-size: 14px; margin-top: 0; }
+.not-cuenta { font-size: 12px; font-weight: 700; }
+.not-c-aviso { color: #d97706; }
+.not-c-info { color: #2563eb; }
+.not-lista { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.not-nota { background: var(--tarjeta); border-left: 4px solid #2563eb; border-radius: 10px; padding: 10px 12px; box-shadow: var(--sombra); }
+.not-vencida { border-left-color: #dc2626; background: color-mix(in srgb, #dc2626 8%, var(--tarjeta)); }
+.not-pronto { border-left-color: #d97706; background: color-mix(in srgb, #d97706 8%, var(--tarjeta)); }
+.not-hecha { border-left-color: #d1d5db; opacity: 0.6; }
+.not-hecha .not-titulo { text-decoration: line-through; }
+.not-titulo { font-weight: 700; font-size: 15px; overflow-wrap: anywhere; }
+.not-cuerpo { font-size: 13px; color: var(--suave); margin-top: 3px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.not-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 6px; font-size: 12px; }
+.not-fecha { font-weight: 600; color: #2563eb; }
+.not-f-vencida { color: #dc2626; }
+.not-f-pronto { color: #d97706; }
+.not-f-hecha { color: var(--suave); }
+.not-cliente { color: var(--suave); font-size: 12px; text-decoration: underline; padding: 0; background: none; }
+.not-etq { color: #fff; border-radius: 4px; padding: 1px 7px; font-size: 11px; font-weight: 600; }
+.not-acciones { display: flex; gap: 6px; align-items: center; margin-top: 8px; }
+.not-estado { flex: 1; min-width: 0; height: 34px; border: 1px solid var(--borde); border-radius: 999px; padding: 0 10px; font-size: 12px; font-weight: 600; background: #eef2ff; color: #1d4ed8; }
+.not-e-en_seguimiento { background: #ede9fe; color: #7e22ce; }
+.not-e-delegado, .not-e-reenviado { background: #cffafe; color: #0891b2; }
+.not-e-completado { background: #d1fae5; color: #15803d; }
+.not-e-cancelada { background: #fee2e2; color: #b91c1c; }
+.not-correo { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
+
+.rep-excel { background: #28a745; }
+.rep-pdf { background: #dc3545; }
+.rep-filtros { margin-bottom: 4px; }
+.rep-selects { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 8px; }
+.rep-selects .campo { margin-bottom: 8px; min-width: 0; }
+.rep-selects .campo > span { font-size: 12px; margin-bottom: 3px; }
+.rep-selects .campo select { font-size: 13px; padding: 8px 6px; }
+.rep-quitar { margin: 0 0 10px; padding: 8px 12px; font-size: 13px; width: auto; }
+.rep-resumen { margin-top: 4px; }
+.rep-tabla { font-size: 12px; }
+.rep-tabla th, .rep-tabla td { padding: 6px 8px; }
+.rep-tabla thead th { position: sticky; top: 0; }
+.rep-tabla .rep-n { text-align: right; }
+.rep-tabla tfoot td { font-weight: 800; border-top: 2px solid var(--borde); background: var(--fondo); white-space: nowrap; }
+.rep-saldo { color: var(--aviso); font-weight: 700; }
+.rep-com, .rep-vig { color: var(--ok); }
+.rep-com { font-weight: 700; }
+.rep-cc { color: var(--info); }
+.rep-ven, .rep-atraso { color: var(--peligro); }
+.rep-atraso { font-weight: 700; }
+.rep-otro { color: var(--suave); }
+.rep-hist { display: flex; flex-direction: column; gap: 8px; }
+.rep-hist-item { display: flex; gap: 12px; padding: 12px; border-radius: 10px; background: var(--tarjeta); box-shadow: var(--sombra); }
+.rep-h-pago { background: color-mix(in srgb, #16a34a 10%, var(--tarjeta)); }
+.rep-h-tarea { background: color-mix(in srgb, #f59e0b 10%, var(--tarjeta)); }
+.rep-h-poliza { background: color-mix(in srgb, #2563eb 10%, var(--tarjeta)); }
+.rep-hist-icono { font-size: 22px; min-width: 30px; text-align: center; }
+.rep-hist-desc { font-weight: 600; font-size: 14px; }
+.rep-hist-sub { color: var(--suave); font-size: 12px; margin-top: 2px; }
+.rep-hist-fecha { color: var(--suave); font-size: 11px; margin-top: 4px; }
+@media print {
+  .rep-marco { overflow: visible !important; }
+  .rep-tabla { font-size: 9px; }
+  .rep-tabla th, .rep-tabla td { padding: 3px 4px; white-space: normal; }
+  .not-acciones { display: none !important; }
+}
+
+/* Empresas */
+.emp-linea { display: flex; align-items: center; gap: 8px; margin-top: 4px; flex-wrap: wrap; }
+.emp-linea b { color: var(--texto); font-variant-numeric: tabular-nums; }
+.emp-wa { display: inline-flex; align-items: center; justify-content: center; background: var(--ok-f); color: var(--ok); text-decoration: none; }
+.fila-acciones a.icono-accion { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
+.emp-num { font-family: ui-monospace, Menlo, monospace; font-size: 12px; font-weight: 700; }
+.emp-pol { background: var(--tarjeta); border-radius: 14px; box-shadow: var(--sombra); margin-bottom: 10px; overflow: hidden; }
+.emp-pol-cuerpo { display: flex; flex-direction: column; gap: 4px; width: 100%; padding: 12px 14px 8px; text-align: left; }
+.emp-pol-cab { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.emp-aseg { font-size: 12px; margin-left: auto; }
+.emp-pol-pie { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.emp-pol-pie b { font-variant-numeric: tabular-nums; flex-shrink: 0; }
+.emp-botones { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 0 14px 12px; }
+.emp-botones .mini { text-decoration: none; }
+.emp-derecha { margin-left: auto; display: flex; gap: 6px; }
+.emp-hoja-lista { max-height: 50vh; overflow-y: auto; margin-bottom: 12px; }
+.emp-asegs { display: flex; flex-direction: column; gap: 0; }
+.emp-aseg-card { padding: 12px 14px; }
+.emp-aseg-card .emp-botones { padding: 8px 0 0; }
+.emp-aseg-cab { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
+.emp-aseg-nombre { font-size: 15px; font-weight: 800; }
+.emp-aseg-largo { font-size: 11px; color: var(--suave); margin-top: 1px; word-break: break-word; }
+.emp-aseg-dato { font-size: 12.5px; color: var(--suave); word-break: break-word; }
+.emp-aseg-dato a { color: var(--info); }
+.emp-chips { margin: 6px 0 0; }
+
+/* WA masivo */
+.wam-cab { display: flex; flex-direction: column; gap: 10px; }
+.wam-cab small { display: block; color: var(--suave); font-size: 13px; margin-top: 2px; }
+.wam-titulo { font-size: 14px; font-weight: 800; margin-bottom: 12px; }
+.wam-preview { white-space: pre-wrap; word-break: break-word; font-family: ui-monospace, Menlo, monospace; font-size: 12px; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px; -webkit-user-select: text; user-select: text; }
+@media (prefers-color-scheme: dark) { .wam-preview { background: #052e16; color: #bbf7d0; border-color: #14532d; } }
+.wam-acciones { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; justify-content: flex-end; }
+.wam-total { font-size: 12px; font-weight: 700; color: var(--info); }
+.wam-siguiente { margin-bottom: 12px; font-size: 14px; background: #15803d; }
+.wam-fila { border-bottom: 1px solid var(--borde); }
+.wam-fila:last-child { border-bottom: 0; }
+.wam-off { opacity: .5; }
+.wam-linea { display: flex; align-items: center; gap: 10px; padding: 10px 12px; }
+.wam-linea input { width: 20px; height: 20px; flex-shrink: 0; }
+.wam-cuerpo { flex: 1; min-width: 0; display: flex; flex-direction: column; text-align: left; }
+.wam-linea .mini { white-space: nowrap; flex-shrink: 0; }
+.wam-detalle { padding: 0 12px 12px; display: flex; flex-direction: column; gap: 8px; }
+.wam-plantillas { margin-bottom: 14px; box-shadow: none; border: 1px solid var(--borde); }
+.wam-dest { flex-wrap: wrap; }
+.wam-dest .wam-acciones { flex-wrap: nowrap; margin-left: auto; }
+.emp-kpi-t { display: flex; flex-direction: column; align-items: center; gap: 2px; white-space: nowrap; }
+.emp-kpi-t i { font-style: normal; }

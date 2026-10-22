@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { Configuracion } from './screens/web/Configuracion';
 import { Cotizador } from './screens/web/Cotizador';
+import { Cumpleanos } from './screens/web/Cumpleanos';
 import { Empresas } from './screens/web/Empresas';
 import { Notas } from './screens/web/Notas';
 import { Reportes } from './screens/web/Reportes';
@@ -37,6 +39,8 @@ export const PANTALLAS_WEB = {
   cotizador: ['Cotizador', Cotizador],
   notas: ['Notas y recordatorios', Notas],
   reportes: ['Reportes', Reportes],
+  cumpleanos: ['Cumpleaños', Cumpleanos],
+  config: ['Configuración del CRM', Configuracion],
 } as const;
 export type PantallaWeb = keyof typeof PANTALLAS_WEB;
 
@@ -304,7 +308,7 @@ export default function App() {
       );
     }
   } else if (pestana === 'inicio') {
-    cuerpo = <Inicio ctx={ctx} irA={setPestana} irLista={(m) => ir({ t: 'lista', m })} irInformes={() => ir({ t: 'informes' })} />;
+    cuerpo = <Inicio ctx={ctx} irA={setPestana} irLista={(m) => ir({ t: 'lista', m })} irInformes={() => ir({ t: 'informes' })} irWeb={(p) => ir({ t: 'web', p })} />;
   } else if (pestana === 'clientes') {
     cuerpo = <Clientes ctx={ctx} />;
   } else if (pestana === 'polizas') {
