@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { ComisionesWeb } from './screens/web/Comisiones';
 import { Configuracion } from './screens/web/Configuracion';
 import { Cotizador } from './screens/web/Cotizador';
 import { Cumpleanos } from './screens/web/Cumpleanos';
@@ -27,7 +28,7 @@ import { Mas } from './screens/Mas';
 import { Mensajero } from './screens/Mensajero';
 import { Portafolio } from './screens/Portafolio';
 import {
-  ClienteFicha, Clientes, ComisionFicha, Comisiones, PagoFicha, Pagos, PolizaFicha, Polizas, ProspectoFicha, Prospectos,
+  ClienteFicha, Clientes, ComisionFicha, PagoFicha, Pagos, PolizaFicha, Polizas, ProspectoFicha, Prospectos,
   SiniestroFicha, Siniestros, VehiculoFicha, Vehiculos, type Ctx,
 } from './screens/Modulos';
 
@@ -270,7 +271,7 @@ export default function App() {
     cuerpo = <Importar ctx={ctx} />;
   } else if (actual?.t === 'lista') {
     titulo = NOMBRE_LISTA[actual.m];
-    const L = { siniestros: Siniestros, prospectos: Prospectos, pagos: Pagos, vehiculos: Vehiculos, comisiones: Comisiones,
+    const L = { siniestros: Siniestros, prospectos: Prospectos, pagos: Pagos, vehiculos: Vehiculos, comisiones: ComisionesWeb,
       clientes: Clientes, polizas: Polizas, tareas: Agenda }[actual.m];
     cuerpo = <L ctx={ctx} />;
   } else if (actual?.t === 'ficha') {

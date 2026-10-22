@@ -82,6 +82,7 @@ export function Adjuntos({ modulo, r, avisar, alCambiar }: {
   const lista = adjuntos(r);
   const [ocupado, setOcupado] = useState<string | null>(null);
   const [borrar, setBorrar] = useState<Adjunto | null>(null);
+  const [avance, setAvance] = useState('');
   const entrada = useRef<HTMLInputElement>(null);
 
   async function abrir(f: Adjunto, i: number) {
@@ -104,10 +105,15 @@ export function Adjuntos({ modulo, r, avisar, alCambiar }: {
   async function subir(files: FileList | null) {
     if (!files?.length) return;
     let actual = r;
-    for (const f of Array.from(files)) {
+    const lista = Array.from(files);
+    for (const [i, f] of lista.entries()) {
       setOcupado('subir');
+      const cual = lista.length > 1 ? ` (${i + 1} de ${lista.length})` : '';
+      setAvance(`Subiendo ${f.name.slice(0, 24)}${cual}…`);
       try {
-        actual = await agregarAdjunto(modulo, actual.id, f);
+        actual = await agregarAdjunto(modulo, actual.id, f, (sub, tot) => {
+          setAvance(`Subiendo ${f.name.slice(0, 24)}${cual}… ${tot ? Math.floor((sub / tot) * 100) : 0}%`);
+        });
         alCambiar(actual);
         avisar(`✓ ${f.name} guardado`);
       } catch (e) {
@@ -115,6 +121,7 @@ export function Adjuntos({ modulo, r, avisar, alCambiar }: {
       }
     }
     setOcupado(null);
+    setAvance('');
     if (entrada.current) entrada.current.value = '';
   }
 
@@ -153,10 +160,9 @@ export function Adjuntos({ modulo, r, avisar, alCambiar }: {
           ))}
         </div>
       )}
-      <input ref={entrada} type="file" multiple hidden onChange={(e) => subir(e.target.files)}
-        accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.txt" />
+      <input ref={entrada} type="file" multiple hidden onChange={(e) => subir(e.target.files)} />
       <button className="boton secundario mas-abajo" type="button" disabled={ocupado !== null} onClick={() => entrada.current?.click()}>
-        {ocupado === 'subir' ? 'Subiendo…' : '📎 Agregar archivo o foto'}
+        {ocupado === 'subir' ? avance || 'Subiendo…' : '📎 Agregar archivos o fotos (sin límite)'}
       </button>
       {borrar && (
         <Hoja titulo="¿Eliminar archivo?" onCerrar={() => setBorrar(null)}>

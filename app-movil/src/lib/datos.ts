@@ -1,6 +1,8 @@
 import COLUMNAS from './columnas.json';
 import { PREFIJO_ID, type Modulo } from './esquema';
 import { limpiarTexto, nuevoId } from './formato';
+import { SUPABASE_KEY, SUPABASE_URL } from './config';
+import { ErrorSubida, explicarError, subirPorPartes, TROZO, type Progreso } from './subida';
 import { db } from './supabase';
 
 /*
@@ -354,20 +356,41 @@ export async function enlaceAdjunto(f: Adjunto & { b64?: string }): Promise<stri
   return data.signedUrl;
 }
 
-export const MAX_ADJUNTO = 2.5 * 1024 * 1024; // mismo limite que el CRM web
+/** Tope de seguridad: el maximo que acepta Supabase Storage (el limite real lo pone el plan). */
+export const MAX_ADJUNTO = 50 * 1024 * 1024 * 1024;
 
-/** Sube un archivo al deposito privado y lo agrega a la ficha (igual que el CRM web). */
-export async function agregarAdjunto(modulo: Modulo, id: string, archivo: File): Promise<Reg> {
-  if (archivo.size > MAX_ADJUNTO) throw new ErrorDatos(`"${archivo.name.slice(0, 30)}" supera 2.5 MB.`);
+export async function agregarAdjunto(modulo: Modulo, id: string, archivo: File, progreso?: Progreso): Promise<Reg> {
+  if (!archivo.size) throw new ErrorDatos(`"${archivo.name.slice(0, 30)}" está vacío.`);
+  if (archivo.size > MAX_ADJUNTO) throw new ErrorDatos(`"${archivo.name.slice(0, 30)}" es demasiado grande.`);
   const { data: s } = await db.auth.getSession();
   const uid = s.session?.user.id;
   if (!uid) throw new ErrorDatos('Tu sesión venció. Vuelve a entrar.');
   const fid = nuevoId('F');
   const ruta = `${uid}/${modulo}/${id}/${fid}-${archivo.name.replace(/[^\w.-]/g, '_')}`;
-  const { error } = await db.storage.from('adjuntos').upload(ruta, archivo, {
-    contentType: archivo.type || 'application/octet-stream', upsert: false,
-  });
-  if (error) throw new ErrorDatos('No se pudo subir el archivo.');
+  const tipo = archivo.type || 'application/octet-stream';
+  if (archivo.size > TROZO) {
+    // Archivos grandes: por partes, retomando si se corta la señal
+    try {
+      await subirPorPartes({
+        url: SUPABASE_URL, apikey: SUPABASE_KEY, bucket: 'adjuntos', ruta, archivo, tipo, progreso,
+        token: async () => {
+          const { data } = await db.auth.getSession();
+          if (!data.session) throw new ErrorSubida('Tu sesión venció. Vuelve a entrar.');
+          return data.session.access_token;
+        },
+      });
+    } catch (e) {
+      throw new ErrorDatos(e instanceof ErrorSubida ? e.message : 'No se pudo subir el archivo.');
+    }
+  } else {
+    progreso?.(0, archivo.size);
+    const { error } = await db.storage.from('adjuntos').upload(ruta, archivo, { contentType: tipo, upsert: false });
+    if (error) {
+      const st = Number((error as { statusCode?: string | number }).statusCode ?? 0);
+      throw new ErrorDatos(explicarError(st, error.message ?? ''));
+    }
+    progreso?.(archivo.size, archivo.size);
+  }
   const nuevo = {
     id: fid, name: archivo.name, type: archivo.type, size: archivo.size, b64: '', path: ruta,
     fecha: new Date().toISOString().slice(0, 10),
