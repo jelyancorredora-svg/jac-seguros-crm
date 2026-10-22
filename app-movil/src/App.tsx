@@ -5,6 +5,7 @@ import { Cotizador } from './screens/web/Cotizador';
 import { Cumpleanos } from './screens/web/Cumpleanos';
 import { retornoGcal, vueltaDeGoogleReciente } from './lib/gcal';
 import { prefDrive } from './lib/drive';
+import { abrirNav, atrasNav, cerradaNav, pantallasAbiertas, reiniciarNav } from './lib/navegacion';
 import { Empresas } from './screens/web/Empresas';
 import { Notas } from './screens/web/Notas';
 import { Reportes } from './screens/web/Reportes';
@@ -79,6 +80,7 @@ export default function App() {
   const [cargando, setCargando] = useState(false);
   const [pestana, setPestana] = useState<Pestana>('inicio');
   const [pila, setPila] = useState<Vista[]>([]);
+  const navIds = useRef<number[]>([]);
   const [aviso, setAviso] = useState('');
   const [vivo, setVivo] = useState<EstadoVivo>('conectando');
   const hayCartera = cartera !== null;
@@ -95,6 +97,8 @@ export default function App() {
   const olvidar = useCallback(() => {
     setCartera(null);
     setPila([]);
+    navIds.current = [];
+    reiniciarNav();
     setPestana('inicio');
   }, []);
 
@@ -186,7 +190,9 @@ export default function App() {
     if (fase.f !== 'dentro' || !cartera || !retornoGcal.v) return;
     if (retornoGcal.v === 'rechazado') { avisar('No se pudo conectar con Google Calendar.'); retornoGcal.v = null; }
     setPestana('mas');
+    reiniciarNav();
     setPila([{ t: 'web', p: 'config' }]);
+    navIds.current = [abrirNav(() => { navIds.current.pop(); setPila((p) => p.slice(0, -1)); })];
   }, [fase.f, cartera, avisar]);
 
   /* Sincronizacion en vivo con el CRM web y los demas dispositivos */
@@ -218,7 +224,7 @@ export default function App() {
   /* Boton "atras" de Android */
   useEffect(() => {
     const h = CapApp.addListener('backButton', () => {
-      if (pila.length) setPila((p) => p.slice(0, -1));
+      if (pantallasAbiertas()) atrasNav(); // cierra solo lo de arriba (formulario, ficha…)
       else if (pestana !== 'inicio') setPestana('inicio');
       else void CapApp.minimizeApp();
     });
@@ -237,7 +243,20 @@ export default function App() {
   if (fase.f === 'bloqueada') return <Bloqueo onDesbloquear={() => setFase({ f: 'dentro' })} onSalir={salir} />;
 
   /* ---------------- dentro ---------------- */
-  const ir = (v: Vista) => setPila((p) => [...p, v]);
+  const ir = (v: Vista) => {
+    setPila((p) => [...p, v]);
+    // Despues de que se cierre la ventana que haya abierta (p. ej. "Nuevo cliente" → su ficha),
+    // para que el historial quede en orden.
+    window.setTimeout(() => {
+      navIds.current.push(abrirNav(() => { navIds.current.pop(); setPila((p) => p.slice(0, -1)); }));
+    }, 0);
+  };
+  /* Volver a la pantalla anterior cerrando TODO lo que haya encima (ventanas incluidas) */
+  const volverPantalla = () => {
+    const id = navIds.current.pop();
+    if (id) cerradaNav(id);
+    setPila((p) => p.slice(0, -1));
+  };
   const actual = pila[pila.length - 1];
 
   const ctx: Ctx | null = cartera && {
@@ -251,7 +270,8 @@ export default function App() {
       return { ...c, [m]: i >= 0 ? lista.map((x) => (x.id === r.id ? r : x)) : [r, ...lista] };
     }),
     quitar: (m, id) => setCartera((c) => c && { ...c, [m]: c[m].filter((x) => x.id !== id) }),
-    volver: () => setPila((p) => p.slice(0, -1)),
+    // p. ej. al eliminar: cierra la confirmacion y la ficha, y vuelve a la lista
+    volver: volverPantalla,
     ponerMeta: (k, v) => setCartera((c) => c && { ...c, meta: { ...c.meta, [k]: v } }),
   };
 
@@ -322,7 +342,7 @@ export default function App() {
       cuerpo = (
         <>
           <Agenda ctx={ctx} />
-          <EditarTarea ctx={ctx} r={r} fecha={txt(r, 'fechaLimite')} onCerrar={() => setPila((p) => p.slice(0, -1))} />
+          <EditarTarea ctx={ctx} r={r} fecha={txt(r, 'fechaLimite')} onCerrar={volverPantalla} />
         </>
       );
     }
@@ -346,7 +366,7 @@ export default function App() {
     <div className="marco">
       <header className="cabecera">
         {actual && (
-          <button type="button" aria-label="Atrás" onClick={() => setPila((p) => p.slice(0, -1))}>
+          <button type="button" aria-label="Atrás" onClick={atrasNav}>
             <Icono nombre="atras" />
           </button>
         )}
@@ -364,7 +384,7 @@ export default function App() {
       <nav className="pestanas">
         {PESTANAS.map(([k, t, i]) => (
           <button key={k} type="button" className={!actual && pestana === k ? 'activa' : ''}
-            onClick={() => { setPila([]); setPestana(k); }}>
+            onClick={() => { setPila([]); navIds.current = []; reiniciarNav(); setPestana(k); }}>
             <Icono nombre={i} />
             {t}
           </button>

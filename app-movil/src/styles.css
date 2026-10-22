@@ -721,3 +721,16 @@ a { color: inherit; text-decoration: none; }
   .comw-imp .tabla td { white-space: normal; }
 }
 .cot-ramo { overflow-wrap: anywhere; }
+
+/* Ventanas: "‹ Volver" fijo arriba */
+.hoja { padding-top: 0; }
+.hoja-cab {
+  position: sticky; top: 0; z-index: 2; background: var(--fondo);
+  display: flex; align-items: center; gap: 10px; padding: 14px 0 10px; margin-bottom: 8px;
+  border-bottom: 1px solid var(--borde);
+}
+.hoja-cab h3 { margin: 0; flex: 1; min-width: 0; font-size: 17px; line-height: 1.25; }
+.hoja-volver {
+  flex-shrink: 0; padding: 8px 12px; border-radius: 999px; font-weight: 800; font-size: 15px;
+  background: var(--info-f); color: var(--info);
+}

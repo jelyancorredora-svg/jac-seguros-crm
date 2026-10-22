@@ -1,4 +1,5 @@
-import { Fragment, type ReactNode } from 'react';
+import { Fragment, useEffect, useRef, type ReactNode } from 'react';
+import { abrirNav, cerradaNav } from '../lib/navegacion';
 import { diasHasta } from '../lib/formato';
 import { Icono, type NombreIcono } from './Icono';
 
@@ -97,11 +98,44 @@ export function EtiquetaEstado({ estado }: { estado: string | null }) {
   return <span className={`etiqueta ${clase}`}>{estado}</span>;
 }
 
-export function Hoja({ titulo, onCerrar, children }: { titulo: string; onCerrar: () => void; children: ReactNode }) {
+/**
+ * Ventana que sube desde abajo (formularios, confirmaciones…).
+ * - "‹ Volver" siempre visible arriba, aunque el formulario sea largo.
+ * - El boton atras del telefono / computadora tambien la cierra.
+ * - Con `sinGuardar` (cambios hechos), pregunta antes de cerrar para no perder nada.
+ */
+export function Hoja({ titulo, onCerrar, children, sinGuardar }: {
+  titulo: string; onCerrar: () => void; children: ReactNode; sinGuardar?: boolean;
+}) {
+  const cerrarRef = useRef(onCerrar);
+  cerrarRef.current = onCerrar;
+  const sucioRef = useRef(!!sinGuardar);
+  sucioRef.current = !!sinGuardar;
+  const idRef = useRef(0);
+
+  const puedeCerrar = () => !sucioRef.current || window.confirm('¿Salir sin guardar los cambios?');
+
+  useEffect(() => {
+    // atras del telefono: cerrar (si la persona confirma)
+    const id = abrirNav(() => {
+      if (!puedeCerrar()) return false;
+      idRef.current = 0;
+      cerrarRef.current();
+      return true;
+    });
+    idRef.current = id;
+    return () => { if (idRef.current) cerradaNav(idRef.current); };
+  }, []);
+
+  const cerrar = () => { if (puedeCerrar()) cerrarRef.current(); };
+
   return (
-    <div className="hoja-fondo" onClick={onCerrar} role="presentation">
+    <div className="hoja-fondo" onClick={cerrar} role="presentation">
       <div className="hoja" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label={titulo}>
-        <h3>{titulo}</h3>
+        <div className="hoja-cab">
+          <button type="button" className="hoja-volver" onClick={cerrar} aria-label="Volver">‹ Volver</button>
+          <h3>{titulo}</h3>
+        </div>
         {children}
       </div>
     </div>

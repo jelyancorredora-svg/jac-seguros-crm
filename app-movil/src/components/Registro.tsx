@@ -323,7 +323,7 @@ export function FormRegistro({ modulo, titulo, r, cartera, fijos, onCerrar, onGu
   }
 
   return (
-    <Hoja titulo={titulo} onCerrar={onCerrar}>
+    <Hoja titulo={titulo} onCerrar={onCerrar} sinGuardar={!ocupado && campos.some((c) => v[c.k] !== inicial[c.k])}>
       <form onSubmit={guardar} noValidate>
         {extra}
         {grupos.map((g) => (
