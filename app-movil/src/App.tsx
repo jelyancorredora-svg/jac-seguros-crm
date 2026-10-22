@@ -1,4 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { Cotizador } from './screens/web/Cotizador';
+import { Empresas } from './screens/web/Empresas';
+import { Notas } from './screens/web/Notas';
+import { Reportes } from './screens/web/Reportes';
+import { WaMasivo } from './screens/web/WaMasivo';
 import { App as CapApp } from '@capacitor/app';
 import { Icono, type NombreIcono } from './components/Icono';
 import { Cargando, Vacio } from './components/Piezas';
@@ -25,7 +30,17 @@ import {
 } from './screens/Modulos';
 
 export type Pestana = 'inicio' | 'clientes' | 'polizas' | 'crm' | 'agenda' | 'mas';
-export type Vista = { t: 'ficha'; m: Modulo; id: string } | { t: 'lista'; m: Modulo } | { t: 'ajustes' } | { t: 'importar' } | { t: 'informes' } | { t: 'mensajero' } | { t: 'portafolio' };
+/* Modulos del CRM web replicados en la app (menu Mas) */
+export const PANTALLAS_WEB = {
+  empresas: ['Empresas y colectivos', Empresas],
+  wamasivo: ['WhatsApp masivo', WaMasivo],
+  cotizador: ['Cotizador', Cotizador],
+  notas: ['Notas y recordatorios', Notas],
+  reportes: ['Reportes', Reportes],
+} as const;
+export type PantallaWeb = keyof typeof PANTALLAS_WEB;
+
+export type Vista = { t: 'ficha'; m: Modulo; id: string } | { t: 'lista'; m: Modulo } | { t: 'ajustes' } | { t: 'importar' } | { t: 'informes' } | { t: 'mensajero' } | { t: 'portafolio' } | { t: 'web'; p: PantallaWeb };
 export type Avisar = (texto: string) => void;
 
 type Fase =
@@ -239,6 +254,10 @@ export default function App() {
   } else if (actual?.t === 'portafolio') {
     titulo = 'Portafolio por ramo';
     cuerpo = <Portafolio ctx={ctx} />;
+  } else if (actual?.t === 'web') {
+    const [t, P] = PANTALLAS_WEB[actual.p];
+    titulo = t;
+    cuerpo = <P ctx={ctx} />;
   } else if (actual?.t === 'informes') {
     titulo = 'Informes';
     cuerpo = <Informes ctx={ctx} />;
@@ -297,7 +316,7 @@ export default function App() {
     cuerpo = <Agenda ctx={ctx} />;
   } else {
     cuerpo = <Mas ctx={ctx} irLista={(m) => ir({ t: 'lista', m })} irAjustes={() => ir({ t: 'ajustes' })} irImportar={() => ir({ t: 'importar' })} irInformes={() => ir({ t: 'informes' })}
-      irMensajero={() => ir({ t: 'mensajero' })} irPortafolio={() => ir({ t: 'portafolio' })} />;
+      irMensajero={() => ir({ t: 'mensajero' })} irPortafolio={() => ir({ t: 'portafolio' })} irWeb={(p) => ir({ t: 'web', p })} />;
   }
 
   return (

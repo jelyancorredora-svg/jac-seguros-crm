@@ -145,6 +145,7 @@ export async function leerFilas(tabla: string, ids: string[]): Promise<Array<{ r
 export const CLAVES_META = [
   'calReuniones', 'calNotas', 'calMetas', 'calDiarios', 'aseguradoras', 'ramosCfg', 'vcReglas',
   'encomiendas', 'mensajero', 'mensajeroTel', 'mensajeroEmail',
+  'notas', 'comRates', 'etiquetas', 'plantillas', 'comisCfg',
 ] as const;
 export type Meta = {
   calReuniones: Reg[];
@@ -160,6 +161,16 @@ export type Meta = {
   mensajero: string;
   mensajeroTel: string;
   mensajeroEmail: string;
+  /** Notas & Recordatorios del CRM web: {id, titulo, cuerpo, fecha, clienteId, etiqueta, color, done, cre} */
+  notas: Reg[];
+  /** Tasas de comision: {aseg, ramo, pct} (ramo vacio = todos) */
+  comRates: Array<{ aseg?: string; ramo?: string; pct?: number }>;
+  /** Etiquetas {id, nombre, color} */
+  etiquetas: Reg[];
+  /** Plantillas de WhatsApp {id, nombre, tipo, texto} */
+  plantillas: Reg[];
+  /** Configuracion de comisiones por aseguradora/ramo (forma libre del CRM web) */
+  comisCfg: Record<string, unknown>;
 };
 
 export async function leerMeta(): Promise<Meta> {
@@ -180,6 +191,11 @@ export async function leerMeta(): Promise<Meta> {
     mensajero: typeof m.mensajero === 'string' ? m.mensajero : 'Francisco Flores',
     mensajeroTel: typeof m.mensajeroTel === 'string' ? m.mensajeroTel : '66714215',
     mensajeroEmail: typeof m.mensajeroEmail === 'string' ? m.mensajeroEmail : '',
+    notas: lista(m.notas),
+    comRates: Array.isArray(m.comRates) ? (m.comRates as Meta['comRates']) : [],
+    etiquetas: lista(m.etiquetas),
+    plantillas: lista(m.plantillas),
+    comisCfg: m.comisCfg && typeof m.comisCfg === 'object' && !Array.isArray(m.comisCfg) ? (m.comisCfg as Record<string, unknown>) : {},
   };
 }
 
