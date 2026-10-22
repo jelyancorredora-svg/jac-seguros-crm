@@ -378,7 +378,9 @@ export const MAX_ADJUNTO = 50 * 1024 * 1024 * 1024;
 export async function agregarAdjunto(modulo: Modulo, id: string, original: File, progreso?: Progreso): Promise<Reg> {
   if (!original.size) throw new ErrorDatos(`"${original.name.slice(0, 30)}" está vacío.`);
   const archivo = await comprimirFoto(original);   // fotos 5–10 veces mas livianas
-  if (prefDrive.archivosEn === 'drive') return agregarADrive(modulo, id, archivo, progreso);
+  // Google Drive es el destino principal; si Google no esta conectado se guarda en la
+  // nube del CRM para no perder nada (despues se puede mudar a Drive con un toque).
+  if (prefDrive.archivosEn === 'drive' && tokenGcal()) return agregarADrive(modulo, id, archivo, progreso);
   if (archivo.size > MAX_ADJUNTO) throw new ErrorDatos(`"${archivo.name.slice(0, 30)}" es demasiado grande.`);
   const { data: s } = await db.auth.getSession();
   const uid = s.session?.user.id;
@@ -434,7 +436,7 @@ export async function eliminarAdjunto(modulo: Modulo, id: string, f: Adjunto): P
   return r;
 }
 
-/** Sube a Google Drive (15 GB gratis) y anota el archivo en la ficha */
+/** Sube a Google Drive y anota el archivo en la ficha */
 async function agregarADrive(modulo: Modulo, id: string, archivo: File, progreso?: Progreso): Promise<Reg> {
   const t = tokenGcal();
   if (!t) throw new ErrorDatos('Para guardar en Google Drive toca primero "Conectar con Google" (Más → Configuración del CRM).');
@@ -458,5 +460,40 @@ async function agregarADrive(modulo: Modulo, id: string, archivo: File, progreso
   } catch (e) {
     if (e instanceof ErrorDatos) throw e;
     throw new ErrorDatos(e instanceof ErrorDrive ? e.message : 'No se pudo subir a Google Drive.');
+  }
+}
+
+/**
+ * Muda a Google Drive un archivo que esta en la nube del CRM: lo copia a Drive,
+ * cambia la ficha para que apunte a Drive y recien entonces lo borra de la nube.
+ * Si algo falla a mitad, el archivo sigue donde estaba (nunca se pierde).
+ */
+export async function moverADrive(modulo: Modulo, id: string, f: Adjunto, progreso?: Progreso): Promise<Reg> {
+  const t = tokenGcal();
+  if (!t) throw new ErrorDatos('Conecta Google primero.');
+  if (!f.path || f.drive) throw new ErrorDatos('Este archivo no está en la nube del CRM.');
+  const { data: blob, error } = await db.storage.from('adjuntos').download(f.path);
+  if (error || !blob) throw new ErrorDatos(`No se pudo leer "${f.name ?? 'archivo'}" de la nube del CRM.`);
+  try {
+    if (!prefDrive.carpeta) {
+      prefDrive.carpeta = await carpetaCRM(t, '');
+      void guardarMeta<Record<string, unknown>>('integraciones', {}, (a) => ({ ...a, driveCarpeta: prefDrive.carpeta })).catch(() => {});
+    }
+    const sub = await subirADrive(t, prefDrive.carpeta, blob, `${modulo}-${id}-${f.name ?? 'archivo'}`, f.type || blob.type, progreso);
+    const igual = (x: Adjunto) => (f.id ? x.id === f.id : x.path === f.path);
+    let r: Reg;
+    try {
+      r = await actualizarCon(modulo, id, (a) => ({
+        archivos: adjuntos(a).map((x) => (igual(x) ? { ...x, path: undefined, drive: sub.id, url: sub.url } : x)),
+      }));
+    } catch (e) {
+      await borrarDeDrive(t, sub.id).catch(() => {});
+      throw e;
+    }
+    await db.storage.from('adjuntos').remove([f.path]);
+    return r;
+  } catch (e) {
+    if (e instanceof ErrorDatos) throw e;
+    throw new ErrorDatos(e instanceof ErrorDrive ? e.message : 'No se pudo mudar a Google Drive.');
   }
 }

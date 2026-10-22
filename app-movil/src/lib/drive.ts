@@ -1,5 +1,5 @@
 /*
- * 📁 Archivos en TU Google Drive (15 GB gratis con tu cuenta de Google).
+ * 📁 Archivos en TU Google Drive (el espacio de tu plan de Google).
  *
  * - Todo va a una carpeta "JAC Seguros CRM — Archivos" en tu Drive.
  * - Permiso minimo "drive.file": la app SOLO ve los archivos que ella misma
@@ -19,7 +19,7 @@ export const prefDrive: { archivosEn: 'supabase' | 'drive'; carpeta: string } = 
 
 function explicar(status: number, cuerpo: string): string {
   if (status === 401) return 'El permiso de Google venció. Toca "Conectar con Google" y vuelve a subirlo.';
-  if (status === 403 && /storageQuotaExceeded|quota/i.test(cuerpo)) return 'Tu Google Drive está lleno (15 GB gratis). Libera espacio o cambia a guardar en la nube del CRM.';
+  if (status === 403 && /storageQuotaExceeded|quota/i.test(cuerpo)) return 'Tu Google Drive está lleno. Libera espacio o cambia a guardar en la nube del CRM.';
   if (status === 403 && /insufficient|scope|PERMISSION/i.test(cuerpo)) return 'Falta el permiso de Google Drive. Toca "Conectar con Google" otra vez y acepta Drive.';
   if (status === 403 && /accessNotConfigured|has not been used|disabled/i.test(cuerpo)) return 'La API de Google Drive no está activada en tu proyecto de Google (ver Configuración → Archivos).';
   return `Google Drive respondió ${status}. Inténtalo de nuevo.`;
@@ -123,7 +123,7 @@ export async function borrarDeDrive(token: string, id: string, f: typeof fetch =
   if (!r.ok && r.status !== 404) throw new ErrorDrive(explicar(r.status, await r.text().catch(() => '')));
 }
 
-/** Espacio de tu cuenta de Google (Drive + Gmail + Fotos comparten los 15 GB) */
+/** Espacio de tu cuenta de Google (Drive + Gmail + Fotos comparten el espacio del plan) */
 export async function espacioDrive(token: string, f: typeof fetch = fetch): Promise<{ usado: number; limite: number } | null> {
   const r = await f(`${API}/about?fields=storageQuota`, { headers: { Authorization: 'Bearer ' + token } });
   if (!r.ok) return null;

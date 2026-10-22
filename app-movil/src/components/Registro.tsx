@@ -6,6 +6,7 @@ import {
 import { CAMPOS, OCULTOS, type Campo, type Modulo } from '../lib/esquema';
 import { dinero, esCorreo, fecha, hoyISO } from '../lib/formato';
 import { prefDrive } from '../lib/drive';
+import { tokenGcal } from '../lib/gcal';
 import { Hoja } from './Piezas';
 
 /* ---------------- valor legible de un campo ---------------- */
@@ -112,11 +113,12 @@ export function Adjuntos({ modulo, r, avisar, alCambiar }: {
       const cual = lista.length > 1 ? ` (${i + 1} de ${lista.length})` : '';
       setAvance(`Subiendo ${f.name.slice(0, 24)}${cual}…`);
       try {
+        const aNube = prefDrive.archivosEn === 'drive' && !tokenGcal();
         actual = await agregarAdjunto(modulo, actual.id, f, (sub, tot) => {
           setAvance(`Subiendo ${f.name.slice(0, 24)}${cual}… ${tot ? Math.floor((sub / tot) * 100) : 0}%`);
         });
         alCambiar(actual);
-        avisar(`✓ ${f.name} guardado`);
+        avisar(aNube ? `✓ ${f.name} guardado en la nube del CRM (conecta Google para que vaya a tu Drive)` : `✓ ${f.name} guardado`);
       } catch (e) {
         avisar(e instanceof ErrorDatos ? e.message : `No se pudo subir ${f.name}.`);
       }

@@ -177,7 +177,7 @@ export default function App() {
   /* Donde se guardan los archivos (Google Drive o la nube del CRM), igual en todos tus equipos */
   useEffect(() => {
     const i = cartera?.meta.integraciones;
-    prefDrive.archivosEn = i?.archivosEn === 'drive' ? 'drive' : 'supabase';
+    prefDrive.archivosEn = i?.archivosEn === 'supabase' ? 'supabase' : 'drive'; // Drive es el destino principal
     prefDrive.carpeta = typeof i?.driveCarpeta === 'string' ? i.driveCarpeta : '';
   }, [cartera?.meta.integraciones]);
 
