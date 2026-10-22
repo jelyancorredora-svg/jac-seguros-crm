@@ -278,10 +278,20 @@ export async function registrarAccion(modulo: Modulo, id: string, e: EntradaHist
 }
 
 /** Solo para tareas (la agenda del CRM permite eliminarlas). */
-export async function eliminarTarea(id: string): Promise<void> {
-  const { error } = await db.from('tareas').delete().eq('id', id);
+/**
+ * Elimina un registro de cualquier modulo (igual que el boton 🗑 del CRM web).
+ * Se pide a la base que devuelva lo borrado: si no devuelve nada es que no
+ * habia permiso o ya no existia, y se avisa en vez de fingir que se borro.
+ */
+export async function eliminarRegistro(m: Modulo, id: string): Promise<void> {
+  const tabla = TABLA[m];
+  const { data, error } = await db.from(tabla).delete().eq('id', id).select('id');
   if (error) throw new ErrorDatos(mensajeError(error));
+  if (!data?.length) throw new ErrorDatos('No se pudo eliminar: ya no existe o no tienes permiso.');
+  versiones.get(tabla)?.delete(id);
 }
+
+export const eliminarTarea = (id: string) => eliminarRegistro('tareas', id);
 
 /**
  * Modifica una lista de crm_meta (reuniones, notas, metas, diario).

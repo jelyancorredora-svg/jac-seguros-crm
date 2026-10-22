@@ -3,7 +3,7 @@ import { Icono } from '../components/Icono';
 import { Accion, EtiquetaEstado, Fila, Hoja, Vacio, inicial } from '../components/Piezas';
 import { Adjuntos, FichaCampos, FormRegistro, Historial, ListaLarga } from '../components/Registro';
 import { avanzarEtapa } from '../lib/crm';
-import { fec, guardarRegistro, num, txt, type Cartera, type Reg } from '../lib/datos';
+import { eliminarRegistro, ErrorDatos, fec, guardarRegistro, num, txt, type Cartera, type Reg } from '../lib/datos';
 import { ESTADOS_COMERCIALES, ETAPAS_VENTA, type Modulo } from '../lib/esquema';
 import {
   diasHasta, dinero, enlaceCorreo, enlaceLlamada, enlaceWhatsApp, fecha, hoyISO, normalizar,
@@ -21,6 +21,8 @@ export type Ctx = {
   /** Mete o reemplaza un registro en la cartera en memoria */
   poner: (m: Modulo, r: Reg) => void;
   quitar: (m: Modulo, id: string) => void;
+  /** Vuelve a la pantalla anterior */
+  volver: () => void;
   ponerMeta: (clave: keyof Cartera['meta'], v: unknown) => void;
 };
 
@@ -134,16 +136,90 @@ export function NuevoRegistro({ ctx, modulo, titulo, clienteId, base, onCerrar, 
   );
 }
 
-/* Cabecera de una ficha con boton editar */
+/* ---------------- editar / guardar / eliminar (igual que el CRM web) ---------------- */
+
+const NOMBRE_MODULO: Record<Modulo, string> = {
+  clientes: 'cliente', polizas: 'póliza', pagos: 'pago', siniestros: 'siniestro', vehiculos: 'vehículo',
+  comisiones: 'comisión', prospectos: 'prospecto', tareas: 'tarea',
+};
+
+function nombreRegistro(m: Modulo, r: Reg): string {
+  if (m === 'polizas') return `Póliza ${txt(r, 'num') || ''}`.trim();
+  if (m === 'vehiculos') return txt(r, 'placa') || 'Vehículo';
+  if (m === 'pagos') return `Pago ${dinero(num(r, 'monto'))}${txt(r, 'cliente') ? ' · ' + txt(r, 'cliente') : ''}`;
+  if (m === 'comisiones') return `Comisión ${txt(r, 'aseg')} ${txt(r, 'mes')}`.trim();
+  return txt(r, 'nombre') || txt(r, 'titulo') || NOMBRE_MODULO[m];
+}
+
+/** Hoja de confirmacion para eliminar un registro */
+function ConfirmarEliminar({ ctx, modulo, r, onCerrar, alEliminar }: {
+  ctx: Ctx; modulo: Modulo; r: Reg; onCerrar: () => void; alEliminar?: () => void;
+}) {
+  const [ocupado, setOcupado] = useState(false);
+  const [error, setError] = useState('');
+  const nPol = modulo === 'clientes' ? (polizasPorCliente(ctx.cartera).get(r.id)?.length ?? 0) : 0;
+  async function eliminar() {
+    setOcupado(true);
+    setError('');
+    try {
+      await eliminarRegistro(modulo, r.id);
+      ctx.quitar(modulo, r.id);
+      const n = NOMBRE_MODULO[modulo];
+      ctx.avisar(`🗑️ ${n[0].toUpperCase() + n.slice(1)} eliminad${['polizas', 'comisiones', 'tareas'].includes(modulo) ? 'a' : 'o'}`);
+      onCerrar();
+      alEliminar?.();
+    } catch (e) {
+      setError(e instanceof ErrorDatos ? e.message : 'No se pudo eliminar.');
+      setOcupado(false);
+    }
+  }
+  return (
+    <Hoja titulo={`¿Eliminar ${NOMBRE_MODULO[modulo]}?`} onCerrar={onCerrar}>
+      <p className="texto-largo"><b>{nombreRegistro(modulo, r)}</b></p>
+      <p className="texto-largo">Se elimina en la app, en el CRM web y en todos tus dispositivos. No se puede deshacer.</p>
+      {nPol > 0 && <div className="nota">Sus {nPol} póliza{nPol > 1 ? 's' : ''} no se borra{nPol > 1 ? 'n' : ''}: quedará{nPol > 1 ? 'n' : ''} como póliza{nPol > 1 ? 's' : ''} sin cliente.</div>}
+      {error && <p className="error">{error}</p>}
+      <div className="botonera">
+        <button className="boton peligro" type="button" onClick={eliminar} disabled={ocupado}>{ocupado ? 'Eliminando…' : '🗑️ Sí, eliminar'}</button>
+        <button className="boton secundario" type="button" onClick={onCerrar} disabled={ocupado}>Cancelar</button>
+      </div>
+    </Hoja>
+  );
+}
+
+/** Barra de la ficha: ✏️ Editar (el formulario tiene 💾 Guardar) y 🗑️ Eliminar */
 function Editar({ ctx, modulo, r, titulo }: { ctx: Ctx; modulo: Modulo; r: Reg; titulo: string }) {
-  const [abierto, setAbierto] = useState(false);
+  const [abierto, setAbierto] = useState<'editar' | 'eliminar' | null>(null);
   return (
     <>
-      <button className="boton mas-abajo" type="button" onClick={() => setAbierto(true)}>✏️ Editar todos los datos</button>
-      {abierto && (
-        <FormRegistro modulo={modulo} titulo={titulo} r={r} cartera={ctx.cartera} onCerrar={() => setAbierto(false)}
-          onGuardado={(n) => { ctx.poner(modulo, n); setAbierto(false); ctx.avisar('✓ Cambios guardados'); }} />
+      <div className="botonera acciones-ficha">
+        <button className="boton" type="button" onClick={() => setAbierto('editar')}>✏️ Editar</button>
+        <button className="boton peligro" type="button" onClick={() => setAbierto('eliminar')}>🗑️ Eliminar</button>
+      </div>
+      {abierto === 'editar' && (
+        <FormRegistro modulo={modulo} titulo={titulo} r={r} cartera={ctx.cartera} onCerrar={() => setAbierto(null)}
+          onGuardado={(n) => { ctx.poner(modulo, n); setAbierto(null); ctx.avisar('✓ Cambios guardados'); }} />
       )}
+      {abierto === 'eliminar' && (
+        <ConfirmarEliminar ctx={ctx} modulo={modulo} r={r} onCerrar={() => setAbierto(null)} alEliminar={ctx.volver} />
+      )}
+    </>
+  );
+}
+
+/** ✏️ y 🗑️ al final de cada fila de las listas */
+export function AccionesFila({ ctx, modulo, r }: { ctx: Ctx; modulo: Modulo; r: Reg }) {
+  const [abierto, setAbierto] = useState<'editar' | 'eliminar' | null>(null);
+  const titulo = `Editar ${NOMBRE_MODULO[modulo]}`;
+  return (
+    <>
+      <button className="icono-accion" type="button" aria-label={`Editar ${nombreRegistro(modulo, r)}`} onClick={() => setAbierto('editar')}>✏️</button>
+      <button className="icono-accion rojo" type="button" aria-label={`Eliminar ${nombreRegistro(modulo, r)}`} onClick={() => setAbierto('eliminar')}>🗑️</button>
+      {abierto === 'editar' && (
+        <FormRegistro modulo={modulo} titulo={titulo} r={r} cartera={ctx.cartera} onCerrar={() => setAbierto(null)}
+          onGuardado={(n) => { ctx.poner(modulo, n); setAbierto(null); ctx.avisar('✓ Cambios guardados'); }} />
+      )}
+      {abierto === 'eliminar' && <ConfirmarEliminar ctx={ctx} modulo={modulo} r={r} onCerrar={() => setAbierto(null)} />}
     </>
   );
 }
@@ -250,7 +326,7 @@ export function Clientes({ ctx }: { ctx: Ctx }) {
         const ps = pols.get(c.id) ?? [];
         const vig = ps.filter(polizaVigente).length;
         return (
-          <Fila key={c.id} inicial={inicial(txt(c, 'nombre'))} titulo={txt(c, 'nombre') || 'Sin nombre'}
+          <Fila acciones={<AccionesFila ctx={ctx} modulo="clientes" r={c} />} key={c.id} inicial={inicial(txt(c, 'nombre'))} titulo={txt(c, 'nombre') || 'Sin nombre'}
             sub={[txt(c, 'cedula'), txt(c, 'cel')].filter(Boolean).join(' · ')}
             derecha={<span className={`etiqueta ${vig ? 'e-ok' : ps.length ? 'e-aviso' : 'e-neutra'}`}>{ps.length} pól.{ps.length && vig !== ps.length ? ` · ${vig} vig.` : ''}</span>}
             onClick={() => ctx.abrir('clientes', c.id)} />
@@ -361,7 +437,7 @@ export function ClienteFicha({ ctx, c }: { ctx: Ctx; c: Reg }) {
         {vehiculos.length > 0 && (
           <div className="lista">
             {vehiculos.map((v) => (
-              <Fila key={v.id} titulo={txt(v, 'placa') || 'Sin placa'}
+              <Fila acciones={<AccionesFila ctx={ctx} modulo="vehiculos" r={v} />} key={v.id} titulo={txt(v, 'placa') || 'Sin placa'}
                 sub={[fec(v, 'soat') && `SOAT ${fecha(fec(v, 'soat'))}`, fec(v, 'imp') && `Imp. ${fecha(fec(v, 'imp'))}`].filter(Boolean).join(' · ')}
                 onClick={() => ctx.abrir('vehiculos', v.id)} />
             ))}
@@ -373,7 +449,7 @@ export function ClienteFicha({ ctx, c }: { ctx: Ctx; c: Reg }) {
         {siniestros.length > 0 && (
           <div className="lista">
             {siniestros.map((s) => (
-              <Fila key={s.id} titulo={txt(s, 'nombre') || 'Siniestro'} sub={[txt(s, 'aseg'), fecha(fec(s, 'fechaSin'))].filter(Boolean).join(' · ')}
+              <Fila acciones={<AccionesFila ctx={ctx} modulo="siniestros" r={s} />} key={s.id} titulo={txt(s, 'nombre') || 'Siniestro'} sub={[txt(s, 'aseg'), fecha(fec(s, 'fechaSin'))].filter(Boolean).join(' · ')}
                 derecha={<EtiquetaEstado estado={txt(s, 'estado') || null} />} onClick={() => ctx.abrir('siniestros', s.id)} />
             ))}
           </div>
@@ -427,7 +503,7 @@ function EtiquetaPol({ p }: { p: Reg }) {
 
 export function FilaPoliza({ p, ctx, conCliente }: { p: Reg; ctx: Ctx; conCliente?: boolean }) {
   return (
-    <Fila titulo={conCliente ? txt(p, 'nombreCliente') || 'Sin nombre' : `${txt(p, 'ramo') || 'Póliza'} · ${txt(p, 'num')}`}
+    <Fila acciones={<AccionesFila ctx={ctx} modulo="polizas" r={p} />} titulo={conCliente ? txt(p, 'nombreCliente') || 'Sin nombre' : `${txt(p, 'ramo') || 'Póliza'} · ${txt(p, 'num')}`}
       sub={[conCliente ? txt(p, 'ramo') : '', txt(p, 'aseg'), fecha(fec(p, 'fechaFin'))].filter(Boolean).join(' · ')}
       derecha={<EtiquetaPol p={p} />} onClick={() => ctx.abrir('polizas', p.id)} />
   );
@@ -621,7 +697,7 @@ export function PolizaFicha({ ctx, p }: { ctx: Ctx; p: Reg }) {
 
 function FilaPago({ p, ctx }: { p: Reg; ctx: Ctx }) {
   return (
-    <Fila titulo={dinero(num(p, 'monto'))}
+    <Fila acciones={<AccionesFila ctx={ctx} modulo="pagos" r={p} />} titulo={dinero(num(p, 'monto'))}
       sub={[fecha(fec(p, 'fecha')), txt(p, 'cliente'), txt(p, 'cuota') || txt(p, 'metodo')].filter(Boolean).join(' · ')}
       derecha={<EtiquetaEstado estado={txt(p, 'estado') || null} />} onClick={() => ctx.abrir('pagos', p.id)} />
   );
@@ -686,7 +762,7 @@ export function Siniestros({ ctx }: { ctx: Ctx }) {
       <Filtros valor={abiertos} cambiar={setAbiertos} opciones={[['abiertos', 'Abiertos'], ['todos', 'Todos']]} />
       <Contador n={lista.length} total={ctx.cartera.siniestros.length} que="siniestros" />
       <ListaLarga items={lista} vacio="No hay siniestros en esta vista." render={(s) => (
-        <Fila key={s.id} titulo={txt(s, 'cliente') || txt(s, 'asegurado') || 'Siniestro'}
+        <Fila acciones={<AccionesFila ctx={ctx} modulo="siniestros" r={s} />} key={s.id} titulo={txt(s, 'cliente') || txt(s, 'asegurado') || 'Siniestro'}
           sub={[txt(s, 'nombre'), txt(s, 'aseg'), fecha(fec(s, 'fechaSin'))].filter(Boolean).join(' · ')}
           derecha={<EtiquetaEstado estado={txt(s, 'estado') || null} />} onClick={() => ctx.abrir('siniestros', s.id)} />
       )} />
@@ -737,7 +813,7 @@ export function Vehiculos({ ctx }: { ctx: Ctx }) {
       <ListaLarga items={lista} vacio="No hay vehículos." render={(v) => {
         const d = proximo(v);
         return (
-          <Fila key={v.id} titulo={txt(v, 'placa') || 'Sin placa'} sub={txt(v, 'clienteNom')}
+          <Fila acciones={<AccionesFila ctx={ctx} modulo="vehiculos" r={v} />} key={v.id} titulo={txt(v, 'placa') || 'Sin placa'} sub={txt(v, 'clienteNom')}
             derecha={d !== null ? <span className={`etiqueta ${d < 0 ? 'e-peligro' : 'e-aviso'}`}>{d < 0 ? 'Vencido' : `${d} días`}</span> : undefined}
             onClick={() => ctx.abrir('vehiculos', v.id)} />
         );
@@ -784,7 +860,7 @@ export function Comisiones({ ctx }: { ctx: Ctx }) {
       <Filtros valor={f} cambiar={setF} opciones={[['pendiente', 'Pendientes'], ['cobrada', 'Cobradas'], ['todas', 'Todas']]} />
       <p className="contador">{lista.length} comisiones · {dinero(total)}</p>
       <ListaLarga items={lista} vacio="No hay comisiones en esta vista." render={(c) => (
-        <Fila key={c.id} titulo={`${dinero(num(c, 'monto'))} · ${txt(c, 'aseg')}`}
+        <Fila acciones={<AccionesFila ctx={ctx} modulo="comisiones" r={c} />} key={c.id} titulo={`${dinero(num(c, 'monto'))} · ${txt(c, 'aseg')}`}
           sub={[txt(c, 'ramo'), txt(c, 'mes') || fecha(fec(c, 'fecha')), txt(c, 'polizaNum')].filter(Boolean).join(' · ')}
           derecha={<EtiquetaEstado estado={txt(c, 'estado') === 'cobrada' ? 'Cobrada' : 'Pendiente'} />}
           onClick={() => ctx.abrir('comisiones', c.id)} />
@@ -831,7 +907,7 @@ export function Prospectos({ ctx }: { ctx: Ctx }) {
       <ListaLarga items={lista} vacio="No hay prospectos en esta vista." render={(p) => {
         const d = diasHasta(seguimientoProspecto(p));
         return (
-          <Fila key={p.id} inicial={inicial(txt(p, 'nombre'))} titulo={txt(p, 'nombre') || 'Sin nombre'}
+          <Fila acciones={<AccionesFila ctx={ctx} modulo="prospectos" r={p} />} key={p.id} inicial={inicial(txt(p, 'nombre'))} titulo={txt(p, 'nombre') || 'Sin nombre'}
             sub={[txt(p, 'etapaVenta'), txt(p, 'fuente'), seguimientoProspecto(p) ? `seguir ${fecha(seguimientoProspecto(p))}` : ''].filter(Boolean).join(' · ')}
             derecha={f === 'curso' && d !== null && d <= 0 ? <span className="etiqueta e-peligro">Contactar</span> : undefined}
             onClick={() => ctx.abrir('prospectos', p.id)} />

@@ -4,7 +4,7 @@ import { avanzarEtapa, llevarAPipeline, PIPE_ETAPAS, ventaCruzada, type Oportuni
 import { ErrorDatos, fec, num, txt, type Reg } from '../lib/datos';
 import { diasHasta, dinero, enlaceWhatsApp, fecha } from '../lib/formato';
 import { polizaCancelada, prospectoAbierto, seguimientoProspecto } from '../lib/reglas';
-import { Prospectos, type Ctx } from './Modulos';
+import { AccionesFila, Prospectos, type Ctx } from './Modulos';
 
 type Tab = 'pipe' | 'seg' | 'vc' | 'ren' | 'pros';
 const TABS: Array<[Tab, string]> = [
@@ -117,6 +117,7 @@ function Pipeline({ ctx }: { ctx: Ctx }) {
                       <div className="pipe-acciones">
                         {enlaceWhatsApp(txt(p, 'cel')) && <a className="mini verde" href={enlaceWhatsApp(txt(p, 'cel'))!} target="_blank" rel="noopener noreferrer">💬</a>}
                         <button type="button" className="mini" onClick={() => setMover(p)}>Mover ➜</button>
+                        <AccionesFila ctx={ctx} modulo="prospectos" r={p} />
                       </div>
                     </div>
                   );
@@ -155,7 +156,7 @@ function Seguimientos({ ctx }: { ctx: Ctx }) {
       <h3 className="seccion">{titulo} ({l.length})</h3>
       <div className="lista">
         {l.map((p) => (
-          <Fila key={p.id} inicial={inicial(txt(p, 'nombre'))} titulo={txt(p, 'nombre')}
+          <Fila key={p.id} acciones={<AccionesFila ctx={ctx} modulo="prospectos" r={p} />} inicial={inicial(txt(p, 'nombre'))} titulo={txt(p, 'nombre')}
             sub={[txt(p, 'etapaVenta'), seguimientoProspecto(p) && fecha(seguimientoProspecto(p)), num(p, 'montoEstimado') ? dinero(num(p, 'montoEstimado')) : ''].filter(Boolean).join(' · ')}
             derecha={clase ? <span className={`etiqueta ${clase}`}>{titulo.split(' ')[0]}</span> : undefined}
             onClick={() => ctx.abrir('prospectos', p.id)} />

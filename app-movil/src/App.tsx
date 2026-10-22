@@ -213,6 +213,7 @@ export default function App() {
       return { ...c, [m]: i >= 0 ? lista.map((x) => (x.id === r.id ? r : x)) : [r, ...lista] };
     }),
     quitar: (m, id) => setCartera((c) => c && { ...c, [m]: c[m].filter((x) => x.id !== id) }),
+    volver: () => setPila((p) => p.slice(0, -1)),
     ponerMeta: (k, v) => setCartera((c) => c && { ...c, meta: { ...c.meta, [k]: v } }),
   };
 

@@ -17,18 +17,27 @@ export function Vacio({ children }: { children: ReactNode }) {
   return <div className="vacio">{children}</div>;
 }
 
-export function Fila({ titulo, sub, inicial, derecha, onClick }: {
+export function Fila({ titulo, sub, inicial, derecha, onClick, acciones }: {
   titulo: ReactNode; sub?: ReactNode; inicial?: string; derecha?: ReactNode; onClick?: () => void;
+  /** Botones al final de la fila (editar / eliminar), fuera del boton principal */
+  acciones?: ReactNode;
 }) {
-  return (
-    <button className="fila" onClick={onClick} type="button">
+  const contenido = (
+    <>
       {inicial !== undefined && <div className="avatar">{inicial}</div>}
       <div className="fila-cuerpo">
         <div className="fila-titulo">{titulo}</div>
         {sub && <div className="fila-sub">{sub}</div>}
       </div>
       {derecha}
-    </button>
+    </>
+  );
+  if (!acciones) return <button className="fila" onClick={onClick} type="button">{contenido}</button>;
+  return (
+    <div className="fila">
+      <button className="fila-boton" onClick={onClick} type="button">{contenido}</button>
+      <div className="fila-acciones">{acciones}</div>
+    </div>
   );
 }
 
